@@ -1,0 +1,127 @@
+#!/bin/bash
+#
+# rrdcached        This starts and stops rrdcached.
+#
+# chkconfig: 345 56 50
+# description: This is the rrdtool caching daemon
+#
+# processname: rrdcached
+# pidfile: /var/tmp/rrdcached.pid
+
+PATH=/sbin:/bin:/usr/bin:/usr/sbin
+
+# These can be overridden by /etc/sysconfig/rrdcached
+RRDCACHED=/usr/local/rrdtool-1.4/bin/rrdcached
+PIDFILE=/var/tmp/rrdcached.pid
+SOCKET=`hostname`
+SOCKFILE=/var/tmp/rrdcached.sock
+RRDBASE=/var/rrdtool
+JOURNAL=$RRDBASE/journal
+USER=mrtg
+SGROUP=mrtg
+SMODE=0660
+# Write threads, default 1
+THREADS=4
+# How long between writes, must be >stepsize, default 300
+WINDOW=1800
+# Random write delay, must be <WINDOW
+CDELAY=60
+# Allocation units, default 1, must be < WINDOW/stepsize
+#ALLOC=`expr $WINDOW / 300`
+ALLOC=2
+# Additional option
+OPTIONS=""
+
+
+# Source function library.
+. /etc/init.d/functions
+# Get config.
+test -f /etc/sysconfig/network && . /etc/sysconfig/network
+test -f /etc/sysconfig/rrdcached && . /etc/sysconfig/rrdcached
+
+# Check that we are root ... so non-root users stop here
+[ `id -u` = 0 ] || exit 1
+
+# Check that networking is up.
+[ "${NETWORKING}" = "yes" ] || exit 0
+
+[ -f $RRDCACHED ] || exit 1
+
+RETVAL=0
+prog="rrdcached"
+
+start(){
+    echo -n $"Starting $prog: "
+
+	[ -d $JOURNAL ] || mkdir -p $JOURNAL
+	chown -R $USER $JOURNAL
+	[ -d $RRDBASE ] || mkdir -p $RRDBASE
+	chown $USER $RRDBASE
+
+    su $USER -c "$RRDCACHED -s $SGROUP -m $SMODE -l unix:$SOCKFILE -l $SOCKET -l localhost -z $CDELAY -p $PIDFILE -t $THREADS -j $JOURNAL -F -b $RRDBASE -w $WINDOW $OPTIONS "
+	sleep 1
+	if [ -f $PIDFILE ]
+	then
+		success
+	else
+		failure
+	fi
+    echo
+}
+
+stop(){
+    echo -n $"Stopping $prog: "
+	if [ -f $PIDFILE ]
+	then
+		PID=`cat $PIDFILE`
+		N=1
+		if [ -d /proc/$PID ]
+		then 
+			kill $PID
+		fi
+		while [ -d /proc/$PID -a $N -lt 24 ]
+		do
+			echo -n .
+			sleep 5
+			N=`expr $N + 1`
+		done
+		if [ -d /proc/$PID ]
+		then
+			RETVAL=1
+			failure
+		else
+			RETVAL=0
+			success
+		fi
+	else 
+		killproc rrdcached
+    	RETVAL=$?
+		success
+	fi
+    echo
+    return $RETVAL
+
+}
+
+# See how we were called.
+case "$1" in
+    start)
+	start
+	;;
+    stop)
+	stop
+	;;	
+	restart)
+	stop
+	sleep 2
+	start
+	;;
+    status)
+	status $prog
+	;;
+    *)
+	echo $"Usage: $0 {start|stop|status|restart}"
+	RETVAL=1
+esac
+
+exit $RETVAL

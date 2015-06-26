@@ -1,0 +1,121 @@
+Security in routers2.cgi v2.14.1
+------------------------
+
+Security is always a grey area -- you have to balance the useability against
+the sensitivity of the data.  Only you can choose how sensitive the data in
+question is, and so only you can choose which additional methods, if any,
+you choose to follow.  Listed here are a few of the optional security
+changes and loopholes the software currently has.
+
+1) SNMP Community
+This one involves the program revealing the SNMP community string via the
+Extension scripts.  If you call an Extension script with the 'insecure'
+option set, then it will pass the SNMP community string in the URL. This can
+easily be seen by a user.  
+To protect against this, firstly only use 'insecure' if you really need it.
+Secondly, make sure your SNMP strings are read-only, and restricted to just 
+your routers.cgi/MRTG server.
+
+2) Hidden .cfg file targets
+If you use the 'allowexplore' option in the routers2.conf, remember that it
+is only a 'security by obscurity'.  People who know the names of your .cfg
+files can still view their graphs, if given a complete URL for that graph.
+To prevent this, use authentication and restrict the .cfg files by user.
+
+3) Authentication.
+If you use internal authentication (as opposed to letting your web server
+take care of it) then note that the cookie-based system is vulnerable to
+a number of attacks.  A replay attack from the same client workstation is 
+possible, if a user is modifying expire times.  Also, you should change the
+value of CHOCOLATE_CHIP in the script in order to make it harder for people
+to create their own fake cookies.
+Web server-based authentication is a much more secure way to achieve this,
+and you should run through https SSL in order to prevent password sniffing.
+A session-based authentication system patch has been provided by a user
+submission, and should be available from v2.15.
+If you choose to use web server authentication (recommended), then don't forget
+to set the authentication on the graphpath directory IN ADDITION to setting
+it on the routers2.cgi script itself.  Use the same Realm and authentication
+parameters so that they only have to sign in once, of course. Failing to do 
+this allows people to sneak looks at graphs in the graphpath.  You may also
+want to put the same requirements on any extension scripts you use, such as
+the trending module trend.cgi
+
+4) Shared graphs directory
+The working directory, graphpath, is used for all temporary graphs.  This 
+allows the system to be more efficient, since if userA asks for a graph
+recently sent to userB, the system will not need to regenerate it.  However,
+this gives the possibility that a user can directly request a graphic file
+that they would not normally have access to, if they know the internal
+naming pattern.
+This is not currently fixable, but a patch in a user submission due to be 
+incorporated soon will allow separate graphpath directories on a per-user 
+basis, solving this issue.  See version 2.15.
+As mentioned in (3), dont forget to put authentication on this directory as 
+well as on the routers2.cgi script, if you are using webserver based 
+authentication.
+
+5) SpeedyCGI
+If using speedyCGI, note that it will put parameters into the ARGV line. This
+can potentially allow people with system access to find out the .cfg file
+names and target names.  A small risk, although it helps them to exploit (4).
+
+6) GET rather than POST in URL syntax.
+This is unavoidable in most cases.  Although login is done via POST, the
+script needs to use GET syntax in many places -- workarounds would require
+large amounts of javascript and decrease portability and browser support.
+This allows users to find out .cfg filenames and target names by exploring
+the web browser history -- not a problem in itself, but it helps them with
+other exploits such as (4).  The worst case of this is (1) where it can
+reveal the SNMP community string.
+
+7) Filesystem space denial-of-service
+If you give your users access to the Archive feature, then they could 
+potentially call it repeatedly to archive every minute.  This will fill up the
+filesystem where the graphpath resides.
+To fix this, I would suggest restricting users to read-only, and only allowing
+certain authenticated users access to add an archive.  Also, a periodic
+clean-up job should be run on the archive path.
+Note that, if you have a lot of targets, you can potentially have 4 graphs
+(dwmy), 8 styles, 3 rescales = 96 graphs average 8k = 0.8Mb per target in the
+graphs directory.  A medium site with 1000 targets would be pushing 1Gb for
+graphs alone!  You should be running a periodic job to clean up your
+graphs directory of no longer required graphs -- even run this every 10 mins
+to clean up old 'daily' graphs, if you need to.
+A bug in versions before V2.14beta5 makes this vulnerabilty worse.  You should
+upgrade or patch as soon as possible if your server is visible from the 
+internet.
+
+This should not be seen as a complete list of potential vulnerabilities.
+However, for the vast majority of people, none of these would be concerns.
+
+There are a number of additional features in the code to give you extra
+control over security, and to hide portions of the system from selected
+users.
+
+1) Builtin authentication
+This is not perfect, but will allow you to grant access to various .cfg files
+on a per-user basis.  It is better to use the web server's own authentication,
+though, if you can, and let the CGI interface pass the authenticated username
+to the script.
+
+2) Security levels
+You can define a default and per-user security level number.  This is used to
+decide whether or not to display Extension links (and [menu] links).  This
+is, however, only for display purposes -- the Extension script is expected to
+handle its own securtiy!  Therefore, if using web server authentication, you
+should set the same requirements on the extension script as on routers.cgi
+itself and the graphs directory (use the same Realm name so that the password
+authenticates to all of them at once).
+
+3) allowexplore
+You can disable the Devices and Targets menus, if you want, through the
+routers2.conf file.  This only controls the menus, though, and knowledge
+of the file and targets names will still give you access (provided they are
+not blocked by the cfgfiles and confpath of course).
+
+4) Graph archiving
+This can be switched to read-only mode in the default or per-user defninitions.
+In read-only mode you cannot create or delete graph copies.
+
+Steve Shipway, 2004

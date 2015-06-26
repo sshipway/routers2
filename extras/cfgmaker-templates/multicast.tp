@@ -1,0 +1,41 @@
+# cfgmaker template for use with Routers2 application
+# Adds multicast target if possible
+# use: cfgmaker --template=mcast.tmpl
+
+my($mctarget_name) = $target_name."_MCAST";
+
+$target_lines = $default_target_lines;
+$target_lines .= "routers.cgi*IfIp[$target_name]: $if_ip\n" if( $if_ip );
+$target_lines .= "routers.cgi*IfNo[$target_name]: $if_index\n" if( $if_index );
+$target_lines .= "routers.cgi*IfName[$target_name]: $if_snmp_name\n" 
+	if( $if_snmp_name );
+$target_lines .= "routers.cgi*ShortDesc[$target_name]: ".(
+# You may wish to reorder these according to your sites requirements
+	$if_snmp_alias?$if_snmp_alias:
+	$if_cisco_descr?$if_cisco_descr:
+	$if_port_name?$if_port_name:
+	$if_snmp_descr?$if_snmp_descr:
+	$if_snmp_name?$if_snmp_name:
+	$if_ip?$if_ip:$if_index?$if_index:$target_name)."\n";
+$target_lines .= "routers.cgi*Extension[$target_name]: \"Show current port status\" /cgi-bin/ifstatus.cgi camera2-sm.gif\n" if($if_is_lan);
+
+my($mcoid) = oid_pick($router_connect,$v3opt,"1.3.6.1.4.1.9.10.2.1.1.5.1.1.$ifindex");
+if($mcoid) {
+$target_lines .= "\nTarget[$mctarget_name]: 1.3.6.1.4.1.9.10.2.1.1.5.1.1.$ifindex&1.3.6.1.4.1.9.10.2.1.1.5.1.2.$ifindex:$router_connect\n";
+
+$target_lines .= "SetEnv[$mctarget_name]: MRTG_INT_IP=\"$if_ip\" MRTG_INT_DESCR=\"$if_snmp_descr_save\"\n";
+$target_lines .= "Directory[$mctarget_name]: $directory_name\n" if($directory_name);
+$target_lines .= "MaxBytes[$mctarget_name]: $if_speed\n";
+$target_lines .= "Title[$mctarget_name]: $html_desc_prefix$html_if_title_desc -- $sysname (Multicast)\n";
+$target_lines .= "PageTop[$mctarget_name]: Multicast\n";
+$target_lines .= "routers.cgi*ShortDesc[$mctarget_name]: Mcast: ".(
+	$if_snmp_alias?$if_snmp_alias: $if_cisco_descr?$if_cisco_descr: $if_port_name?$if_port_name:
+	$if_snmp_descr?$if_snmp_descr: $if_snmp_name?$if_snmp_name:
+	$if_ip?$if_ip:$if_index?$if_index:$target_name)."\n";
+$target_lines .= "routers.cgi*IfIp[$mctarget_name]: $if_ip\n" if( $if_ip );
+$target_lines .= "routers.cgi*IfNo[$mctarget_name]: $if_index\n" if( $if_index );
+$target_lines .= "routers.cgi*IfName[$mctarget_name]: $if_snmp_name\n" ;
+$target_lines .= "routers.cgi*Icon[$mctarget_name]: interface2-sm.gif\n" ;
+$target_lines .= "routers.cgi*Mode[$mctarget_name]: interface\n" ;
+$target_lines .= "routers.cgi*Extension[$mctarget_name]: \"Show current port status\" /cgi-bin/ifstatus.cgi camera2-sm.gif\n" if($if_is_lan);
+}	

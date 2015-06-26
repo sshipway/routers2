@@ -1,0 +1,349 @@
+v2.21            MRTG Directives Understood by routers2.cgi
+                 ------------------------------------------
+
+The following is a full list of all the MRTG configuration file directives that 
+routers2.cgi will understand.  Anything not here you should assume will be 
+ignored by the script.
+
+In the majority of cases, the prepend, append and default targets are 
+understood and acted upon.  The exception is for some of the routers.cgi
+specific directives listed later.
+
+Note that some of the MRTG options are either not relevant to routers.cgi, or
+are not acted upon.  Particularly more recent options aimed at defining
+display options for the MRTG graph generation.
+
+IMPORTANT NOTE: When placing directives in the MRTG .cfg file, ALL of the 
+   directives for a particular Target MUST come AFTER the Target[]: definition.
+   Any directives that come before the Target[]: line will usually be IGNORED.
+SECOND NOTE: Unlike with native MRTG, if you re-define any directive for the 
+   default Targets ('$','_','^') then the LAST definition will be used for ALL
+   defined Targets.  Native MRTG allows redefinition, Routers2 does not.
+
+Key:
+[+] : Can also be used with the 'routers.cgi*' prefix as well.
+[-] : Can be left blank when used with 'routers.cgi*' prefix
+[*] : Required
+[=] : Can also be set in routers.conf
+[!] : Deprecated - use other options instead
+[?] : Experimental
+[G] : Can be used with userdefined Graph targets (see 'routers.cgi*Graph') if
+      given routers.cgi* prefix
+
+Global Directives
+-----------------
+
+Include: filename [+]
+   Note that routers.cgi will not fail if included file cannot be found.
+WorkDir: /path  [=]
+Interval: number or number:number
+LibAdd: /path
+
+Application-specific global directives
+--------------------------------------
+
+routers.cgi*Ignore: yes
+    Do not process this file.
+routers.cgi*Desc: router description
+    Set the long description for this device
+routers.cgi*ShortDesc: router name for menu
+    Set the short menu name for this device
+routers.cgi*Icon: iconfilefordevice.gif
+    Set the icon file (within the iconurl path) for this device
+routers.cgi*Extension: "Menu desc" /url/of/extension.cgi optionalicon.gif optionalwindowname optional-security-level insecure noopts
+    Define a CGI extension script for this device.  See the HOWTO.
+    The windowname can be '_top' if you want to completely exit routers.cgi
+    However you should usually not specify one
+    Security level defaults to 0.  Use 'insecure' keyword to enable passing
+    of SNMP community string to plugin.  Use 'noopts' to not pass any extra
+    parameters to the plugin.
+    Note that the Menu desc is subject to Symbol Replacement (see end)
+routers.cgi*ClearExtensions: yes
+    Undefine all previously defined device-level extensions
+routers.cgi*RoutingTable: no [=]
+    Disable routingtable extensions on a per-device basis
+routers.cgi*Redirect: url [?]
+    For this Device, obtain the pages from a different routers2.cgi.  This can
+    be on a different server, allowing you to place 'stub' files on your main
+    server, and place some of the MRTG instances on a separate MRTG server.
+    eg: routers.cgi*Redirect: http://otherserver.foo.com/cgi-bin/routers2.cgi
+routers.cgi*SetSymbol: symbolname "text..."
+    Set a symbolic value for replacement
+routers.cgi*Cache: no
+    Selectively disable caching of the file
+routers.cgi*InOut: active
+    Make the default generated In/Out graphs have 'active' mode set
+routers.cgi*Summary: summary options....
+    active: Make the default generated summary page have 'active' mode set
+    nodetails: Make the summary page have graphs only, no text
+
+Per-Target Directives
+---------------------
+
+Target[targetname]:   [*]
+Title[targetname]:   [*][=]
+Pagetop[targetname]:   (if enabled in the routers.conf)   [*][=][G]
+PageFoot[targetname]:  (if enabled in the routers.conf)  [=][G]
+    Pagetop and Pagefoot can now contain symbols: see the end of this
+    file for a complete list of all supported symbols and their uses.
+Background[targetname]:    [+][=][G]
+Options[targetname]: integer noo noi bits bytes perminute perhour nopercent [+]
+    dorelpercent logscale
+    Note that nopercent also implies routers.cgi*InCompact[]: no
+    Also, dorelpercent implies noo, nopercent, max=100, unit=%, fixunit,
+      and incompact=no
+TimeZone[targetname]:
+SetEnv[targetname]: MRTG_INT_DESCR="" [=]  MRTG_INT_IP=""
+YLegend[atrgetname]:    [+][-][G]
+LegendI[targetname]:    [+][-]
+LegendO[targetname]:    [+][-]
+Legend1[targetname]:    [+][-][G]
+Legend2[targetname]:    [+][-][G]
+Legend3[targetname]:    [+][-]
+Legend4[targetname]:    [+][-]
+ShortLegend[targetname]:    [+][-][G]
+MaxBytes[targetname]:   [*][+]
+AbsMax[targetname]:   [+]
+UnScaled[targetname]:     [+][-][=]
+    routers.cgi defaults to 'dwmy' for Interface targets, and to '' otherwise
+Directory[targetname]:
+Colours[targetname]: #ffffff, #ffffff, #ffffff, #ffffff  [+][=]
+   The Colours directive MUST have at least 4 parameters of the form #ffffff
+   where ffffff is a 6-hex digit colour number.
+   The extended routers.cgi*Colours[] option allows you to specify as many
+   as you want.
+   In a userdefined graph, the colours will be used in sequence, and when 
+   they run out it will start again from the beginning.
+Factor[targetname]: [+]
+WithPeak[targetname]: ndwmy [+][=]
+   When used with the routers.cgi* prefix, you can also use d (daily) and the
+   magic word 'none' to mean none (you cannot leave it blank for MRTG)
+Kilo[targetname]: value [+]
+   Value = 1024 or 1000
+   Default is as defined by usebigk option in routers2.conf.
+   Set the 'kilo' amount to be used when scaling
+
+Application-specific Per-target directives
+------------------------------------------
+These will override any previous conflicting definitions without the 
+'routers.cgi*' prefix.
+Note that some of these will imply others, particularly Options and Mode.
+
+routers.cgi*Options[target]: interface[!] ignore noo noi scaled[=][!] 
+   nomax[=] nototal[G] noabsmax nopercentile nopercent average[G only] 
+   total[G] fixunit available[not G] noavailable[not G] reverse[not G]
+   aspercent rigid c2fi[not G] c2fo[not G] default nothresholds[not G]
+    Set various graph options for this target
+    Instead of 'interface', use the Mode option, and use routers.cgi*UnScaled
+      with the 'none' option instead of 'scaled'.
+    fixunit removes the kMG option - useful if m{unit} makes no sense.
+    available shows the %age data availability at the bottom of the graph
+    nototal/nopercentile remove the Total and 95thPercentile calculations
+    nopercent suppresses the calculation of the percentages
+    average and total add an average/total line to a userdefined graph
+    reverse shows (maxbytes-value) on graph instead of value
+    aspercent shows ((value/maxbytes)x100%) on graph instead of value - it
+      also implies max=100, nopercent, fixunit, unit=%
+    nomax/noabsmax suppress the max/absmax lines on the graph
+    rigid makes the set y-axis rigid (either to MaxBytes or UpperLimit)
+    c2fi/c2fo perform a centigrade to farenheit conversion on the in/out data
+      values at display time.  IE,  value * 1.8 + 32.
+    default means that this is the default target to display for this device.
+    nothresholds means to NOT display lines for any Thresh*[] definitions
+routers.cgi*InMenu[target]: yes no
+    Should this target appear in the Targets menu? It is still accessible
+    via a bookmarked URL, though.
+routers.cgi*InSummary[target]: yes no
+    Include this graph in the Summary page?
+routers.cgi*InCompact[target]: yes no
+    Include this graph in the Compact Summary page?
+routers.cgi*InOut[target]: yes no
+    Include this target in the Incoming/Outgoing graphs?
+routers.cgi*Ignore[target]: yes 
+    Completely ignore this target (unlike InMenu=no, this is totally ignored)
+routers.cgi*Desc[target]: long description for target (replaces Title) [=][G]
+routers.cgi*ShortDesc[target]: short description of target (replaces MRTG_INT_DESCR) [=][G]
+    Set short menu description of target
+routers.cgi*Mode[target]: interface cpu mem generic ping
+    Choose set of defaults for display options.  Also changes stylesheet class.
+routers.cgi*Icon[target]: iconfilefortarget.gif [=][G]
+    Set icon for use in Targets menu
+routers.cgi*TotalLegend[target]: like ShortLegend, but the units for the
+    'Total' count at the bottom of the graph.
+routers.cgi*MBLegend[target]: legend for Max Bandwidth line [G]
+routers.cgi*AMLegend[target]: legend for Absolute Max line [G]
+routers.cgi*LegendTI[graphtarget]: legend for Total In line on userdefined [G]
+routers.cgi*LegendTO[graphtarget]: legend for Total Out line on userdefined [G]
+routers.cgi*LegendAI[graphtarget]: legend for Average In line on userdefined [G]
+routers.cgi*LegendAO[graphtarget]: legend for Average Out line on userdefined [G]
+routers.cgi*Archive[target]: daily 99 monthly 99 
+    Set archiving expiry times for daily and monthly RRD archives. 
+    Use decimal numbers for 99.  If no 'daily' or 'monthly', then daily assumed
+    Can also use 'no' to mean 'daily 0 monthly 0'
+routers.cgi*GraphStyle[target]: stack range normal mirror lines stackmirror [G]
+    stack: graph areas are stacked
+    range: a floating bar is created from In -> Out
+    mirror: the Out line(s) are placed below the x-axis, the In lines above
+    lines: two line instead of area+line
+    stackmirror: a stacked mirror graph (if userdefined)
+    Choose different ways to show the In/Out lines on the graph.  With
+    range, make sure Out<In or you get blank graphs!  In stack mode, remember
+    that the Out block is placed on top of the In block.
+	In stack mode, an Average or Total line in a userdefined graph is still
+    displayed as a line, not stacked on top of the areas.
+routers.cgi*UnScaled[target]: 6dwmy [G]
+    As well as the normal dwmy options, also you can use 6 (6-hour graphs),
+    and the magic word 'none' to mean NO graphs.
+routers.cgi*UpperLimit[target]: 9999
+    Set the maximum y-axis on the graph.  See also 'rigid' option to fix it.
+routers.cgi*LowerLimit[target]: 9999
+    Set the minimum y-axis on the graph.  See also 'rigid' option to fix it.
+routers.cgi*FixUnit[target]: 9 [?]
+    Fix the number of exponent to use.  Implies option fixunit. Using FixUnit
+    of 0 is the same as option fixunit -- use 3 to get everything in k, etc.
+    Not always reliable.
+routers.cgi*Extension[target]: "Menu Description" /url/of/extension.cgi optionalicon.gif optionalframename optional-security-level insecure noopts [G]
+    Define a per-target CGI extension script.  See HOWTO for more details.
+    The frame name can be _top to replace routers.cgi, or _new for a new window
+    Security level is a number and defaults to 0.  
+    Use 'insecure' keyword to enable passing of SNMP community string to plugin.
+    Use 'noopts' to not pass any extra parameters to the plugin.
+    Note that the Menu desc is subject to Symbol Replacement (see end)
+routers.cgi*Link[target]: "Menu Description" filename.cfg optionaltargetname optionalicon.gif optional-security-level [G]
+    Define a link to another routers.cgi graph, targetname in file filename.cfg
+    The security level defaults to 0 (everyone).
+    Note that the Menu desc is subject to Symbol Replacement (see end)
+routers.cgi*HRule[target]: 9999 "Description for legend" #xxxxxx [G]
+    Add a horizontal line in the graph.  Colour is a dark grey unless you
+    specify a colour using #xxxxxx.  This will appear first in the legends, 
+	and is most useful in userdefined graphs.
+    Note that the number is the number on the Y-Axis, which is AFTER any 
+    Factor[] or perminute/perhour/bits multiplication.
+routers.cgi*Ylegend2[target]: label for a secondary Y-axis
+routers.cgi*ScaleShift[target]: xxxxx:yyyyy
+    Set scale shift for secondary Y axis: scale by xxxx, shift by yyyyy
+routers.cgi*ShortLegend2[target]: Units for 'out' on second axis (BETA!)
+
+routers.cgi*Graph[target]: graphtarget graphoptions....
+ (this creates a userdefined graph, name 'graphtarget' that shows the all
+  targets which have this graphtarget.  You can have more than one of them.)
+
+   Valid options: noi noo total average nolegend nodetails overridelegend
+        nolines active[?] maximum #ffffff (some colour ffffff)
+    You can add any number of colours, they will be used in rotation.
+    - noi and noo switch off incoming/outgoing lines for all sub-targets
+    - total and average switch on the total and average lines in the graph
+    - nolegend removes the entire legend. 
+    - nodetails removes everything except the average and total lines, if defd.
+    - overridelegend will use the shortname of the sub-target to identify it 
+    instead of its LegendI/O. Useful if multiple targets have the same legends
+    - nolines will suppress the individual lines (leaving just avg and total
+    lines, and the legends). This is different from nodetails because it still
+    keeps the text in the legend for the sub-targets.
+    - active will suppress any Target for which the MAX value is 0 in the time
+    period  
+    - maximum will make the graph show the MAXIMUM rather than the AVERAGE rra.
+    Note this can be misleading in stacked graphs!  You can also use 'minimum'
+    as an option, but you need to add an RRA to your .rrd file for it to work.
+
+   After creating a graph this way, you can also use (some) of the routers.cgi*
+   directives to customise it. eg
+       routers.cgi*Graph[target]: foo
+       routers.cgi*LegendTI[foo]: Total incoming label
+       routers.cgi*LegendTO[foo]: Total outgoing label
+       routers.cgi*Title[foo]: Graph title
+       routers.cgi*GraphStyle[foo]: stack
+
+routers.cgi*Summary[target]: summarytarget summaryoptons... [G]
+  (this creates a userdefined summary page, name 'summarytarget'.  Similar
+   to routers.cgi*Graph.   You can have more than one of them. )
+   Valid options: nodetails (removes everything bar the graph itself).
+                  active [?] (only targets with a MAX >0 in the time period)
+                  withpagetop, withpagefoot (add pagetop/foot for individual 
+                    subgraphs.  This overrides mrtgpagetop/mrtgpagefoot from 
+                    routers2.conf)
+
+routers.cgi*SortBy[userdefined]: option
+    Valid options: average, max, maxrev, averagerev, name
+    This defined the order in which the component targets of a userdefined 
+    graph are sorted before display.  Allow you to make stacking graphs with
+    the largest components first and on the bottom.
+    This also applies to the order of graphs in a userdefined summary page.
+  
+routers.cgi*SetSymbol[target]: symbolname "text ..."
+     Set a symbolic value that can be used in PageTop, PageFoot and Extension
+     by using %symbolname%.  Also can be used in the routers2.conf in the
+     pagetop and pagefoot directives.
+
+routers.conf file
+-----------------
+
+Any definitions in the [targetnames], [targettitles] and [targeticons] 
+sections of the routers.conf will override any definitions in the MRTG files.
+Any definitions in the [routers.cgi] section will be defaults for when no
+MRTG directive or appropriate other default exists.
+
+Style Sheets
+------------
+Note that colours specified in a Background[] definition will override 
+anything defined in your stylesheet.  Also, your choice of Mode[] will
+potentially change your page background colour and other styles.
+
+Symbol Replacement
+------------------
+Certain symbols will be globally replaced in the PageTop, PageFoot and
+link description for Extension and Link.
+%DEVICE%    : MRTG cfg filename relative to confpath
+%CFGFILE%   : MRTG cfg filename
+%TARGET%    : MRTG target name
+%RRDFILE%   : RRD filename
+%COMMUNITY% : SNMP community
+%IP%        : IP address if known
+%HOSTNAME%  : Device hostname if known
+%STYLE%     : Graph style code (n, l, x2, etc)
+%STYLENAME% : Graph style name
+%TYPE%      : Graph type code (d, w, m, y ...)
+%TYPENAME%  : Graph type name
+%LU%        : Last update timestamp
+%LUH%       : Last update in human readable format
+%USERNAME%  : Username if authenticated
+%ROUTERS2%  : URL of routers2.cgi
+%ARCHDATE%  : Archival date, if this is an archived RRD file
+%INTERVAL%  : RRD file interval in seconds
+%AVGINT%    : averaging interval in seconds for currently viewed graph RRA
+
+You can include environment variables:
+%ENV(xxxx)% : contents of environment variable xxxx
+
+And include whole files:
+%INCLUDE(filename)% : contents of text file filename
+
+And to run an external command and include the output:
+%EXEC(command line with arguments)% : include standard output
+Note that this is a security risk as the command is run as the web server
+user.  For this to work, you need to enable the feature in the [web] section
+of the routers2.conf with 'allow-execs = yes' (Beta)
+
+To include a generic SNMP lookup of an OID on the current device, use:
+%OID(numeric OID)% : insert contents of SNMP OID retrieved on the fly
+Note this could cause a 4s delay per instance if the device is down or
+unreachable!  Also, this depends on the community string and device name 
+or IP being identifiable in the Target string. (beta)
+
+Note that %INCLUDE()%s are processed first, so can contain other symbols.  In
+general, though, symbols should not expand to other symbols.
+
+You can also define your own symbols with 
+routers.cgi*SetSymbol: symbolname "text"
+routers.cgi*SetSymbol[targetname]: symbolname "text"
+
+Finally, if the config file was created with cfgmaker, then routers2 will
+attempt to parse the comments and PageTop to extract
+%CMSYSTEM%   : The system name
+%CMDESC%     : The system description
+%CMLOCATION% : The system location
+%CMCONTACT%  : The system contact
+%CMIDESC%    : The interface description
+This is very very unreliable and format dependent and may fail with later 
+versions of cfgmaker or if you are using templates with cfgmaker.
+

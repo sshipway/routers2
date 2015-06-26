@@ -1,0 +1,41 @@
+
+The gaugexml3.cgi utility.
+
+This replaces the previous gaugexml.cgi script, and is intended to be used in 
+conjunction with the shareware file slickboard.swf (available from www.maani.us)
+and AC_RunActiveContent.js to produce animated gauges for MRTG Targets (and
+also for Routers2 userdefined targets).
+
+So, here are the instructions:
+
+1. Obtain slickboard from http://www.maani.us/slickboard/index.php?menu=Download
+
+2. Install the slickboard.swf and AC_RunActiveContent.js into your web server 
+directory.  Also install the gaugexml3.js file in the same location.
+
+3. Install the new gaugexml3.cgi into your cgi-bin. Edit the parameters at the 
+start of the script for CFGDIR, ROUTERSCGI and so on as required. You may need 
+to use gaugexml3.pl or gaugexml3.cgi, depending on your web server.
+
+4. Place this Javascript at the beginning of your web page:
+
+Code:
+<script language="javascript">AC_FL_RunContent = 0;</script>
+<script language="javascript"> DetectFlashVer = 0; </script>
+<script src="AC_RunActiveContent.js" language="javascript"></script>
+<script src="gaugexml3.js" language="javascript"></script>
+
+
+5. Where you want the gauge to appear, insert the following code. You will 
+also need to use the appropriate MRTG config file name for mrtg.cfg, and the 
+appropriate Target name for targetname. 
+
+Code:
+<script><!--
+gauge('mrtg.cfg','targetname');
+// -->
+</script>
+<noscript><P>This content requires JavaScript.</P></noscript>
+
+
+

@@ -1,0 +1,28 @@
+rrd-archive.pl  Steve S
+Covered by GNU GPL
+
+This is the script you should use if you want *data* archiving (as opposed to
+graph image archiving) with routers.cgi.  It should be run every night at 
+midnight via cron, or your favourite scheduler.
+
+Note that you can use a LOT of extra disk space by this!  Multiply the size
+of your .rrd files directory by AT LEAST 40 to get an estimate of the space
+you will need to set aside.
+
+The routers2.cgi program will spot the existance of the archive subdirectory,
+and will automatically enable you to choose different archived data for your 
+data source.  
+
+The rrd-archive-clean.pl script will delete any old archives for which you
+no longer have a valid .cfg file, or for which archiving has been disabled.
+Use this with caution -- if you have disabled archiving temporarily, you 
+could delete your entire archive!
+
+For your .cfg file:
+routers.cgi*Archive[targetname]: no
+or
+routers.cgi*Archive[targetname]: daily 31 monthly 12
+Set daily to 0 to mean No Archiving. ('no' is shorthand for 'daily 0 monthly
+0')
+
+Steve

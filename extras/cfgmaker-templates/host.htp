@@ -1,0 +1,352 @@
+# Generic host template for all systems support MIB-II host resources
+# MIB.  Will take care of storage devices as well, but watch out for 
+# changes in enumeration caused by inserting USB devices!
+#
+# Version 1.0: hrMIB, UCD (not filesystems)
+# Version 1.1: added Sun MIB and some hrMIB alternatives
+
+$head_lines .= "#---------------------------------------------------------------------\n";
+
+if( $sysdescr =~ /linux/i ) {
+  $target_lines .= "routers.cgi*Icon: linux-sm.gif\n";
+} elsif( $sysdescr =~ /(windows|microsoft)/i ) {
+  $target_lines .= "routers.cgi*Icon: windows-sm.gif\n";
+} elsif( $sysdescr =~ /(IBM|AIX)/i ) {
+  $target_lines .= "routers.cgi*Icon: ibm-sm.gif\n";
+} elsif( $sysdescr =~ /(sun|solaris)/i ) {
+  $target_lines .= "routers.cgi*Icon: sun-sm.gif\n";
+} elsif( $sysdescr =~ /cisco/i ) {
+  $target_lines .= "routers.cgi*Icon: cisco-sm.gif\n";
+}
+$target_lines .= <<ECHO;
+routers.cgi*Description: $router_name ($sysname)
+routers.cgi*ShortDesc: $sysname
+#-------------------------------------------------
+ECHO
+
+my($cpuoid) = oid_pick($router_connect,$v3opt,"1.3.6.1.4.1.2021.11.11.0",
+  "1.3.6.1.4.1.9.2.1.58.0");
+if($cpuoid) { # this uses the UCD MIB or Cisco MIB
+$target_lines .= <<ECHO;
+#######################################
+# CPU load
+Target[$router_name-cpu]: 100 - $cpuoid&$cpuoid:$router_connect
+PageTop[$router_name-cpu]: $router_name CPU usage
+Title[$router_name-cpu]: CPU on $router_name
+Maxbytes[$router_name-cpu]: 100
+Options[$router_name-cpu]: gauge
+YLegend[$router_name-cpu]: percent
+ShortLegend[$router_name-cpu]: %
+LegendI[$router_name-cpu]: cpu:
+Legend1[$router_name-cpu]: CPU usage
+Legend3[$router_name-cpu]: Peak CPU usage
+routers.cgi*Options[$router_name-cpu]: noo, nopercent, nototal, fixunit
+routers.cgi*InOut[$router_name-cpu]: no
+routers.cgi*ShortDesc[$router_name-cpu]:CPU
+routers.cgi*Icon[$router_name-cpu]: chip-sm.gif
+routers.cgi*InSummary[$router_name-cpu]: yes
+routers.cgi*InCompact[$router_name-cpu]: yes
+routers.cgi*Mode[$router_name-cpu]: cpu
+routers.cgi*MBLegend[$router_name-cpu]: 100% usage
+ECHO
+} else { # lets try hrMIB
+  my (@cpus) = snmpwalk($router_connect,'1.3.6.1.2.1.25.3.3.1.2');
+  foreach my $tmpcpu (@cpus) {
+    $tmpcpu =~ /(\d+):\d/;
+    my( $instance )=$1;
+    my( $target_name )=$router_name.".cpu".$instance;
+    $target_lines .= <<ECHO;
+Target[$target_name]: 1.3.6.1.2.1.25.3.3.1.2.$instance&1.3.6.1.2.1.25.3.3.1.2.$instance:$router_connect
+Title[$target_name]: $sysname processor $instance
+MaxBytes[$target_name]: 100
+Options[$target_name]:  gauge, unknaszero, noo
+Directory[$target_name]: $directory_name
+WithPeak[$target_name]: wmy
+YLegend[$target_name]: % Utilisation
+ShortLegend[$target_name]: %
+Legend1[$target_name]: 1min CPU load on proc$instance
+Legend3[$target_name]: Max 5min CPU load on proc$instance
+LegendI[$target_name]: cpu$instance:
+PageTop[$target_name]: <H1>$sysname Processor Load</H1>
+routers.cgi*ShortDesc[$target_name]:  CPU #$instance
+routers.cgi*Options[$target_name]: nopercent, nototal, fixunit
+routers.cgi*InOut[$target_name]: no
+routers.cgi*Icon[$target_name]: chip-sm.gif
+routers.cgi*InSummary[$target_name]: yes
+routers.cgi*InCompact[$target_name]: yes
+routers.cgi*Mode[$target_name]: cpu
+routers.cgi*MBLegend[$target_name]: 100% usage
+ECHO
+    if($#cpus > 0) {
+		$target_lines .= "routers.cgi*Graph[$target_name]: $router_name-allcpu average\n";
+		$target_lines .= "routers.cgi*InMenu[$target_name]: no\n";
+	}
+  }
+  if($#cpus > 0) {
+	$target_lines .= <<ECHO;
+routers.cgi*Title[$router_name-allcpu]: All CPUs on $router_name
+routers.cgi*Icon[$router_name-allcpu]: chip-sm.gif
+routers.cgi*ShortDesc[$router_name-allcpu]: CPU
+routers.cgi*LegendAI[$router_name-allcpu]: cpu :
+ECHO
+  }
+}
+
+my($rmemoid) = oid_pick($router_connect,$v3opt,"1.3.6.1.4.1.2021.4.6.0",
+	"1.3.6.1.4.1.42.2.12.2.2.12.6.4.0");
+my($smemoid) = oid_pick($router_connect,$v3opt,"1.3.6.1.4.1.2021.4.4.0",
+	"1.3.6.1.4.1.42.2.12.2.2.12.7.1.0);
+if($rmemoid and $smemoid) { # this uses the UCD MIB
+my($maxreal, $maxswap);
+if($rmemoid =~ /2021/) {
+	($maxreal, $maxswap) = snmpget($router_connect,
+	"1.3.6.1.4.1.2021.4.5.0","1.3.6.1.4.1.2021.4.3.0");
+} else {
+	($maxreal, $maxswap) = snmpget($router_connect,
+	"1.3.6.1.4.1.42.2.12.2.2.12.6.1.0","1.3.6.1.4.1.42.2.12.2.2.12.7.5.0");
+}
+$target_lines .= <<ECHO;
+#######################################
+# Memory used
+Target[$router_name-memory]: $rmemoid&$smemoid:$router_connect * 1024
+PageTop[$router_name-memory]: $router_name Memory Available
+Title[$router_name-memory]: Available Memory on $router_name
+SetEnv[$router_name-memory]: MRTG_INT_DESCR="Memory"
+MaxBytes1[$router_name-memory]: $maxreal
+MaxBytes2[$router_name-memory]: $maxswap
+Options[$router_name-memory]: gauge
+YLegend[$router_name-memory]: Bytes
+ShortLegend[$router_name-memory]: b
+LegendI[$router_name-memory]: real:
+LegendO[$router_name-memory]: swap:
+Legend1[$router_name-memory]: Available real memory
+Legend2[$router_name-memory]: Available swap space
+Legend3[$router_name-memory]: Peak available real
+Legend4[$router_name-memory]: Peak available swap
+routers.cgi*Options[$router_name-memory]: nototal
+routers.cgi*Mode[$router_name-memory]: memory
+routers.cgi*ShortDesc[$router_name-memory]: Memory
+routers.cgi*Description[$router_name-memory]: Memory available: $router_name
+routers.cgi*InOut[$router_name-memory]: no
+routers.cgi*InSummary[$router_name-memory]: yes
+routers.cgi*InCompact[$router_name-memory]: yes
+routers.cgi*Icon[$router_name-memory]: chip-sm.gif
+routers.cgi*MBLegend[$router_name-memory]: 100% usage
+ECHO
+}
+
+my (@storage) = snmpwalk($router_connect,'1.3.6.1.2.1.25.2.3.1.4');
+my( $fscnt ) = 0;
+foreach my $tmps (@storage) {
+  $tmps =~ /(\d+):(\d+)/;
+  next if(!$2);
+  my($instance,$blocksize)=($1,$2);
+  my($diskname,$disksize,$disktype) = 
+  snmpget($router_connect,'1.3.6.1.2.1.25.2.3.1.3.'.$instance,
+   '1.3.6.1.2.1.25.2.3.1.5.'.$instance, '1.3.6.1.2.1.25.2.3.1.2.'.$instance);
+  $disktype = $1 if($disktype =~ /\.(\d+)$/);
+  next if(!$diskname or !$disksize 
+    or ($disktype!=2 and $disktype!=3 and $disktype!=4));
+  my($shortdisk) = $instance;
+  $shortdisk = $1 if($diskname =~ /^(\w):/);
+  my($target_name)=$router_name.".disk.".$shortdisk;
+  my($maxsize)= $disksize * $blocksize;
+
+  if($disktype == 2 ) {      # memory use
+	next if($rmemoid); # we already have it
+    $target_lines .= <<ECHO;
+#######################################
+# Memory used
+Target[$router_name-memory]: 1.3.6.1.2.1.25.2.3.1.6.$instance&1.3.6.1.2.1.25.2.3.1.5.$instance:$router_connect * $blocksize
+PageTop[$router_name-memory]: $router_name Memory Used
+Title[$router_name-memory]: Memory used on $router_name
+SetEnv[$router_name-memory]: MRTG_INT_DESCR="Memory"
+MaxBytes[$router_name-memory]: $maxsize
+Options[$router_name-memory]: gauge
+YLegend[$router_name-memory]: Bytes
+ShortLegend[$router_name-memory]: b
+LegendI[$router_name-memory]: used:
+LegendO[$router_name-memory]: size:
+Legend1[$router_name-memory]: Memory used
+Legend2[$router_name-memory]: Memory total
+Legend3[$router_name-memory]: Peak memory used
+Legend4[$router_name-memory]: Peak memory total
+routers.cgi*Options[$router_name-memory]: nototal  noo
+routers.cgi*Mode[$router_name-memory]: memory
+routers.cgi*ShortDesc[$router_name-memory]: Memory
+routers.cgi*Description[$router_name-memory]: Memory used: $router_name
+routers.cgi*InOut[$router_name-memory]: no
+routers.cgi*InSummary[$router_name-memory]: yes
+routers.cgi*InCompact[$router_name-memory]: yes
+routers.cgi*Icon[$router_name-memory]: chip-sm.gif
+routers.cgi*MBLegend[$router_name-memory]: 100% usage
+ECHO
+  } elsif($disktype == 3 ) { # swap use
+	next if($smemoid);
+    $target_lines .= <<ECHO;
+#######################################
+# Swap used
+Target[$router_name-swap]: 1.3.6.1.2.1.25.2.3.1.6.$instance&1.3.6.1.2.1.25.2.3.1.5.$instance:$router_connect * $blocksize
+PageTop[$router_name-swap]: $router_name Swap space used
+Title[$router_name-swap]: Swap space used on $router_name
+SetEnv[$router_name-swap]: MRTG_INT_DESCR="Swap"
+MaxBytes[$router_name-swap]: $maxsize
+Options[$router_name-swap]: gauge
+YLegend[$router_name-swap]: Bytes
+ShortLegend[$router_name-swap]: b
+LegendI[$router_name-swap]: used:
+LegendO[$router_name-swap]: size:
+Legend1[$router_name-swap]: Swap space used
+Legend2[$router_name-swap]: Swap space total
+Legend3[$router_name-swap]: Peak swap used
+Legend4[$router_name-swap]: Peak swap total
+routers.cgi*Options[$router_name-swap]: nototal noo
+routers.cgi*Mode[$router_name-swap]: memory
+routers.cgi*ShortDesc[$router_name-swap]: Swap
+routers.cgi*Description[$router_name-swap]: Swap space used: $router_name
+routers.cgi*InOut[$router_name-swap]: no
+routers.cgi*InSummary[$router_name-swap]: yes
+routers.cgi*InCompact[$router_name-swap]: yes
+routers.cgi*Icon[$router_name-swap]: chip-sm.gif
+routers.cgi*MBLegend[$router_name-swap]: 100% usage
+ECHO
+  } elsif($disktype == 4 ) { # filesystems
+    $fscnt += 1;
+$target_lines .= <<ECHO;
+#######################################
+# Filesystem $diskname
+Target[$target_name]: 1.3.6.1.2.1.25.2.3.1.6.$instance&1.3.6.1.2.1.25.2.3.1.6.$instance:$router_connect * $blocksize
+PageTop[$target_name]: $router_name Disk space used ($diskname)
+Title[$target_name]: Disk space used on $router_name ($diskname)
+SetEnv[$target_name]: MRTG_INT_DESCR="$diskname"
+MaxBytes[$target_name]: $maxsize
+Options[$target_name]: gauge
+YLegend[$target_name]: Bytes
+ShortLegend[$target_name]: b
+LegendI[$target_name]: used:
+Legend1[$target_name]: Space used
+Legend3[$target_name]: Peak used
+routers.cgi*Options[$target_name]: nototal, noo
+routers.cgi*Mode[$target_name]: general
+routers.cgi*ShortDesc[$target_name]: Disk: $diskname
+routers.cgi*Description[$target_name]: $router_name space used on $diskname
+routers.cgi*InOut[$target_name]: no
+routers.cgi*InMenu[$target_name]: yes
+routers.cgi*InSummary[$target_name]: yes
+routers.cgi*InCompact[$target_name]: yes
+routers.cgi*Icon[$target_name]: dir-sm.gif
+routers.cgi*Graph[$target_name]: $router_name-filesystems "Disk space" withtotal noo
+ECHO
+  }
+}
+if($fscnt) {
+$target_lines .= <<ECHO;
+routers.cgi*Options[$router_name-filesystems]: available
+routers.cgi*Icon[$router_name-filesystems]: dir-sm.gif
+routers.cgi*ShortDesc[$router_name-filesystems]: Filesystems
+routers.cgi*Title[$router_name-filesystems]: Filesystems on $router_name
+ECHO
+}
+
+my($laoid) = oid_pick($router_connect,$v3opt,
+	"1.3.6.1.4.1.42.2.12.2.2.12.2.2.0","1.3.6.1.4.1.2021.10.1.5.2");
+my($laoid2) = oid_pick($router_connect,$v3opt,
+	"1.3.6.1.4.1.42.2.12.2.2.12.2.3.0","1.3.6.1.4.1.2021.10.1.5.3");
+if($laoid and $laoid2) { # this uses the UCD MIB
+$target_lines .= <<ECHO;
+#######################################
+# Load average
+Target[$router_name-lavg]: $laoid&$laoid2:$router_connect / 100
+PageTop[$router_name-lavg]: $router_name Load Average
+Title[$router_name-lavg]: Load Average on $router_name
+SetEnv[$router_name-lavg]: MRTG_INT_DESCR="Load Average"
+MaxBytes[$router_name-lavg]: 1000
+Options[$router_name-lavg]: nopercent, gauge
+YLegend[$router_name-lavg]: Processes
+ShortLegend[$router_name-lavg]: &nbsp;
+LegendI[$router_name-lavg]: 5min avg:
+LegendO[$router_name-lavg]: 15min avg:
+Legend1[$router_name-lavg]: 5-min load average
+Legend2[$router_name-lavg]: 15-min load average
+Legend3[$router_name-lavg]: Peak 5-min load average
+Legend4[$router_name-lavg]: Peak 15-min load average
+routers.cgi*Options[$router_name-lavg]: nomax, nototal, fixunit, noo
+routers.cgi*Mode[$router_name-lavg]: general
+routers.cgi*ShortDesc[$router_name-lavg]: Load Avg
+routers.cgi*Description[$router_name-lavg]: Load average: $router_name
+routers.cgi*UnScaled[$router_name-lavg]: none
+routers.cgi*WithPeak[$router_name-lavg]: none
+routers.cgi*InOut[$router_name-lavg]: no
+routers.cgi*InSummary[$router_name-lavg]: yes
+routers.cgi*InCompact[$router_name-lavg]: no
+routers.cgi*Icon[$router_name-lavg]: load-sm.gif
+ECHO
+}
+
+my($ucoid) = oid_pick($router_connect,$v3opt,
+	"1.3.6.1.4.1.42.2.12.2.2.12.1.2.0", "1.3.6.1.2.1.25.1.5.0");
+if($ucoid) { 
+$target_lines .= <<ECHO;
+#######################################
+# User count
+Target[$router_name-users]: $ucoid&$ucoid:$router_connect
+PageTop[$router_name-users]: $router_name Active users
+Title[$router_name-users]: Active Users on $router_name
+MaxBytes[$router_name-users]: 1000
+SetEnv[$router_name-users]: MRTG_INT_DESCR="Users"
+Options[$router_name-users]: nopercent, gauge
+YLegend[$router_name-users]: Users
+ShortLegend[$router_name-users]: &nbsp;
+LegendI[$router_name-users]: Users
+Legend1[$router_name-users]: Active Users
+Legend3[$router_name-users]: Peak Active Users
+routers.cgi*Options[$router_name-users]: nomax, nototal, fixunit, noo
+routers.cgi*Mode[$router_name-users]: general
+routers.cgi*ShortDesc[$router_name-users]: Users
+routers.cgi*Description[$router_name-users]: Users on $router_name
+routers.cgi*UnScaled[$router_name-users]: none
+routers.cgi*InOut[$router_name-users]: no
+routers.cgi*InSummary[$router_name-users]: yes
+routers.cgi*InCompact[$router_name-users]: no
+routers.cgi*Icon[$router_name-users]: user-sm.gif
+ECHO
+}
+
+my($proid) = oid_pick($router_connect,$v3opt,"1.3.6.1.2.1.25.1.6.0");
+if($proid) { 
+my($maxpr) = snmpget($router_connect, "1.3.6.1.2.1.25.1.7.0");
+$target_lines .= <<ECHO;
+#######################################
+# Process count
+Target[$router_name-procs]: $proid&$proid:$router_connect
+PageTop[$router_name-procs]: $router_name Processes
+Title[$router_name-procs]: Processes on $router_name
+ECHO
+if($maxpr) {
+	$target_lines .= "MaxBytes[$router_name-procs]: $maxpr\n";
+} else {
+	$target_lines .= "MaxBytes[$router_name-procs]: 10000\n";
+}
+$target_lines .= 
+  "routers.cgi*Options[$router_name-procs]: nototal, fixunit, noo"
+  .($maxpr?"":", nomax")."\n";
+$target_lines .= <<ECHO;
+SetEnv[$router_name-procs]: MRTG_INT_DESCR="Procs"
+Options[$router_name-procs]: nopercent, gauge
+YLegend[$router_name-procs]: Processes
+ShortLegend[$router_name-procs]: &nbsp;
+LegendI[$router_name-procs]: Procs
+Legend1[$router_name-procs]: Processes
+Legend3[$router_name-procs]: Peak Processes
+routers.cgi*Mode[$router_name-procs]: general
+routers.cgi*ShortDesc[$router_name-procs]: Processes
+routers.cgi*Description[$router_name-procs]: Processes on $router_name
+routers.cgi*UnScaled[$router_name-procs]: none
+routers.cgi*InOut[$router_name-procs]: no
+routers.cgi*InSummary[$router_name-procs]: yes
+routers.cgi*InCompact[$router_name-procs]: no
+routers.cgi*Icon[$router_name-procs]: list-sm.gif
+routers.cgi*MBLegend[$router_name-procs]: Max capacity
+ECHO
+}
+

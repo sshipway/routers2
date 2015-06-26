@@ -1,0 +1,86 @@
+In here are various scripts and utilities that you may find useful, but which
+are not part of the main distribution.  This also includes any user-submitted
+scripts.
+The scripts in here are not as well supported as the main application.  Any
+of them written by someone other than myself are supported by that person - so
+report any problems to them, and not to me.
+You may well have to modify these scripts by changing the Perl path on the
+first line, or by changing the extension or the file execute permissions.
+Some of them also require other configuration.  See any accompanying
+documentation, or header comments in the files themselves.
+
+graphprune.pl Steve Shipway
+    This is a script that can be run nightly to clean up old graphs in the 
+    graphs directory, in order to save space. Public domain.
+
+extensions
+    This directory holds various plugin extensions for routers.cgi
+
+buildwan.pl Steve Shipway
+    This more complex script - which requires Net::SNMP to be installed - will
+    take a 'seed' router, and then explore your entire WAN (as far as possible)
+    and create a set of MRTG files suitable for use with routers.cgi.  The
+    created files will have a number of routers.cgi specific directives added.
+    Public domain software.
+
+rrdextend.pl Steve Shipway
+    This script will extend the RRAs in all the RRD files for a given MRTG
+    .cfg file.  You will need the rrdtool executable in your path to run it.
+    You need to do this in order to use the extended time windows options.
+    Some of you may wish to modify the location of the rrdtool executable and
+    perl executable coded into the script.
+    This too is public domain.
+  
+getstats.sh Steve Shipway
+    Statistics gathering backend for server monitor.  Called from inetd.  This
+    is used by the gather.pl and servers.cgi extensions.
+
+gather.pl Steve Shipway
+    This is the perl script, supposed to be run every 5 mins, that contacts the
+    getstats.sh program on remote UNIX hosts to get the load stats.  This data
+    is then placed into an RRD and reported by routers.cgi when the servers=yes
+    option has been set. 
+
+targetnames Steve Shipway
+	This script is used to attempt to generate the [targetnames] section of
+	the routers2.conf file, by querying the routers via SNMP.  It uses the
+	various SNMP libraries supplied with MRTG.
+
+cfgmaker_host Steve Shipway
+	This will make a MRTG .cfg file, with lots of routers.cgi extensions,
+    for a specified host.  It will search for the UCD and host MIBs in 
+    order to make targets, including the interfaces.  It is supposed to
+    be given a server name as a parameter. Public domain.
+
+rrd-archive.pl Steve Shipway
+   This is a script to run nightly, to generate the archived .rrd files
+   used by routers.cgi to do historical graphs.  GPL
+
+mrtg-nrpe.sh Steve Shipway
+    A wrapper to allow you to collect data in MRTG format from the Nagios
+    remote agent, nrpe.  Unix shellscript, Public domain.
+
+mrtg-pnsclient.pl Steve Shipway
+    A perl script to allow you to collect data in MRTG format from the
+    Nagios/NetSaint remote agent, pNSclient.  This is a great way to collect
+    data remotely from a Windows Perfmon counter.
+
+vmware_monitor.pl Steve Shipway
+    A perl script to dynamically retrieve stats from a VMWare server, and 
+    create .rrd and .cfg files appropriately.
+
+dashboard Steve Shipway
+    Some CGI scripts to work with the SLickboard Flash tool to display
+    MRTG data as a dashobard gauge, graph, or bar chart.
+
+rrdcached
+    Information on how to make Routers2 and MRTG work with the rrdcached 
+    caching daemon for rrdtool.
+
+checkagent Steve Shipway
+    A tool to check a remote host for the nsclient, nrpe or snmp agents
+
+check_ucd Steve Shipway
+    An MRTG/Nagios plugin to let you run a Nagios plugin via the UCD SNMP 
+	daemon, and query the output
+

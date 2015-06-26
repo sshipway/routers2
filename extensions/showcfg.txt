@@ -1,0 +1,18 @@
+Name:
+showcfg.txt
+
+Author:
+Steve Shipway
+
+Example:
+routers.cgi*Extension: "Show .cfg file" /cgi-bin/showcfg.cgi list-sm.gif
+
+Description:
+This simple script will just display the relevant .cfg file for the
+current device.  This is intended for demo purposes.
+This is a SECURITY RISK since it will also show your community strings!
+
+Installation:
+You will need to modify the $confpath variable at the start of the script
+as well as the first perl location line.
+

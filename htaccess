@@ -1,0 +1,65 @@
+# .htaccess file for use by Apache with mod_expires.  Other web servers /may/
+# also support this.  Put it in the graphs directory, and set the options in
+# your httpd.conf to have AllowOverride set.
+# We set the expiry time to be 1 second less than the lifespan of the graph
+#
+# Filenames will be <router>-<interface>-<time period>-<graph style>.<format>
+# where <format> is gif or png
+#       <graph style> is n, l, t, x2, etc etc
+#       <time period> is 6,d,w,m,y with s for summary
+#
+<Files *-6-*.*>
+ExpiresActive On
+ExpiresDefault M50
+# Expire 6hourly after 1 minute
+</Files>
+<Files *-d-*.*>
+ExpiresActive On
+ExpiresDefault M290
+# Expire daily ones 5 mins after they are created
+</Files>
+<Files *-w-*.*>
+ExpiresActive On
+ExpiresDefault M1799
+# Expire weekly ones 30 mins after they are created
+</Files>
+<Files *-m-*.*>
+ExpiresActive On
+ExpiresDefault M3590
+# Expire monthly 1 hour after they are created
+</Files>
+<Files *-y-*.*>
+ExpiresActive On
+ExpiresDefault M86390
+# Expire yearly 1 day after they are created
+</Files>
+<Files *-6s-*.*>
+ExpiresActive On
+ExpiresDefault M50
+# Expire  6hourly after 1 minute
+</Files>
+<Files *-ds-*.*>
+ExpiresActive On
+ExpiresDefault M290
+# Expire daily ones 5 mins after they are created
+</Files>
+<Files *-ws-*.*>
+ExpiresActive On
+ExpiresDefault M1790
+# Expire weekly ones 30 mins after they are created
+</Files>
+<Files *-ms-*.*>
+ExpiresActive On
+ExpiresDefault M3590
+# Expire monthly 1 hour after they are created
+</Files>
+<Files *-ys-*.*>
+ExpiresActive On
+ExpiresDefault M86390
+# Expire yearly 1 day after they are created
+</Files>
+# For the benefit of the verify page.
+<Files redsquare.png>
+ExpiresActive On
+ExpiresDefault M1
+</Files>

@@ -1,0 +1,57 @@
+Installing Perl Modules
+-----------------------
+
+Under Windows, you can use the PPM program to install the Perl modules.
+To install the RRDTool modules, use
+	ppm install RRDs.ppd
+when in the perl-shared directory of your RRDTool installation (see the RRDTool
+installation instructions for details).
+To install GD or Net::SNMP, use
+	ppm install GD
+	ppm install Net-SNMP
+after first setting the proxy variables, if you use a proxy to access the 
+Internet (you will need an Internet connection for this to work).  See the PPM
+documentationon the ActivePerl website for details.
+
+If you are unable to install GD by the above method, try this instead:
+	ppm install http://theoryx5.uwinnipeg.ca/ppms/GD.ppd
+or, as a last resort, this:
+	ppm install http://www.steveshipway.org/software/3rdparty/GD.ppd
+
+Finally, you can download the files:
+	http://www.steveshipway.org/software/3rdparty/GD.ppd
+	http://www.steveshipway.org/software/3rdparty/GD.tar.gz
+then modify the ppd file appropriately for your system, or even install
+the ppm file (inside the .tar.gz) directly.
+
+Caveats for Windows users  (RRDTool v1.0.38 (Win) and before)
+-------------------------
+
+If you are running the RRDTool server under Windows, then there are a few 
+things that do not work as designed, due to limitations in the Windows version
+of RRDTool and the operating system.
+
+1) Timezone support.
+   This is not as flexible, since windows does not like to have varying
+   timezones.  The RRDTool executable was not compiled with this support.
+
+2) Working day highlighting, and 'greying out' for unknown data
+   This does not work, although the cause has been correct and is expected to
+   be OK in the next version.  This is due to a bug in the windows version.
+
+3) Day- and week- change lines (etc) in graphs
+   Under UNIX, you get a red vertical line to indicate the change of day/week/
+   month/year in the graphs.  This does not happen under Windows due to a
+   difference in the libraries that cannot be worked around.
+
+4) Week numbering
+   Under older versions of RRDTool, you could not have spaces in the axis
+   labels.  This causes the 'Monthly' graph to have axis labels that just 
+   say 'week' instead of 'week 1' etc.  If this happens, DO NOT define the
+   weeknumber option in the routers2.conf file.
+
+5) Windows Path separator
+   The windows path separator, '\', is the escape character in almost every
+   other system.  This has caused some difficulty in the Bookmark button
+   operation, and other places.  This should now be OK (as of routers.cgi
+   v2.5) but is a point to watch out for.

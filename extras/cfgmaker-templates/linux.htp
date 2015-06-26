@@ -1,0 +1,159 @@
+if( $sysdescr =~ /linux/i ) {
+$head_lines .= "#---------------------------------------------------------------------\n";
+$target_lines .= <<ECHO;
+routers.cgi*Icon: linux-sm.gif
+routers.cgi*Description: $router_name ($sysname)
+routers.cgi*ShortDesc: $sysname
+#-------------------------------------------------
+
+#######################################
+# CPU load
+Target[$router_name-snmp-cpu]: 100 - enterprises.2021.11.11.0&enterprises.2021.11.11.0:$router_connect
+PageTop[$router_name-snmp-cpu]: $router_name CPU usage
+Title[$router_name-snmp-cpu]: CPU on $router_name
+Maxbytes[$router_name-snmp-cpu]: 100
+Options[$router_name-snmp-cpu]: gauge
+YLegend[$router_name-snmp-cpu]: percent
+ShortLegend[$router_name-snmp-cpu]: %
+LegendI[$router_name-snmp-cpu]: cpu:
+Legend1[$router_name-snmp-cpu]: CPU usage
+Legend3[$router_name-snmp-cpu]: Peak CPU usage
+routers.cgi*Options[$router_name-snmp-cpu]: noo, nopercent, nototal
+routers.cgi*InOut[$router_name-snmp-cpu]: no
+routers.cgi*ShortDesc[$router_name-snmp-cpu]:CPU
+
+#######################################
+# Memory used
+Target[$router_name-snmp-memory]: enterprises.2021.4.6.0&enterprises.2021.4.4.0:$router_connect
+PageTop[$router_name-snmp-memory]: $router_name Memory Available
+Title[$router_name-snmp-memory]: Available Memory on $router_name
+SetEnv[$router_name-snmp-memory]: MRTG_INT_DESCR="Memory"
+Factor[$router_name-snmp-memory]: 1024
+# This should be set to your real memory size, in K
+MaxBytes1[$router_name-snmp-memory]: 10000000
+# This should be set to your swap size, in K
+MaxBytes2[$router_name-snmp-memory]: 10000000
+Options[$router_name-snmp-memory]: gauge
+YLegend[$router_name-snmp-memory]: Bytes
+ShortLegend[$router_name-snmp-memory]: b
+LegendI[$router_name-snmp-memory]: real:
+LegendO[$router_name-snmp-memory]: swap:
+Legend1[$router_name-snmp-memory]: Available real memory
+Legend2[$router_name-snmp-memory]: Available swap space
+Legend3[$router_name-snmp-memory]: Peak available real
+Legend4[$router_name-snmp-memory]: Peak available swap
+routers.cgi*Options[$router_name-snmp-memory]: nototal
+routers.cgi*Mode[$router_name-snmp-memory]: memory
+routers.cgi*ShortDesc[$router_name-snmp-memory]: Memory
+routers.cgi*Description[$router_name-snmp-memory]: Memory available: $router_name
+routers.cgi*InOut[$router_name-snmp-memory]: no
+routers.cgi*InSummary[$router_name-snmp-memory]: yes
+routers.cgi*InCompact[$router_name-snmp-memory]: yes
+routers.cgi*Icon[$router_name-snmp-memory]: chip-sm.gif
+routers.cgi*MBLegend[$router_name-snmp-memory]: 100% usage
+
+#######################################
+# Filesystems
+#Target[$router_name-snmp-disk]: enterprises.2021.9.1.8.1&enterprises.2021.9.1.8.1:$router_connect
+#PageTop[$router_name-snmp-disk]: $router_name Disk space used (/)
+#Title[$router_name-snmp-disk]: Disk space used on $router_name (/)
+#SetEnv[$router_name-snmp-disk]: MRTG_INT_DESCR="/"
+## Set this to the size of the disk in K
+#MaxBytes[$router_name-snmp-disk]: 100000000
+#Factor[$router_name-snmp-disk]: 1024
+#Options[$router_name-snmp-disk]: gauge
+#YLegend[$router_name-snmp-disk]: Bytes
+#ShortLegend[$router_name-snmp-disk]: b
+#LegendI[$router_name-snmp-disk]: used:
+#Legend1[$router_name-snmp-disk]: Space used
+#Legend3[$router_name-snmp-disk]: Peak used
+#routers.cgi*Options[$router_name-snmp-disk]: nototal, noo
+#routers.cgi*Mode[$router_name-snmp-disk]: general
+#routers.cgi*ShortDesc[$router_name-snmp-disk]: Disk: /
+#routers.cgi*Description[$router_name-snmp-disk]: $router_name space used on /
+#routers.cgi*InOut[$router_name-snmp-disk]: no
+#routers.cgi*InMenu[$router_name-snmp-disk]: no
+#routers.cgi*InSummary[$router_name-snmp-disk]: yes
+#routers.cgi*InCompact[$router_name-snmp-disk]: yes
+#routers.cgi*Icon[$router_name-snmp-disk]: dir-sm.gif
+#routers.cgi*Graph[$router_name-snmp-disk]: $router_name-filesystems "Disk space" withtotal noo
+#routers.cgi*Options[$router_name-filesystems]: available
+#routers.cgi*Icon[$router_name-filesystems]: dir-sm.gif
+#routers.cgi*ShortDesc[$router_name-filesystems]: Filesystems
+#routers.cgi*Title[$router_name-filesystems]: Filesystems on $router_name
+
+#######################################
+# Load average
+Target[$router_name-snmp-lavg]: enterprises.2021.10.1.5.2&enterprises.2021.10.1.5.3:$router_connect / 100
+PageTop[$router_name-snmp-lavg]: $router_name Load Average
+Title[$router_name-snmp-lavg]: Load Average on $router_name
+SetEnv[$router_name-snmp-lavg]: MRTG_INT_DESCR="Load Average"
+MaxBytes[$router_name-snmp-lavg]: 1000
+Options[$router_name-snmp-lavg]: nopercent, gauge
+YLegend[$router_name-snmp-lavg]: Processes
+ShortLegend[$router_name-snmp-lavg]: &nbsp;
+LegendI[$router_name-snmp-lavg]: 5min avg:
+LegendO[$router_name-snmp-lavg]: 15min avg:
+Legend1[$router_name-snmp-lavg]: 5-min load average
+Legend2[$router_name-snmp-lavg]: 15-min load average
+Legend3[$router_name-snmp-lavg]: Peak 5-min load average
+Legend4[$router_name-snmp-lavg]: Peak 15-min load average
+routers.cgi*Options[$router_name-snmp-lavg]: nomax, nototal, fixunit, noo
+routers.cgi*Mode[$router_name-snmp-lavg]: general
+routers.cgi*ShortDesc[$router_name-snmp-lavg]: Load Avg
+routers.cgi*Description[$router_name-snmp-lavg]: Load average: $router_name
+routers.cgi*UnScaled[$router_name-snmp-lavg]: none
+routers.cgi*WithPeak[$router_name-snmp-lavg]: none
+routers.cgi*InOut[$router_name-snmp-lavg]: no
+routers.cgi*InSummary[$router_name-snmp-lavg]: yes
+routers.cgi*InCompact[$router_name-snmp-lavg]: no
+routers.cgi*Icon[$router_name-snmp-lavg]: load-sm.gif
+
+#######################################
+# User count
+Target[$router_name-snmp-users]: internet.2.1.25.1.5.0&internet.2.1.25.1.5.0:$router_connect
+PageTop[$router_name-snmp-users]: $router_name Active users
+Title[$router_name-snmp-users]: Active Users on $router_name
+MaxBytes[$router_name-snmp-users]: 1000
+SetEnv[$router_name-snmp-users]: MRTG_INT_DESCR="Users"
+Options[$router_name-snmp-users]: nopercent, gauge
+YLegend[$router_name-snmp-users]: Users
+ShortLegend[$router_name-snmp-users]: &nbsp;
+LegendI[$router_name-snmp-users]: Users
+Legend1[$router_name-snmp-users]: Active Users
+Legend3[$router_name-snmp-users]: Peak Active Users
+routers.cgi*Options[$router_name-snmp-users]: nomax, nototal, fixunit, noo
+routers.cgi*Mode[$router_name-snmp-users]: general
+routers.cgi*ShortDesc[$router_name-snmp-users]: Users
+routers.cgi*Description[$router_name-snmp-users]: Users on $router_name
+routers.cgi*UnScaled[$router_name-snmp-users]: none
+routers.cgi*InOut[$router_name-snmp-users]: no
+routers.cgi*InSummary[$router_name-snmp-users]: yes
+routers.cgi*InCompact[$router_name-snmp-users]: no
+routers.cgi*Icon[$router_name-snmp-users]: user-sm.gif
+
+#######################################
+# Process count
+Target[$router_name-snmp-procs]: internet.2.1.25.1.6.0&internet.2.1.25.1.6.0:$router_connect
+PageTop[$router_name-snmp-procs]: $router_name Processes
+Title[$router_name-snmp-procs]: Processes on $router_name
+MaxBytes[$router_name-snmp-procs]: 1000000
+SetEnv[$router_name-snmp-procs]: MRTG_INT_DESCR="Procs"
+Options[$router_name-snmp-procs]: nopercent, gauge
+YLegend[$router_name-snmp-procs]: Processes
+ShortLegend[$router_name-snmp-procs]: &nbsp;
+LegendI[$router_name-snmp-procs]: Procs
+Legend1[$router_name-snmp-procs]: Processes
+Legend3[$router_name-snmp-procs]: Peak Processes
+routers.cgi*Options[$router_name-snmp-procs]: nomax, nototal, fixunit, noo
+routers.cgi*Mode[$router_name-snmp-procs]: general
+routers.cgi*ShortDesc[$router_name-snmp-procs]: Processes
+routers.cgi*Description[$router_name-snmp-procs]: Processes on $router_name
+routers.cgi*UnScaled[$router_name-snmp-procs]: none
+routers.cgi*InOut[$router_name-snmp-procs]: no
+routers.cgi*InSummary[$router_name-snmp-procs]: yes
+routers.cgi*InCompact[$router_name-snmp-procs]: no
+routers.cgi*Icon[$router_name-snmp-procs]: list-sm.gif
+
+ECHO
+}

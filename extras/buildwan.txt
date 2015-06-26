@@ -1,0 +1,33 @@
+The buildwan.pl utility.
+
+This script will attempt to generate a complete set of MRTG .cfg files, with
+the necessary routers.cgi extensions, when given one ormore routers to start
+exploring from.  Sort of like cfgmaker, but on a larger scale.
+
+You should also pass it the SNMP community string, and the name of the
+subdirectory (off of the cfgpath) where the generated files will be installed.
+You can optionally pass it a domain name, which is stripped off of hostnames
+for brevity when creating labels.
+
+It uses DNS to identify the name of routers, and takes IP addresses in the
+10.x.x.x subnet to be 'preferable' to anything else.
+
+People who have renamed the routers2.cgi script may need to make modifications 
+to the script, and also people who have particular router names etc.
+
+Usage example:
+
+	buildwan.pl -D company.com -c secret -s routerdir -w workdir 10.26.7.254
+
+The -s parameter is optional, but if not given the your generated .cfg files 
+    should all reside in the cfgpath and not in subdirs.  If given, it is
+    then name of the subdir off of the cfgpath that all the generated .cfg
+    files will live in.  This is needed for crosslink definitions.
+The -c parameter is optional, and defaults to 'public'.  You can specify many
+   SNMP communities here, separated by commas
+The -w parameter give the workdir, where the .rrd files are to be kept.
+The -D parameter defines your company domain, which is stripped from host names
+The -A parameter tell it to add all interfaces, even if they are down
+The -N network stops it from exploring neighbour networks
+At the end you give the ip address(es) of seed routers to start exploring the
+   WAN from.

@@ -1,0 +1,8 @@
+For new language packs and instructions, go to the website at
+http://www.steveshipway.org/software and view the links on the routers2 page.
+
+This is an EXAMPLE language pack for English.  It is not needed since the 
+program already supports English internally without a language pack.
+
+In addition to the lang_en.conf file, you would also need the icon set to 
+put in the /rrdicons/en directory.

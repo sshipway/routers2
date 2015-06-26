@@ -1,0 +1,26 @@
+Making MRTG/RRD/Routers2 work with RRDCached
+
+1. You will need the trunk version of MRTG or 2.16.5+
+
+2. You will need the trunk version of RRDTool or 1.5+ in order to work with
+   TCP sockets
+
+3. Start the rrdcached daemon.  In RedHat, you cna put the included files
+   etc-init.d-rrdcached and etc-sysconfig-rrdcached into the appropriate
+   locations to do this.
+
+4. You need to add the RRDCached: directive to your MRTG .cfg file to specify
+   where the rrdcached is listening.  Note that thresholding will now no
+   longer work, and autotuning of the rrd files to match changes in DS type
+   or MaxBytes will not happen.
+
+5. Use the rrdcached option in routers2.conf, or the RRDCACHED_ADDRESS env var,
+   to specify to routers2 where the rrdcached is.  Note that if you are using
+   UNIX sockets then RRD Archiving will no longer work.
+
+6. All should now work!  Additional comments in the main frame HTML will show
+    you what the rrdcached settings used by routers2 are.
+
+7. Note that if the rrdcached is stopped and restarted, the MRTG daemon also 
+   needs to be restarted
+

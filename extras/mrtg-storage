@@ -1,0 +1,76 @@
+#!/usr/bin/perl -w
+#
+# mrtg-storage: return storage item usage
+# Version 0.1: Steve Shipway 2008
+#
+# usage: mrtg-storage -H hostname -C community -t timeout -d -v dtorage identifier
+#
+
+use strict;
+use Net::SNMP;
+use Getopt::Std;
+use vars qw/$opt_h $opt_H $opt_C $opt_t $opt_v $opt_d/;
+
+my($hrStorage) = "1.3.6.1.2.1.25.2";
+my($hrStorageDescr) = "$hrStorage.3.1.3";
+my($hrStorageUsed ) = "$hrStorage.3.1.4";
+my($hrStorageSize ) = "$hrStorage.3.1.5";
+my($hrStorageAllocationUnits) = "$hrStorage.3.1.6";
+
+my($HOSTNAME,$COMMUNITY,$MODULE) = ('localhost','public','');
+my($TIMEOUT) = 10;
+my($DEBUG) = 0;
+my($snmp,$snmperr,$resp);
+my($instance) = -1;
+my($oid);
+
+sub dohelp {
+	print "Usage: mrtg-storage -H hostname -C community [-t timeout][-d][-v item]\n";
+	exit 0;
+}
+
+# Process the arguments
+getopts('H:C:t:v:dh');
+if($opt_h) { dohelp(); exit(0); }
+$TIMEOUT   = $opt_t if($opt_t);
+$COMMUNITY = $opt_C if($opt_C);
+$HOSTNAME  = $opt_H if($opt_H);
+$MODULE    = $opt_v if($opt_v);
+$DEBUG = 1 if($opt_d);
+
+# Open the SNMP connection
+($snmp,$snmperr) = Net::SNMP->session( -hostname=>$HOSTNAME,
+        -community=>$COMMUNITY, -timeout=>$TIMEOUT );
+if($snmperr) { print "UNKNOWN\nUNKNOWN\n\nError: $snmperr\n"; exit 0; }
+
+# Search for matching storage entry
+$resp = $snmp->get_table( -baseoid=>$hrStorageDescr );
+if(!$resp) { print "UNKNOWN\nUNKNOWN\n\nNo SNMP data available\n"; exit 0; }
+foreach $oid ( keys %$resp ) {
+	print "Storage ".$resp->{$oid}." found...\n" if($DEBUG);	
+	if(!$MODULE) { print $resp->{$oid}."\n"; next; }
+	if($resp->{$oid} eq $MODULE) {
+		$instance=$1 if( $oid =~ /\.(\d+)$/ );
+		last;
+	}
+}
+exit 0 if(!$MODULE); # testing mode
+if($instance<1) {
+	print "UNKNOWN\nUNKNOWN\n\n";
+	print "The $MODULE storage item is not present\n";
+	exit 0;
+}
+
+# Now we know the sequence number, we can get the items
+$resp = $snmp->get_request( -varbindlist=>[ "$hrStorageAllocationUnits.$instance", "$hrStorageSize.$instance", "$hrStorageUsed.$instance" ] );
+if(!$resp) {
+	print "UNKNOWN\nUNKNOWN\n\n";
+	print "Plugin error: ".$snmp->errmsg()."\n";
+	exit 0;
+}
+
+print "".($resp->{"$hrStorageUsed.$instance"}*$resp->{"$hrStorageAllocationUnits.$instance"})."\n";
+print "".($resp->{"$hrStorageSize.$instance"}*$resp->{"$hrStorageAllocationUnits.$instance"})."\n";
+print "\n";
+print "Storage Used/Size for $MODULE\n";
+exit 0;

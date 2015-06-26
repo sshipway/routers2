@@ -1,0 +1,39 @@
+mrtg-pnsclient.pl
+mrtg-pnsclient.c
+
+This is an interface to allow MRTG to query the NetSaint pNSClient agent which
+runs on Windows servers.  Go to http://nsclient.ready2run.nl/ to obtain a
+copy of the agent.  This script would be called from your .cfg file instead
+of using SNMP.
+
+The .c file is a pure-C version of the code (more efficient, if you can compile
+it) and the .pl is the pure-Perl version of the code.
+
+See the example .cfg file to see how to use this.
+
+Released under GPL.  The pNSClient software is not mine.
+
+Usage:
+	mrtg-pnsclient [-r] -H <hostname> [ -p <port> ] [ -t <timeout> ]
+		-v <module> [ -l <arg> ] [ -o <offset> ]
+		[ -v <module> [ -l <arg> ] [ -o <offset> ]]
+
+-H : specify hostname to contact
+-p : specify non-standard port
+-t : timeout in seconds (default 10)
+-v : pnsclient module -- eg, COUNTER, CPU, MEMORY, DISKSPACE, etc etc
+-l : Argument to module, if required
+-o : 0 or 1 -- offset of required value in response set.  Default 0.
+-r : Ratio/Percentage mode -- return the relative % of the return values.  Good
+     for when using DISKSPACE (offset 1 is the size, 0 is the space used)
+
+If no second -v is given, then the second value defaults to being the
+offset 1 value in the first response (if one exists) and 0 otherwise.
+
+Note: This does not work so well with NC_Net 2.28 because NC_Net is single
+threaded.  A race condition in NC_Net causes all other queries to be returned
+with a blank while it is processing one.  Therefore, if you query two stats
+at once, the second may return unknown.  This problem does not affect pNSclient
+because it is multithreading.
+
+Steve S

@@ -1,0 +1,83 @@
+                        Authentication Documentation
+                        ----------------------------
+
+routers.cgi will optionally use additional user authentication to grant
+users different rights of access.  You can enable this in the routers2.conf
+file with the auth-required directive.
+
+If you have authentication enabled in your web server, then routes.cgi will
+recognise this as being authoritative.  Otherwise, you will be prompted for
+a login from the CGI script itself (if you have auth-required enabled).
+
+auth-required can be set to YES, NO or OPTIONAL.  In the case of OPTIONAL, then
+if you have not already authenticated, you will get the 'default' level of
+access.  If set to YES then you have no access until you have logged in.
+
+When you have logged in, then routers.cgi will process the [user-xxx] section
+of the file (if your username is xxx).  This can override defaults set in the
+[routers.cgi] section, and allows you to grant access to different files and
+directories, or archive rights, on a per-user basis.
+
+If a user attempts to log in (or is forced to) then their username/password
+will be authenticated by all methods defined in routers2.conf.  All are
+regarded as being authoritative.  The login sets a cookie that expires after
+a defined interval, and is refreshed every time the page refreshes.
+
+LDAP authentication can check several contexts, with several attributes.  It
+can only check a single server, but will try LDAP and/or LDAPS if available.
+It will use LDAPS in preference.  In order to use LDAP authentication, you
+must install the Net::LDAP; for LDAPS you also need Net::LDAPS, which in turn 
+requires OpenSSL, Net::SSLeay, and IO::Socket::SSL
+
+The MySQL authentication requires the DBI and DBD::MySQL modules.  It can work
+either in bind mode (where it checks a user/pass combination by simply trying
+to bind to the database successfully) and in table mode (where it binds as a
+supplied user/pass combination, then queries a table to obtain an encrypted
+password for the user, and compares PASSWORD(pass) with the field retrieved
+for the user.
+
+Before you enable authentication, make sure you have managed to get routers.cgi
+working without it.
+
+#################################
+# File-based authentication
+
+# LDAP-based authentication
+LDAP authentication, can have one or more ldap-context entries
+requires Net::LDAP.  LDAPS requires in addition OpenSSL, Net::SSLeay, and
+IO::Socket::SSL
+If both ldap and ldaps exist, it will try ldaps first.
+You can use server:port if you want to.
+
+ldaps-server = ldap.auckland.ac.nz
+ldap-server = ldap.auckland.ac.nz
+
+Context list, one or more separated by colons.
+this is prefixed by CN=username or by UID=username (both are tested)
+
+ldap-context = ou=People,o=UOA Address Book,c=NZ : ou=People,O=The University of Auckland,C=NZ
+
+Ldap attribute to match, space separated list.  Default is cn and uid.
+
+ldap-attr = cn uid
+
+# MySQL-based authentication
+
+Using MYSQL.  If only server and database given, then test is done with a
+database bind.
+
+mysql-server = authserver
+mysql-database = authdb
+
+If the next few options are also set, then the test will bind as the
+given user and will then attempt to retrieve the user record from the
+specified table, and compare the encrypted password.
+
+mysql-user = xxxx
+mysql-password = pppp
+mysql-table = tttt
+
+Table MUST have two fields, 'user' and 'pass'.
+ user = varchar(15), username
+ pass = varchar(50), encrypted password
+

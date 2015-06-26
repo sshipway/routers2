@@ -1,0 +1,194 @@
+                 Examples of how to define MRTG entries
+                 --------------------------------------
+
+Here is a standard router with 2 interfaces, one of which is monitored for
+errors, and a CPU usage percentage.
+There is a user extension script defined against one interface (it calls the
+routing table script, but could call anything).
+There is an internal link defined against the HSSI interface, that links to 
+the graph for the interface at the remote end of the PtP link.  This would 
+allow easy jumping around your WAN.  
+There is a user extension script defined against the entire device (again it
+just duplicates the default routingtable extension script call).
+A user defined graph has been set up to show both of the interfaces on the 
+same graph, called 'Combined'.
+The file will be given the globe-sm.gif icon in the menu, instead of the 
+default icon.
+The en0 interface is forced to be displayed as Scaled, since the relative 
+traffic percentage is so low.
+Remember that we ALWAYS list the Target[] directive first!  The Extension
+directive is last in the file, so that it can refer back to any commnuity
+strings previously defined.
+
+Start of example ===============================================
+
+#---------------------------------------------------------------
+Logformat: rrdtool
+Workdir: /var/rrdtool
+#---------------------------------------------------------------
+routers.cgi*Icon: globe-sm.gif
+#---------------------------------------------------------------
+Target[internet-router.1]: 1:fish@internet-router
+MaxBytes[internet-router.1]: 250000
+Title[internet-router.1]: internet_router: Hssi0
+PageTop[internet-router.1]: <H1>Traffic Analysis for Hssi0</h1>
+SetEnv[internet-router.1]: MRTG_INT_DESCR="Hssi0"  MRTG_INT_IP="1.2.3.4"
+Options[internet-routers.1]: bits 
+routers.cgi*Graph[internet-router.1]: Combined nototal
+routers.cgi*Link[internet-router.1]: "Remote end of this P-t-P link" remote-site.cfg remote-router-target interface-sm.gif
+#---------------------------------------------------------------
+Target[internet-router.3]: 3:fish@internet-router
+MaxBytes[internet-router.3]: 1250000
+Title[internet-router.3]: internet_router (10.1.2.3): en0
+PageTop[internet-router.3]: <H1>Traffic Analysis for en0</h1>
+Options[internet-routers.3]: bits 
+SetEnv[internet-router.3]: MRTG_INT_DESCR="en0"  MRTG_INT_IP="10.1.2.3"
+routers.cgi*Extension[internet-router.3]: "See the routing table" /cgi-bin/routingtable.cgi insecure
+routers.cgi*Extension[internet-router.3]: "Trending Analysis" /cgi-bin/trend.cgi 
+routers.cgi*Graph[internet-router.3]: Combined
+routers.cgi*Options[internet-router.3]: scaled
+#---------------------------------------------------------------
+# Monitor the CPU usage
+Target[router-inet1-CPU]: 1.3.6.1.4.1.9.2.1.58.0&1.3.6.1.4.1.9.2.1.58.0:fish@internet-router
+MaxBytes[router-inet1-CPU]: 100
+UnScaled[router-inet1-CPU]: dwmy
+Options[router-inet1-CPU]: integer gauge noo
+Title[router-inet1-CPU]: CPU Load on Internet 1
+PageTop[router-inet1-CPU]: <H1>CPU Load</H1>
+routers.cgi*Mode[router-inet1-CPU]: cpu
+#---------------------------------------------------------------
+# Count the errors on one interface
+Target[router-inet1-errors-1]: 1.3.6.1.4.1.x.x.x.x.1&1.3.6.1.4.1.x.x.x.y.1:fish@internet-router
+MaxBytes[router-inet1-errors-1]: 10000
+Options[router-inet1-errors-1]: perminute
+routers.cgi*UnScaled[router-inet1-errors-1]: none
+Options[router-inet1-errors-1]: nomax fixunit
+Title[router-inet1-errors-1]: Errors on interface HSSI0
+PageTop[router-inet1-errors-1]: <H1>HSSI0 Errors</H1>
+routers.cgi*InCompact[router-inet1-errors-1]: no
+YLegend[router-inet1-errors-1]: per minute
+ShortLegend[router-inet1-errors-1]: /min
+Legend1[router-inet1-errors-1]: Incoming errors
+Legend2[router-inet1-errors-1]: Outgoing errors
+Legend3[router-inet1-errors-1]: Peak Incomnig errors
+Legend4[router-inet1-errors-1]: Peak Outgoing errors
+routers.cgi*Icon[router-inet1-errors-1]: alert-sm.gif
+#---------------------------------------------------------------
+routers.cgi*Extension: "Routing table" /cgi-bin/routingtable.cgi router2-sm.gif insecure
+#---------------------------------------------------------------
+
+End of example =================================================
+
+Now, here is something a bit more complex -- an external program is called,
+which returns a max and min Ping round trip time.  This is displayed as a 
+range graph.  The data source is the 'mrtg-ping-probe' program -- see the
+contrib directory with MRTG for details on how to obtain this.
+Note how we use a lot of overrides, and the GraphStyle directive to choose
+the range graph.  Also, we use fixunit, nototal, nopercent and so on.
+The ShortName directive lets us give it a new label in the menu.  The default
+icon selected by the system is a clock, which is fine for us.
+Note that the 95th Percentile calculated (if enabled in your routers2.conf)
+will give a 95th Percentile RANGE, ie, a band which contains the value 95%
+of the time.  This could be understood as the 95th %ile of the upper bound,
+and the 5th %ile of the lower bound.
+
+Start of example ===============================================
+
+#----- global options ------------------------------------------
+Logformat: rrdtool
+Workdir: /var/rrdtool
+#---------------------------------------------------------------
+routers.cgi*ShortName: Ping Times
+#---------------------------------------------------------------
+Target[ping-rachel]: `/usr/local/lib/mrtg-ping-probe rachel`
+MaxBytes[ping-rachel]: 10000
+Title[ping-rachel]: Ping times to Rachel
+PageTop[ping-rachel]: null
+Options[ping-rachel]: gauge nopercent
+YLegend[ping-rachel]: milliseconds
+ShortLegend[ping-rachel]: ms
+Legend1[ping-rachel]: Round Trip Time range 
+Legend2[ping-rachel]: Round Trip Time range
+Legend3[ping-rachel]: High Peak 5min RTT 
+Legend4[ping-rachel]: Low Peak 5min RTT 
+LegendI[ping-rachel]: High:
+LegendO[ping-rachel]: Low:
+routers.cgi*Options[ping-rachel]: nomax fixunit nototal scaled
+routers.cgi*GraphStyle[ping-rachel]: range
+routers.cgi*InCompact[ping-rachel]: no
+routers.cgi*UnScaled[ping-rachel]: none
+#---------------------------------------------------------------
+
+End of example ====================================================
+
+Next is a more complex stacking graph.  This monitors the active threads on a 
+cluster of 2 Netscape proxy servers - of which some are active, and some are
+in a  DNS lookup state.  There is a userdefined graph that shows the overall
+total of all threads. Finally it also graphs the number of requests, valid and
+invalid, in a stacked graph.
+
+Start of example ====================================================
+
+#- global options -----------------------------------------------
+Logformat: rrdtool
+WorkDir: /usr/local/lib/rrd
+routers.cgi*Routingtable: no
+#- count of requests to both servers ---------------------------
+Target[requests]: 1.3.6.1.4.1.1450.1.1.2.1.8.8080.a.b.c.204&1.3.6.1.4.1.1450.1.1.2.1.9.8080.a.b.c.204:community@servera + 1.3.6.1.4.1.1450.1.1.2.1.8.8080.a.b.c.205&1.3.6.1.4.1.1450.1.1.2.1.9.8080.a.b.c.205:community@serverb
+Title[requests]: Bristol Web Proxy Requests 
+MaxBytes[requests]: 100
+PageTop[requests]: <H1>Web Requests via Bristol Proxy</H1>
+Options[requests]: growright integer nopercent perminute 
+LegendI[requests]: Requests:
+LegendO[requests]: Bad req :
+Legend1[requests]: Proxy Requests
+Legend2[requests]: Bad Requests  
+Legend3[requests]: Peak Proxy Requests
+Legend4[requests]: Peak Bad Requests  
+YLegend[requests]: Requests/min
+ShortLegend[requests]: rq/min
+routers.cgi*TotalLegend[requests]: &nbsp;requests
+routers.cgi*Options[requests]: fixunit nomax
+routers.cgi*GraphStyle[requests]: stack
+routers.cgi*UnScaled[requests]: none
+#-- primary server active thread analysis ----------------------
+Target[threads.pri]: 1.3.6.1.4.1.1450.1.1.2.1.6.8080.a.b.c.204&1.3.6.1.4.1.1450.1.1.2.1.7.8080.a.b.c.204:community@servera
+Title[threads.pri]: Pri Proxy Active Threads
+MaxBytes[threads.pri]: 64
+AbsMax[threads.pri]: 512
+PageTop[threads.pri]: <H1>Active Threads on Bristol Proxy A</H1>
+Options[threads.pri]: growright integer nopercent gauge 
+LegendI[threads.pri]: Active:
+LegendO[threads.pri]: DNS   :
+Legend1[threads.pri]: Active threads
+Legend2[threads.pri]: DNS lookups
+Legend3[threads.pri]: Peak active threads
+Legend4[threads.pri]: Peak DNS lookups
+YLegend[threads.pri]: Threads
+routers.cgi*ShortLegend[threads.pri]: &nbsp;
+routers.cgi*Options[threads.pri]: fixunit nototal
+routers.cgi*GraphStyle[threads.pri]: stack
+routers.cgi*Graph[threads.pri]: All_Threads noaverage
+#-- secondary server active thread analysis ----------------------
+Target[threads.sec]: 1.3.6.1.4.1.1450.1.1.2.1.6.8080.a.b.c.205&1.3.6.1.4.1.1450.1.1.2.1.7.8080.a.b.c.205:community@serverb
+Title[threads.sec]: Sec Proxy Active Threads
+MaxBytes[threads.sec]: 64
+AbsMax[threads.sec]: 512
+PageTop[threads.sec]: <H1>Active Threads on Bristol Proxy B</H1>
+Options[threads.sec]: growright integer nopercent gauge 
+LegendI[threads.sec]: Active:
+LegendO[threads.sec]: DNS   :
+Legend1[threads.sec]: Active threads
+Legend2[threads.sec]: DNS lookups
+Legend3[threads.sec]: Peak active threads
+Legend4[threads.sec]: Peak DNS lookups
+YLegend[threads.sec]: Threads
+routers.cgi*ShortLegend[threads.sec]: &nbsp;
+routers.cgi*Options[threads.sec]: fixunit nototal
+routers.cgi*GraphStyle[threads.sec]: stack
+routers.cgi*Graph[threads.sec]: All_Threads noaverage
+#--- options to userdefined graph ----------------------------------
+routers.cgi*GraphStyle[All_Threads]: stack
+routers.cgi*Title[All_Threads]: Bristol Web Proxy Threads
+
+End of example ====================================================

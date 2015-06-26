@@ -1,0 +1,62 @@
+Name:
+trend.cgi: Trending analysis extension. GPL.
+
+Author:
+Steve Shipway 2003
+
+Requires:
+rrdtool executable
+
+Example:
+routers.cgi*Extension[targetname]: "Trending analysis" /cgi-bin/trend.cgi graph-sm.gif
+
+Description:
+
+This is the routers.cgi graph trending analysis plugin.  It works as 
+a routers2.cgi plugin extension (you cannot run it independently).
+
+Install instructions are at the beginning of the script.  Remember you need to
+give the path to your rrdtool EXECUTABLE, not its directory.
+
+A reported bug in many windows versions of rrdtool will result in your
+trending graph having unexplained spikes and negative values.  If this
+happens, then you need to install an earlier (<1.0.33) version of rrdtool in a
+separate directory, and use that rrdtool executable for trend.cgi.
+
+**************************************************************************
+NOTE THAT THIS IS BETA CODE, AND NOT SUPPORTED.  THIS IS NEITHER AS 
+POLISHED NOR AS RELIABLE AS THE MAIN CODE.  YOU ARE WELCOME TO TRY IT OUT, 
+BUT ASSUME YOU ARE ON YOUR OWN!  USE THE DISCUSSION BOARD TO REPORT BUGS 
+OR PROBLEMS.
+**************************************************************************
+
+This works by using a decayed average to create a first order curve (ie, a
+line) approximation for the data.  You can set different decay factors to 
+change the importance of historical data.  I find that about .95 or .9 works
+the best.  It does not predict patterns or curves.  It does not work with 
+userdefined graphs or stack or range graphtype.
+
+This will work with speedycgi if you change the initial variable definitions
+to 'our()' instead of 'my()'.  This requires perl 5.8 or later.
+
+# routers2.conf
+
+trend.cgi will read configuration from routers2.conf in the [trend.cgi]
+section.  You can also set 'trendurl = /cgi-bin/trend.cgi' in the
+[routers.cgi] section if you want trending to be automatically added to all
+targets (this is experimental).  Note that this can also be put in a per-user
+section, so you can offer trending to only particular users.
+
+[trend.cgi]
+debug = 1
+logfile = /tmp/trend.log
+#  set the debugging log on to the debug file.
+
+decay = 0.95
+# set the default decay rate for the averages
+
+fgcolour = #ffffff
+bgcolour = #000000
+linkcolour = #8080ff
+# set default colours for the page to match what you set in [routers.cgi]
+

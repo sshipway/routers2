@@ -1,0 +1,32 @@
+In here are various scripts and utilities that you may find useful, but which
+are not part of the main distribution.  This also includes any user-submitted
+scripts.
+The scripts in here are not as well supported as the main application.  Any
+of them written by someone other than myself are supported by that person - so
+report any problems to them, and not to me.
+You may well have to modify these scripts by changing the Perl path on the
+first line, or by changing the extension or the file execute permissions.
+Some of them also require other configuration.  See any accompanying
+documentation, or header comments in the files themselves.
+
+extension.cgi.pl Steve Shipway
+    This is an example of how to write an extension script for use with 
+    the routers.cgi script.  You can modify this template to create your
+    own extension scripts. Public domain.
+
+ifstatus.cgi Steve Shipway
+    This is a CGI extension script for routers.cgi.  You must have Net::SNMP
+    installed for this to work!  It is based on the routers.cgi extension
+    template above.  It will allow you to see the current status of a given 
+    interface by SNMP querying it on the fly. 
+
+trend.cgi Steve Shipway
+   This is the prototype routers.cgi trending analysis plugin.  Later versions
+   of rrdtool for windows have a bug that may stop this from working.  Please
+   remember that this is in its early stages.  GPL.
+
+ifrouter.cgi
+ifswitch.cgi Brian Dietz
+   These Extension scripts will run queries on Cisco routers.  You need to
+   have Net::Telnet::Cisco installed.
+

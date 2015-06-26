@@ -1,0 +1,399 @@
+#!/usr/bin/perl
+# vim:ts=4
+# Check the agent on the remote host.  Return 0 if ok, 1 if not.
+#
+
+use strict;
+use Socket;
+
+my($DEBUG) = 0;
+my($rv) = "";
+my($HOST) = "";
+my($ALL) = 0;
+
+sub timeout { die "TIMEOUT"; }
+sub pnsquery {
+	my($rv) = '';
+	my($q);
+    my($iaddr,$paddr,$proto);
+	my($HOST,$PORT);
+	my($svc);
+    my($r);
+    my($fn,$rfd,$wfd,$xfd,$n,$t);
+	
+	($HOST,$svc)= @_;
+	$PORT = '1248';
+
+	if($svc) {
+		$q = "5&ShowAll&$svc";
+	} else {
+		$q = "1&&";
+	}
+
+    $iaddr = inet_aton($HOST);
+    if(!$iaddr) { print "\nUnable to resolve host $HOST\n"; return ""; };
+    $paddr = sockaddr_in($PORT,$iaddr);
+    if(!$paddr) { print "\nCreating socket failed: $!\n"; return ""; };
+    $proto = getprotobyname('tcp');
+
+    socket(SOCK,PF_INET,SOCK_STREAM,$proto) or do {
+        print "\nSocket failed: $!\n";  return "";
+    };
+	eval {
+		$SIG{ALRM} = \&timeout;
+		alarm(4); 
+    connect(SOCK,$paddr) or do { die "$!"; };
+		alarm(0);
+	};
+	if($@=~/TIMEOUT/) { 
+		print "No response: may be a firewall, or host down\n"; return ""; } 
+	if($@) { return ""; } # connect failed, so no agent
+
+    setsockopt(SOCK,SOL_SOCKET,SO_REUSEADDR,1);
+
+	# Now send the request
+
+	eval {
+		$SIG{ALRM} = \&timeout;
+		print "Sending 'None&$q'\n" if($DEBUG);
+		alarm(2); # 2 second timeout on write should be enough
+  		  send SOCK, "None&$q", 0;
+		alarm(0);
+	};
+	if($@) { 
+		close SOCK; print "Connected, but unable to send data\n"; return "(agent recieve problem)"; }
+
+    #wait for reply
+    $fn = fileno SOCK;
+    $rfd = $wfd = $xfd = 0;
+    vec($rfd,$fn,1)=1;
+    ($n,$t) = select( $rfd,$wfd,$xfd,4 ); # 4 sec timeout on connect
+    if(!$n or !$rfd) { 
+		print "Connected, but no response from pNSAgent.\n"; return "(agent reply problem)"; }
+
+    # read it
+	eval {
+		$SIG{ALRM} = \&timeout;
+		alarm(5); # 5 second timeout on read should be enough
+	    recv SOCK, $r, 512,0;
+		alarm(0);
+	};
+	if($@) { close SOCK; print "Agent detected, but timeout on reading.\n"; return "(agent reply problem)"; }
+	close SOCK;
+
+   	$r =~ s/\n/~/g;
+	$r="(null)" if(!$r);
+	close SOCK;
+	return $r;
+}
+########################################################################
+my($ctx,$ssl) = (0,0);
+my($SSL) = 1;
+my(%STATUS) = ( OK=>0, WARNING=>1, CRITICAL=>2, UNKNOWN=>3 );
+
+# make crc
+my(@crctable); # array of 256 unsigned longs (4 bytes)
+sub gen_crc_table {
+	my($poly,$j,$i,$crc);
+
+    $poly=0xEDB88320;
+	$i = 0;
+	while($i<256){
+		$crc=$i;
+        foreach $j ( 8,7,6,5,4,3,2,1 ){
+        	if($crc & 1) {
+        		$crc=($crc>>1)^$poly;
+        	} else {
+				$crc>>=1;
+			}
+        }
+		$crctable[$i]=$crc & 0xFFFFFFFF;
+		$i += 1;
+	}
+}
+
+sub crc($$) {
+	my($c) = 0;
+	my($v,$n) = @_;
+#	my($oc);
+
+	gen_crc_table if(!@crctable);
+
+	# calculate CRC here
+	$c=0xFFFFFFFF; 
+	# structure is short/short/long/short/char1024 == 1034 bytes
+#	print "CRC[$n]:" if($DEBUG);
+	foreach ( unpack ("c$n", $v)  ) {
+#		$oc = $c;
+		$c = ( ($c>>8) & 0x00ffffff )^$crctable[($c^$_)&0xFF];
+#		printf "$_ [%X]=>[%x]\n",$oc,$c if($DEBUG);
+	}
+	$c ^= 0xFFFFFFFF;
+#	printf "final=>[%X]\n",$c if($DEBUG);
+	return $c;
+}
+
+sub dumppkt($) {
+	my($v) = $_[0];	
+	my($n);
+
+	$n = length($v);
+	print "Packet:\n";
+	foreach ( unpack ("c$n", $v)  ) { print "$_,"; }
+	print "\n";
+}
+
+# Init SSL
+sub init_ssl {
+	return 0 if(!$SSL); # dont have SSL
+	return 0 if($ctx); # already done it
+	require Net::SSLeay;
+	print "Init_ssl starting\n" if($DEBUG);
+	$Net::SSLeay::trace = 2 if($DEBUG);
+	Net::SSLeay::load_error_strings();
+	Net::SSLeay::SSLeay_add_ssl_algorithms();
+	Net::SSLeay::randomize();
+	$ctx = Net::SSLeay::CTX_new() 
+		or return("Failed to create SSL_CTX $!");
+	Net::SSLeay::CTX_set_options($ctx, &Net::SSLeay::OP_ALL);
+#		and return("ssl_ctx_set_options: $!");
+#	Net::SSLeay::CTX_set_cipher_list($ctx, "ADH")
+#    	and return("ssl ctx set cipher");
+	return 0;
+}
+
+sub end_ssl {
+	print "end_ssl\n" if($DEBUG);
+	Net::SSLeay::free ($ssl);               # Tear down connection
+	Net::SSLeay::CTX_free ($ctx);
+	$ssl = $ctx = 0;
+}
+
+sub end_connection {
+	end_ssl() if($SSL);
+	close SOCK;
+}
+
+# Connect to host, port
+sub do_connect($$) {
+	my($host,$port) = @_;
+	my($ip,$sin,$rv);
+
+	$port = 5666 if(!$port);
+	$port = getservbyname ($port, 'tcp')  unless $port =~ /^\d+$/;
+	return "Bad port [$port]" if(!$port);
+	$ip = gethostbyname ($host);
+	return "Bad host [$host]" if(!$ip);
+	$sin  = sockaddr_in($port, $ip);
+	return "sockaddr_in: $!" if(!$sin);
+	print "Connecting socket to $host:$port \n" if($DEBUG);
+	socket(SOCK, &AF_INET, &SOCK_STREAM, 0)  or do {
+		print "socket failed: $!"; return "socket:$!"; };
+	eval {
+		$SIG{ALRM} = sub { die("TIMEOUT"); };
+		alarm(5);
+		$rv = connect(SOCK, $sin);
+		alarm(0);
+	};
+	if($@) {
+		print "No response: Is host down, or firewall installed?\n";
+	}
+	return "connect: $!" if(!$rv);
+	binmode SOCK;
+	select(SOCK); $|=1; select (STDOUT);   # Eliminate STDIO buffering
+	if($SSL) {
+		$rv = init_ssl();
+		return "Init SSL: $rv" if($rv);
+		print "Creating SSL object\n" if($DEBUG);
+		$ssl = Net::SSLeay::new($ctx);
+		if(!$ssl) {
+			return("Failed to create SSL $! ".Net::SSLeay::print_errs());
+		}
+		print "Setting cipher list\n" if($DEBUG);
+		$rv = Net::SSLeay::CTX_set_cipher_list($ctx,'ADH');
+		Net::SSLeay::set_fd($ssl, fileno(SOCK));   # Must use fileno
+		print "SSL connect...\n" if($DEBUG);
+		eval {
+			$SIG{ALRM} = sub { die("TIMEOUT"); };
+			alarm(5);
+			$rv = Net::SSLeay::connect($ssl);
+			alarm(0);
+		};
+		return "SSL Timeout: maybe remote server doesn't use SSL? Try again with -n" if($@);
+		if($rv!=1) { return("ssl connect: ".Net::SSLeay::print_errs()); }
+	}
+	return 0; # OK
+}
+
+sub send_msg($) {
+	my($msg) = $_[0];
+	my($rv) = 0;
+
+#	dumppkt($msg) if($DEBUG);
+
+	if($SSL) {
+		$rv = Net::SSLeay::write($ssl, $msg);  # Perl knows how long $msg is
+		return ("ssl write: $rv: ".Net::SSLeay::print_errs())
+			if($rv) ;
+	} else {
+		$rv = syswrite SOCK,$msg,length($msg);
+		return "syswrite: $!" if(!$rv);
+	}
+
+	return 0;
+}
+
+sub rcv_msg() {
+	my($rv) = undef;
+	my($n);
+	if($SSL) {
+		$rv = Net::SSLeay::read($ssl); # returns undef on failure
+		if(!defined $rv) {
+			$rv = Net::SSLeay::print_errs();
+		}
+	} else {
+		$n = sysread SOCK,$rv,2048;
+		return "" if(!$n);
+	}
+	return $rv;
+}
+
+sub do_request($@) {
+	my($rv,$stat);
+	my($cmd,@arg) = @_;
+	my($resp,$req,$q,$crc,$rcrc);
+	my($v,$t,$c,$r,$b,$j);
+
+	print "Running $cmd\n" if ($DEBUG);
+
+	$SIG{PIPE} = 'IGNORE';
+
+	$q = "_NRPE_CHECK";
+	if($cmd) { $q = join '!', $cmd, @arg; }
+	# note we have to use a junk field to pad to word boundary
+	$req = pack "nnNna1024n",2,1,0,0,$q,0;
+	$crc = crc($req,length($req));
+	$req = pack "nnNna1024n",2,1,$crc,0,$q,0;
+	printf "Sending [2,1,%X,0,$q,0]\n",$crc if($DEBUG);
+	send_msg($req);
+	CORE::shutdown SOCK, 1;  # Half close 
+	$rv = rcv_msg();
+	return( $STATUS{UNKNOWN}, "Error on read: Problem with remote server?" ) 
+		if(!defined $rv);
+	return( $STATUS{UNKNOWN}, "No data returned: wrong SSL option, or IP address not authorised?" ) if(!$rv);
+	($v,$t,$c,$r,$b,$j) = unpack "nnNna1024a2", $rv;
+	printf "Received [$v,$t,%X,$r,$b]\n",$crc if($DEBUG);
+	return( $STATUS{UNKNOWN}, "Bad response version $v: Upgrade your server!" ) if($v != 2);
+	return( $STATUS{UNKNOWN}, "Bad response type $t: This should never happen??" ) if($t != 2);
+	return( $STATUS{UNKNOWN}, "Bad response status $r: Corrupted packet?" ) 
+		if($r>3 or $r<0);
+	$resp = pack "nnNna1024a2",$v,$t,0,$r,$b,$j;
+	$crc = crc($resp,length($resp));
+	return( $STATUS{UNKNOWN}, "Bad response CRC: wrong SSL option?" ) if($crc != $c);
+
+	$b =~ s/\0+$//;
+	return($r,$b);
+}
+
+sub nrpequery($) {
+	my($rv,$status);
+	my($host) = $_[0];
+	my(@f);
+
+# Connect to server
+	$rv = do_connect( $host, 5666);
+	if($rv) { print "$rv\n"; return ""; }
+
+# Get response
+eval {
+	$SIG{ALRM} = sub { die("TIMEOUT"); };
+	alarm(5);
+	($status,$rv) = do_request("version");
+	alarm(0);
+};
+if($@) { 
+	print "Timeout on NRPE (maybe SSL issue?)\n"; return "(agent problem)";
+}
+end_connection;
+if($status eq $STATUS{UNKNOWN}) {
+	print "WARNING: NRPE gave unexpected response: [$rv]\n";
+	return "(unknown)";
+}
+
+$rv = "(null)" if (!$rv);
+@f = split " ",$rv;
+return $rv;
+return $f[0];
+}
+
+########################################################################
+# MAIN
+
+select STDOUT; $|=1; $HOST = "";
+foreach ( @ARGV ) {
+	/^-d/ and do { $DEBUG = 1; next; };
+	/^-a/ and do { $ALL = 1; next; };
+	/^-h/ and do { $HOST = ""; last; };
+	/^-n/ and do { $SSL = 0; next; };
+	/^-/ and do { $HOST = ""; last; };
+	$HOST = $_; last;
+}
+$HOST =~ s/^.*\///;
+$HOST =~ s/\.c(cfg|onf)$//;
+
+if(!$HOST) {
+	print "Usage: checkagent [-n][-d][-a] hostname\n";
+	print "  -n : Use NO ENCRYPTION for some NRPE clients\n";
+	print "  -d : Debug mode\n";
+	print "  -a : Check for ALL possible agents, not just the first.\n";
+	exit 2;
+}
+
+if(! gethostbyname ($HOST) ) {
+	print "I can't resolve that hostname.\n";
+	exit 1;
+}
+# Check for NRPE
+print "NRPE agent check....\r";
+$rv = nrpequery($HOST);
+print "\r                      \r";
+if($rv) {
+	print "NRPE : NRPE agent detected! $rv\n";
+	exit(0) if(!$ALL);
+} else {
+	print "No valid NRPE agent detected.\n";
+}
+
+# Check for pns
+print "PNS agent check....\r";
+$rv = pnsquery($HOST);
+print "\r                      \r";
+if($rv) {
+	print "PNS : pNSclient agent detected! $rv\n";
+	print "NagEventLog passive agent check....\r";
+	$rv = pnsquery($HOST,"NagiosEventLog"); 
+	if( $rv =~ /0/ ) {
+		print "EVLOG : Nagios EventLog Agent detected!     \n" ;
+	} elsif( $rv =~ /2/ ) {
+		print "EVLOG : Nagios EventLog Agent detected, but inactive.\n" ;
+	}
+	print "                                   \r";
+	print "BigBrother passive agent check....\r";
+	$rv = pnsquery($HOST,"BigBrotherClient"); $rv =~ s/&.*//;
+	if( $rv =~ /0/ ) {
+		print "BB : BigBrother legacy agent detected!   \n" ;
+	} elsif( $rv =~ /2/ ) {
+		print "BB : BigBrother legacy agent detected, but inactive.\n" ;
+	}
+	print "                                   \r";
+
+} else {
+	print "No pNSclient agent detected.\n";
+}
+print "Search complete.\n";
+
+#print "NOAGENT : No agent detected on remote host.\n";
+#print "DOWN : No agent detected, no response.  Host may be down or behind firewall.\n";
+exit 1;
+
+

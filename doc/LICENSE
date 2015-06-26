@@ -1,0 +1,18 @@
+Routers2
+--------
+This software is available under the GNU GPL. More information is available in 
+the text files accompanying this software, or on the web site. Please note 
+that this software is provided without any warranty, or guarantee, and you use 
+it at your own risk. In no event shall myself, my employers, or the owner of 
+any web site distributing this software, be held liable for any loss or damage 
+caused as a result of the use or misuse of this software or the instructions 
+that accompany it. 
+
+JSCal2
+------
+The Routers2 software optionally can install and use the JSCal2 Calendar 
+library to allow popup date selection for extended RRD files.
+The JSCal2 library is created and supplied by Dynarch.com
+They distribute it under the LGPL - for more details, if you wish to use this,
+see their website.
+

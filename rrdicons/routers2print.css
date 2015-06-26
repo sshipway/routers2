@@ -1,0 +1,38 @@
+/* for printing */
+
+/* MAIN FRAME */
+/* default */
+body { color: black; background: white; font-family: sans-serif; font-size: smaller }
+/* side menu */
+body.sidemenu { color: black; background: gainsboro; white-space: nowrap; font-weight: normal }
+B.sidemenu { font-weight: normal } /* disable the B tag */
+div.sidemenu { display: none }
+/* header */
+body.header { color: black; background: gainsboro }
+TD.header#htmiddle { text-align: center }
+div.header { display: none }
+
+/* global defaults */
+IMG { border-style: none }
+A { text-decoration: none; text: black }
+/* default tables */
+TABLE { border-style: none }
+/* side tables on summary page */
+TABLE.summary { border-style: ridge }
+/* verify page */
+TABLE.verify { border-style: ridge }
+TD.no { color: red }
+TD.yes { color: green }
+
+/* PAGE SECTIONS */
+div.extensions { display: none }
+div.icons { display: none }
+/* pagefoot/top and mrtgpagefoot/top if defined */
+div.pagefoot { font-size: smaller }
+div.pagetop { font-size: smaller }
+/* icons on graph page */
+div.icons { display: none }
+/* graph page footer */
+div.footer { display: none; color: #202020; font-size: smaller }
+/* popup on graphs */
+div.popup { display: none }

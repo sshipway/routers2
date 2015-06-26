@@ -1,0 +1,17 @@
+Name:
+extension.cgi: Template for writing perl-based routers.cgi extension scripts.
+	This is public domain, use freely.
+
+Author:
+Steve Shipway 2003
+
+Example:
+routers.cgi*Extension[targetname]: "Extension script" /cgi-bin/extension.cgi 
+
+Description:
+This is an example template to use when building your own extension scripts.
+As it stands, this does nothing except report its passed parameters and perform
+the necessary javascript and parameter parsing.  You will probably want to 
+add configuration file parsing, and then whatever output generation your
+extension requires.
+

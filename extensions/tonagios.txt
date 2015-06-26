@@ -1,0 +1,19 @@
+Name:
+tonagios.cgi
+
+Author:
+Steve Shipway
+
+Example:
+routers.cgi*Extension: "Nagios" /cgi-bin/tonagios.cgi alert-sm.gif
+
+Description:
+This script will embed the current Nagios status page for this host into the
+routers.cgi graph frame, including updating the routers.cgi menus.
+
+Installation:
+You will need to modify the NAGIOS URL defined at the beginning of the script.
+The script assumes that the Nagios host name is the MRTG cfg filename witout
+the .cfg extension; if this is not true, you will need to modify the code
+appropriately.
+

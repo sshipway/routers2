@@ -1,0 +1,533 @@
+v2.21               routers.conf file: valid options.
+                    ---------------------------------
+
+The routers.conf file can be shared between several applications, and has a
+format similar to a Windows .ini file - ie, it is separated into sections,
+and each section has a number of parameters.
+
+Each section begins with a line containing the section name in square brackets,
+and ends at the beginning of the next section.
+
+Options are given as the option name, followed by an '=' symbol, followed
+by the option data, terminated by the end of line.  There is no line
+continuation character - options take a single line only.
+
+The main sections are:
+[web] : This is global options over all applications
+[routers.cgi] : Global options for the routers.cgi frontend
+[targetnames] :  Short names for individual titles
+[targettitles] : Long names for individual targets
+[targeticons] : Icon files for individual targets
+[servers] : Server names for the server monitoring extensions
+[menu] : Links to be added to the Devices menu for all users
+[archive] : Options for the rrd file archiving utility
+
+Note that you can optionally define your own section in addition to these,
+which can hold the same directives as the [routers.cgi] section.  This new
+section will be used to override the [routers.cgi] section directives, if it
+is enabled by either passing the 'extra=sectionname' parameter to the CGI, or
+by renaming routers.cgi to match the new section name.  See the HOWTO for more
+details on this functionality.
+
+The individual options are described below.
+
+[web] : Global options
+----------------------
+
+Name: backurl
+Default: /
+Use: This is where the link on the 'Main Menu' button will take you.
+Format: This should be a URL, possibly relative to the script URL. If set to
+   blank, then the Main Menu button is not displayed.
+
+Name: png
+Default: no
+Use: Is it OK for the script to produce PNG files rather than GIFs?
+Format: yes / no 
+Note: Your RRDTool install must support GIFs to use GIFs.  Some web browsers 
+   (notably PDAs) are unable to display PNG files.  Very old RRDTool and/or
+   GD libraries do not support PNGs: more recent ones do not support GIFs.
+
+Name: NT
+Default: no
+Use: Should we enable the NT compatibility options?  
+Format: yes / no
+Note: This is automatically set to YES if the system detects NT.  Only set it
+   here if the system makes a mistake.
+
+Name: csvmimetype
+Default: text/comma-separated
+Format: A complete MIME type
+Use: This is the MIME type assigned to downloaded .csv files when you select
+   the CSV option.
+
+Name: csvfilename
+Default: export.csv
+Format: A single filename, with no path separator
+Use: This is the filename sent with the .csv file.  This is most meaningful to
+   MSIE, which uses the filename extension to determine the default action
+   to perform on the downloaded data, rather than the MIME type.
+
+Name: timezone
+Default: 0
+Format: An integer difference, in hours, of your default timezone from GMT.
+Use: Only necessary if your system is unable to determine its own timezone,
+   or if you wish to report data in a different timezone to the server's
+   timezone.  May not work effectively under NT because the time libraries
+   under NT do not support dynamic timezones in environment variables.
+
+Name: shortdateformat
+Default: %R&nbsp;%x
+Format: POSIX strftime formatting string
+Use: If you need to override the default (taken from locale settings) date
+   format used in Archive dates, you can use this.  
+
+Name: weeknumber
+Default: %U
+Format: %[UVW]
+Use: If your system has a broken strftime(), and the week number on the 
+   monthly graphs does not appear.  
+
+Name: hournumber
+Default: %k
+Format: %[kHI]
+Use: If your system has a broken strftime(), and the hour number on the 
+   daily graphs does not appear.  
+
+Name: auth-required
+Default: no
+Format: yes no optional
+Use: To enable internal authentication.  In 'yes' mode, the user MUST log in
+   in order to see pages. In 'opt' mode, a not-logged-in user can see the 
+   default system (which may be empty, of course).  In 'no' mode, the login
+   button is not shown.
+
+Name: auth-expire
+Default: +5min
+Format: +<time>
+Example: +1day
+Use: To set cookie expiry time.  IE, how long you can remain idle and still 
+  logged in.
+
+Name: auth-key
+Default: not set
+Format: anything
+Use: To set a secret key used for building authentication tokens.  This should
+   be set to something unique for your site.
+
+Name: ldap-server
+Default: not set
+Format: hostname or IP address
+Use: To enable LDAP authentication, when auth-required is enabled.  Note that
+   this requires the Net::LDAP module.
+
+Name: ldaps-server
+Default: not set
+Format: hostname or IP address
+Use: To enable LDAPS authentication, when auth-required is enabled.  Note that
+   this requires the Net::LDAP module, SSLeay and OpenSSL.
+
+Name: ldap-context
+Default: not set
+Format: LDAP context list, separated by semicolons
+Example: ou=Finance, o=My Company, C=NZ; ou=IT, o=My Company, C=NZ
+Use: To define which context(s) are searched for login information.
+
+Name: mysql-server
+Default: not set
+Format: hostname[:port]
+Use: Set MySQL authentication server host name
+
+Name: mysql-database
+Default: not set
+Use: Set database name for mysql authentication
+
+Name: mysql-user
+Name: mysql-password
+Default: not set (check via direct bind)
+Use: Define bind user for MySQL if you want to use table auth instead of bind
+
+Name: mysql-table
+Default: not set
+Use: Default table name to home list of users and encrypted passwords, if using
+  mysql auth in table mode instead of in direct bind mode
+
+Name: langdir
+Default: same directory as the routers2.conf file
+Format: full directory name
+Example: /usr/local/etc/lang/
+Use: To define where to find the lang_xx.conf files
+
+Name: allow-execs
+Default: no
+Format: yes/no
+Use: To enable the %EXEC()% symbol expansion feature (this may be a security 
+  risk so is disabled by default)
+
+[routers.cgi] : Option specific to routers.cgi system
+-----------------------------------------------------
+
+Name: dbpath
+Required in file
+Format: Complete path name of directory.  Do not end in path separator.
+Use: This is the default directory for locating the .rrd files.  In fact this
+   parameter is rarely used, since most MRTG files will specify the location
+   of the .rrd files themselves - but it is required as a default.
+
+Name: graphpath
+Required in file
+Format: Complete path name of directory.  Do not end in path separator.
+Use: Location where the graph files are to be created.  This directory must
+   be writeable by the web server process, and must be accessible via HTTP.
+
+Name: graphurl
+Required in file
+Format: URL path (remember to use / as the path separator)
+Use: The URL path corresponding to the graphpath directory.
+
+Name: confpath
+Required in file
+Format: Complete path name of directory.  Do not end in path separator.
+Use: The top directory for storage of MRTG .cfg files.  All .cfg files are
+   located under this directory, possibly in subdirectories.
+
+Name: cfgfiles
+Required in file
+Format: space-separated list of wildcarded filenames and relativepaths.
+Eg: dir1/*.cfg router*.cfg */fish.cfg
+Use: This is to specify all the MRTG configuration files, relative to the
+   confpath directory.
+
+Name: iconurl
+Required in file
+Format: URL path of directory
+Eg: /rrdicons/
+Use: This is the URL of the directory containing all of the routers.cgi icon 
+   files.
+
+Name: defaultinterface
+Default: first
+Format: one of: first summary cpu memory interface incoming outgoing
+Use: This indicates which target to initially show when first selecting a
+   new Device.   Note this can be overridden on a per-Target basis by the
+   extended option 'default'.
+   first: select the first target, after sorting alphabetically
+   summary: the summary page, if it exists.  Otherwise, as first
+   cpu: the first CPU target, if any.  Otherwise, as first
+   memory: the first Memory target, if any.  Otherwise, as first
+   interface: the first interface target, if any.  Otherwise, as first.
+   incoming: the Incoming graph, if it exists.  Otherwise, as first.
+   outgoing: the Outgoing graph, if it exists.  Otherwise, as first.
+
+Name: graphstyle
+Default: normal
+Format: one of: normal short tall long big extralong huge
+Use: Specify what the default Graph Style is, unless overridded by personal
+   preferences or explicit choice.
+Note: If 'normal' or smaller is chosen, then the 'legendunit' option may 
+   not work correctly due to the graph size being too small for the text.
+
+Name: optimise
+Default: no
+Format: yes/no
+Use: Optimise reading of .cfg files by system, by not scanning entire file
+Note: To use this, any routers.cgi*Extension:, routers.cgi*Redirect:,
+   routers.cgi*Desc: lines (ie, any routers.cgi* global definitions)
+   MUST be BEFORE the first Target[] definition, else they will be ignored.
+   This speeds things up by about a factor of 10 on large systems, but using
+   speedycgi or mod_perl will have a similar effect at no cost.
+
+Name: withpeak
+Default: yes
+Format: yes / no
+Use: Are the 'peak' lines to be shown on weekly/monthly etc graphs, by 
+   default?  This can be overidden in the MRTG file.
+
+Name: maxima
+Default: yes
+Format: yes / no
+Use:  Should the red 'Max' line be added to graphs?
+Note: If Unscaled is set, then the line may not be visible, but it will still
+   be there (and mentioned in the legend).
+
+Name: unscaled
+Default: yes
+Format: yes / no
+Use: Should graphs be scaled on the y-axis, to show the data in maximum
+   resolution?  This can be overidden in the MRTG configuration file.
+
+Name: 6hour
+Default: no
+Format: yes / no
+Use: Enable support of 6-hour graphs
+Note: 6-hour graphs will only be possible if the data Interval is set to less
+   than 5 mins (the default for MRTG).  You need to have the line
+   Interval: 1
+   in your MRTG file, and re-create your .rrd files, for this to work.
+
+Name: percentile
+Default: no
+Format: yes / no
+Use: Enable 95th Percentile and Total Usage calculations, where appropriate.
+Note: This can eat a LOT of CPU/Memory, so make sure to test with it OFF first.
+   If a target has the 'nototal' option, then Total Usage will be suppressed.
+
+Name: uselastupdate
+Default: no
+Format: yes / no
+Use: Use the .rrd Last Update time as the base for the graphs, rather than 
+   the current time.
+Note: This can be useful if you are demo'ing the software with old data, or
+   if you want to avoid the occasional appearance of 'unavailable' data at the
+   end of the graph.
+
+Name: usebigk
+Default: mixed
+Format: yes / no / mixed
+Use: define the size of a k and an M.
+Note: This depends on the sort of data you're graphing.
+   yes  -> 1k=1024, 1M=1024x1024
+   no   -> 1k=1000, 1M=1000x1000
+   mixed-> 1k=1024, 1M=1024x1000 (default) Yes its strange but its what our
+                                  Cisco routers appear to use.
+
+Name: sorder
+Default: s t n n2 l l2 x x2 sbp nbp sp np
+Format: a list containing one or more of the following values, in a specific
+   order, not more than once each.
+   values: s t n n2 l l2 x x2 sbp nbp sp np
+Use: Specify which graph styles are in the menu, in which order.
+Note: The first in the list is the default graph style.  Be VERY careful with
+   this option, there is not much error checking for it.
+
+Name: routingtableurl
+No default
+Format: The URL of the routingtable.cgi script
+Use: Specify where to find the routingtable script, and enable its use.
+Note: By setting this option, you enable the use of the routingtable
+   extension.  Be aware of the security implications of this!  In addition, 
+   this requires the Net::SNMP Perl module to be installed.
+
+Name: mrtgpagetop
+Name: mrtgpagefoot
+Default: no
+Format: yes / no
+Use: Enable the display of the PageTop and PageFoot MRTG directives.
+Note: Enabling these clutters up the space quite a bit.
+
+Name: pagetop
+Name: pagefoot
+No default
+Format: a block of text, with HTML codes.
+Use: Define some additional text to include at the top and bottom of the 
+   graph.  This can contain the symbols %DEVICE% and %TARGET% which are
+   replaced with the current device filename and targetname.
+
+Name: menufontsize
+Default: 3
+Format: positive integer
+Use: set the font size for the lefthand menu. 
+
+Name: showtotal
+Default: no
+Format: yes / no
+Use: show a 'Total' line on the default incoming and outgoing graphs?
+
+Name: group
+Default: no
+Format: yes / no
+Use: Enable the grouping feature for the 'Devices' menu in the lefthand frame.
+
+Name: compact
+Default yes
+Format: yes / no
+Use: enable the Compact Summary page, if there are any eligible targets for
+   this device.
+
+Name: allowexplore
+Default: yes
+Format: yes / if / no
+Use: restrict exploring of other devices and/or targets.  If set to no, then
+   the devices and targets menus are suppressed.  If set to 'if', then only
+   the devices menu is suppressed.  You can still follow bookmarks to view
+   the graphs, though.
+
+Name: daystart
+Name: dayend
+Default: blank
+Format: blank, or 0 - 24
+Use: Define the 'working day' period, and enable the working day averages.
+   Also enable the highlighting of working hours on the graphs. 
+Note: Obviously dayend > daystart.
+
+Name: windowtitle
+Default: Router Monitor
+Format: text string
+Use: Define the title to be used for the browser window.
+
+Name: pagetitle
+Default: <H1>contents of windowtitle</H1>
+Format: HTML text string
+Use: Define the title to be used in the page header.
+
+Name: bars
+Default: cami
+Format: [cC]?[aA]?[mM]?[pP]?(i|o)?
+Use: Options for bar graphs in Compact Summary.  This is a string of letters to
+  indicate which bars to show: (c)urrent, (a)verage, (m)ax and (p)ercentile
+  You cannot  use percentile if you have not previously enabled it.
+  ONE of these MAY be capitalised to indicate a sort order.
+  In addition you can use (i)n or (o)ut to indicate which part of the traffic
+  to sort by (default IN)
+  The order of the letters is not significant.
+
+Name: bytes
+Default: no
+Format: yes / no
+Use: Change system default to be showing router traffic in bytes, unless it
+   is overridden in the .cfg file.  Unreliable -- better to use the .cfg file
+   option 'routers.cgi*Options[_]: bytes' instead.
+
+Name: bgcolour
+Name: bgcolor
+Name: menubgcolour
+Name: menubgcolor
+Format: #xxxxxx (rrggbb hex colour code)
+Default: #d0d0d0 (menu), #ffffff (background)
+Use:  Default background colour for the system, on pages and on the menu bars.  
+Note: If anyone is daft enough to use both spellings, then the British spelling
+   (ie, with the 'u') takes precedence.
+
+Name: legendunits
+Default: no
+Format: yes / no
+Use: Show the units in the graph legend?  This requires a larger graph size in
+   order to fit it in.  
+
+Name: twinmenu
+Default: no
+Format: yes / no
+Use: Enable the 'twin' menu system, with the Devices and Targets menus both
+   visible at the same time.
+Note: This does not work well in any screen size less than 800x600
+
+Name: minrefreshtime
+Default: 0
+Format: positive integer in seconds
+Use: Allow you to prevent too-frequent refresh of graphs on slow servers
+Note: The graphs will never refresh more frequently than they need to.
+
+Name: menuwidth
+Default: 150
+Format: integer 150 - 500, frame width in pixels
+Use: To set the width of the menu side frames to an alternate width
+
+Name: archive
+Default: no
+Format: yes no read
+Use: Enable the archiving facility.  Use 'read' to enable it, but exclude the
+   Add and Delete buttons -- for viewing only.
+
+Name: withdate
+Default: no
+Format: yes no
+Use: Add a date stamp onto the bottom right of every graph.  This uses the
+   shortdateformat option to format the date.  Note that this is the date
+   and time corresponding to the righthand end of the graph -- so, if you
+   are using the uselastupdate option, this will be the last update time and
+   not the current date and time.
+
+Name: extendedtime
+Default: no
+Format: yes no test
+Use: Enable the extended time window - 'yesterday', 'last week', and so on.
+   This requires the .rrd files to have previously been extended, and data
+   gathered!  In 'test' mode, the .rrd files are checked, and extendedtime is
+   disabled if the .rrd file would not support it.  However, this slows down
+   execution of the script.  See the HOWTO for more information on this.
+
+Name: level
+Default: 0
+Format: number 
+Use: Specify security level - this will in turn enable or disable Extension
+   scripts and any other features locked by a security level.
+
+Name: withdate
+Default: no
+Format: yes/no
+Use: If set to 'yes', then the current date and time are inserted into the
+   bottom right-hand corner of all large generated graphs.  This helps when
+   you are using the graph-archive facility.
+
+Name: language
+Default:  (none)
+Format: 2-character langugage code
+Use: Specify the 'xx' in the lang_xx.conf language definition file to load.
+
+Name: maxtitle
+Default: 128
+Format: integer
+Use: specify the maximum length of a title in the graph
+
+Name: altygrid
+Default: no
+Format: yes/no
+Use: enable the Alternative y-grid calculations in RRDTool
+
+Name: pango
+Default: no
+Fromat: yes/no
+Use: enable Pango markup in graph labels 
+
+[targetnames] : new menu names for items
+----------------------------------------
+
+You can rename files, targets or groups in this section.  eg:
+
+example.mrtg.file.conf = Example router description
+/usr/local/lib/mrtg/config/europe = Example group description
+MRTG_target_name = TargetDescr
+
+Name: routerdefault
+Format: filename / hostname / ai
+Default: ai
+Use: Default Device name calculation method, if not overridden explicitly.
+
+Name: ifdefault
+Format: target / ai
+Default: ai
+Use: Default Target name calculation method.
+
+Name: ifsort
+Format: mode / desc / icon
+Default: mode
+Use: How do we sort the descriptions in menus and summary pages?
+  mode (default) - sort by mode(type), then description
+  desc           - sort by description only
+  icon           - sort by icon, then description
+
+[targeticons] : Icon file names for various targets
+---------------------------------------------------
+
+MRTG_Target_name = interface-sm.gif
+mrtg-cfg-file.cfg = router-sm.gif
+
+Name: filedefault
+Format: filename in iconurl
+Default: list-sm.gif
+Use: Specify the last-resort icon to use in Devices menu, if AI code doesnt
+   have a better idea.
+
+Name: ifdefault
+Format: filename  in iconurl
+Default: target-sm.gif
+Use: Specify the last-resort icon to use in Targets menu, if AI code doesnt
+   have a better idea.
+
+[menu] : Site defined menu items
+--------------------------------
+
+itemkey = [description] url [icon] [targetframe] [securitylevel]
+item1   = "Main site portal" http://portal.mysite.com/  door-sm.gif _top
+
+The menu items appears sorted asciibetically by itemkey.

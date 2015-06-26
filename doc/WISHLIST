@@ -1,0 +1,61 @@
+List of things still to do.
+---------------------------
+
+Create a 'table' display option, that shows all the data (similar to Compact)
+but in a numerical table, also with working day averages.  Maybe as a modifed
+Compact or as an option within Compact?
+
+Should have support for kMG[] in MRTG .conf files
+
+Allow the configuring of working days in the routers.conf to allow for 
+countries with working weeks other than Mon-Fri (eg, Israel, Arab nations)
+
+Change the Summary graph to be like the routers.cgi*Graph[] graphs, maybe as
+a routers.cgi*Group[] definition, so users can define their own summary sets.
+
+Escape targets prefixed with _ to avoid the power of the magic underscore
+
+Non-interactive way of calling archiving functions (this can already be done,
+but it would be nice if it was more user-friendly)
+
+Should the archiving only display the archived graphs for the appropriate
+time period?
+
+Percentile/total text in graph itself, not below.
+
+Allow grouping to be done at any number of levels deep.
+
+Option in routers2.conf to enable an SNMP lookup (uptime, etc) for a target,
+if SNMP details are available.
+
+Thresholding support (enable in routers2.conf?) -- highlight targets in current
+device that are outside of their thresholds.  Mark thresholding levels on
+the graph (as with maxbytes etc).  Maybe a red/green light after Target in
+the menu?
+
+Options for sort order of summary graphs
+
+support Background[] directive to change graph background colour
+
+Support 2nd order approximations in trending, not just 1st order (DIFFICULT)
+
+Allow Total to be in bytes while graph is in bits.
+
+SQL support for authentication
+
+Configuration tool Extension script??
+
+Change names of frames to something more unique
+
+Graphs should be served via CGI, not via web server.  This way we can have more
+security, and set our own expiry times on each one.  Ideally, they should be 
+served and cached internally, but this is probably too cumbersome.
+
+Have an ifsort=mrtg sort order to show targets in the order they are defined 
+in the cfg file.
+
+Test RRD for the existance of the new predictive analysis RRAs, and add a graph
+predition line if possible, to show unexpected behaviour.  This might be 
+awkward as it is in fact a predicted range (max/min).  Maybe two lines over the
+top?  RRD does not support semi-transparent colours yet.
+

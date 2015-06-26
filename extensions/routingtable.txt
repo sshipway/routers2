@@ -1,0 +1,22 @@
+Name:
+routingtable.txt
+
+Author:
+Steve Shipway 2001,2002,2003
+
+Requires:
+Net::SNMP perl module
+
+Example:
+routers.cgi*Extension: "Routing table" /cgi-bin/routingtable.cgi cog-sm.gif insecure
+
+Description:
+
+This plugin extension for routers.cgi will display the routnig table for the
+current router or device.  It uses the SNMP comunity string passed via HTTP, 
+and so needs the 'insecure' argument to the extension definition.
+
+This is done automatically for all devices which have a defined SNMP community
+string and interfaces if you define
+routingtableurl = /cgi-bin/routingtabl.cgi
+in the [routers.cgi] section of the routers2.conf file 

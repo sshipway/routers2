@@ -1,0 +1,31 @@
+# Steve Shipway 2012-2013
+#
+# This takes multiple RRD files, and produces XML for a single RRD
+# that is a merge of the specified files.  It will try to correct and change
+# intervals where required, and approximate data with the best available fill.
+# Multiple DS will be consolodated and merged, and can be renamed if
+# required. !!!!ALWAYS TAKE A BACKUP OF DATA FIRST!!!!
+#
+# This is intended to be used for merging a set of old-style MRTG/RRD archives
+# to make a single new extended-RRA RRD file to work with extendedtime=full
+# in Routers2.
+# Example (when in WorkDir):
+#   cp target.rrd target.rrd.old
+#   rrdmerge.pl -R -o target -r 12000 target.rrd archive/*/target.rrd.d/*.rrd
+#
+# Usage:
+# rrdmerge.pl [-q][-R][-a|-D ds[=ds] ...][-o output[.xml|.rrd]][-r rows]
+#             [-i sec]
+#             base.rrd [rrd1.rrd rrd2.rrd .... ]
+
+Add these lines or similar to all your cfg files in the future so that RRD
+files are created with extended length:
+
+RRDRowCount[_]:   12000
+RRDRowCount30m[_]: 9000
+RRDRowCount2h[_]:  8000
+RRDRowCount1d[_]:  1600
+
+Finally, stop the rrd-archive.pl scheduled job, and set extendedtime=full in
+your routers2.conf
+

@@ -1,0 +1,247 @@
+v2.15                How to Install routers.cgi script
+                     ---------------------------------
+
+Before Starting
+---------------
+First, you need to make sure you have the following installed:
+	MRTG
+	RRDTool (v1.0.39 or later).  Install perl modules under site-perl.
+	Perl (V5 or better).  If under NT, make sure you have configured any
+	    necessary extension associations and so on.
+	Perl CGI libraries (many installs, eg ActivePerl, have this as standard)
+	Perl File::Basename library (this is probably standard)
+	Perl Text::ParseWords library (this is probably standard)
+	Perl Net::SNMP library (only if you want to use Routing Table extensions)
+	Perl GD library (if you want to use the compact summary screen) with
+        the necessary gd support libraries ( see http://www.boutell.com/gd/ )
+	Perl Time::Zone library (not required, but used if you have it.  If
+     using multiple timezones under Windows then you really need it)
+	A web server (duh).  If using Apache, you need mod_expires
+
+You probably already have most of these, if you have already installed MRTG 
+and RRDTool.
+
+Before using mod_perl or speedycgi, check out the sections in the PROBLEMS
+and HOWTO documentation!
+
+Make sure you have the latest version of routers.cgi.  Check on
+http://www.steveshipway.org/software/ 
+
+Next, you need to make sure of the following:
+
+* All MRTG .conf files to be handled by routers.cgi have the 'UseRRDTool' or
+  'Logformat: rrdtool' option set, and their databases are in RRDTool format.
+* Each MRTG .conf file deals with a different router. (Not necessary, but
+  advised)
+
+The last will be correct if you created your .conf files using the
+cfgmaker command that comes with MRTG.  I suggest you use the cfgmaker
+command with the '--descint --ifdesc=descr' options set.
+
+Fast Install
+------------
+If you have a faily generic system, running NT or some flavour of UNIX, 
+probably with either IIS or Apache, then you can use the install script.
+In fact, unless you have a very unusual setup, you can probably use this 
+script.
+Just run:
+	perl install.pl
+and this should ask you a few questions, giving sensible defaults most of the
+time.  Unless you have a customised system, this should install it for you!
+
+If you cannot use install.pl, or you prefer to do it by hand, then read on.
+
+If you have not yet created your MRTG .cfg files, you may wish to use the
+script buildwan.pl in the extras directory -- it creates all necessary .cfg
+files for your entire WAN.
+
+Also, see the section at the bottom about running targetnames.pl
+
+Use of routers.cgi under Windows NT
+-----------------------------------
+I have now tested this with Apache and ActivePerl.  However, there are a few
+caveats.  The script relies on the .htaccess file to force the expiry of
+old graphs.  If you are using Apache under NT this is still OK, but IIS
+does not use the htaccess file.  You need to ensure that the graphs directory
+is either set for the appropriate expiry times, or set to NEVER CACHE.
+After taking a look, it appears that in IIS you can only set expiry times for
+an entire directory at once.  So, set the graphs directory to expire in
+5 MINUTES.
+
+Installing routers2.cgi (not using install.pl)
+----------------------------------------------
+
+You will need to modify the '#!/usr/local/bin/perl' on the first line of the
+scripts to reflect the correct location of your perl executable (the install
+script does this for you).
+
+Dont forget to install the RRDs perl libraries!
+
+Remember that while NT uses backstrokes '\' as path separators, URLs use
+forward strokes '/'.  So, when editing the routers2.conf file, make sure you
+use the correct strokes when defining URL paths and filename paths.
+
+People using ActivePerl should look in the documentation to find out how to
+set up their web server to run Perl CGI scripts.  This can be found at:
+http://velocity.activestate.com/docs/ActivePerl/faq/Windows/ActivePerl-Winfaq6.html
+
+Most of these instructions are UNIX-centric.  Windows NT people should make the
+appropriate changes for directory paths, permissions, and so on.  You will
+obviously need the Windows version of Perl installed and made CGI-able.  The
+same applies to people with Macs or any other more obscure OS.
+
+Timezone support under Windows is minimal, due to limitations of the O/S that
+are compiled into RRDTool.  Under windows, you cannot have a different 
+timezone for each target.  If this is a problem, then stick with MRTG (the
+compiler used for MRTG does not have the problems that RRDTool does).  This
+may well be corrected in a later version of RRDTool - so get the latest version!
+
+Creating Directories
+--------------------
+Now you need to decide where to put the files.  The directories you will
+need are as follows:
+
+CGI-BIN DIRECTORY: This is where the routers.cgi file goes, with read and
+  execute permission.  This directory should be visible to your web browser
+  with exec-cgi flag set. ( 'Script' flag in IIS )
+
+ICONS DIRECTORY: This is where all the .gif files are put.  This directory
+  should be visible to your web browser.  Make a note of the directory's URL
+  This should not be under the CGI-BIN directory.  Usually called /rrdicons
+  or similar.
+
+GRAPHS DIRECTORY:  This is the work directory for the graphs.  It needs to 
+  be writeable to the httpd UID, and otherwise empty.  The htaccess file should
+  be placed in here.  This directory also needs to be visible to your web
+  browser.  Make a note of the URL of the directory, and its path in the 
+  filesystem.  Note that under some web servers you do not have the htaccess
+  file - you should do whatever is equivalent on your server.  Also, Apache
+  needs to have the mod_expires module installed to use htaccess. IIS users
+  should set the directory to expire in 5 MINUTES.
+  This should not be under the CGI-BIN directory.
+
+DATABASE DIRECTORY: Where the RRDTool .rrd databases are kept.  This should
+  already exist.  It should not be under your web server root.
+
+MRTG CONF DIRECTORY:  Where the MRTG .conf files are kept.  This should
+  already exist.  It should not be under your web server root.
+
+Configuring the perl script
+---------------------------
+This is now done via a separate configuration file.  You should modify the 
+script so that it knows where the conf file is (the line is clearly marked
+at the beginning of the .pl file), and (if necessary) modify the path of
+the perl executable in the first line of the script. ( $CONFFILE = "...." )
+
+The conf file should have at least 2 sections, [web] and [routers.cgi].  The
+first needs an entry 'backurl' to define where the 'Main Menu' button takes us.
+The other section defines all the other options that used to be hardcoded into
+the script.
+
+A third section, [routerdesc], is now DEPRECATED.  Don't use it unless you
+have to.
+
+A fourth section, [targetnames]  is optional and allows you to override the 
+default short description for the routers and interfaces.  You key this
+section with either the MRTG .conf file name, or the interface target name.
+
+The short description for a router is taken as:
+	: The entry for the MRTG .conf file in the [targetnames] section
+	: The entry in the [routerdesc] section, or
+	: The 'ShortDesc[_]: ....' entry in the mrtg.conf files, or
+	: The first word in the 'Title[..]: ...' line in the mrtg.conf files
+      (this is also the key used to uniquely identify the router in
+	  the [routerdesc] section)
+
+A fifth section, [targettitles] is optional and allows you to give the 'long'
+description for each interface.  This corresponds directly to the Title[]
+directive in the MRTG files.  If you made your MRTG config files using
+cfgmaker with the --descint option, you may not need do do anything here.
+
+See the example routers2.conf file, and the README file for more information.
+
+You now need to put this configuration file somewhere - I suggest in
+/usr/local/etc - and then modify the script routers.cgi so that it knows
+where to find this file.  The line to modify is clearly indicated at the
+start of the script.  As shipped, it is configured to be kept in the file 
+/usr/local/etc/webdev.conf
+
+targetnames.pl
+--------------
+This is a script to automatically build the [targetnames] section of your
+routers2.conf.  AFTER configuring the routers2.conf file, you can run this
+using the command
+	perl targetnames.pl routers2.conf > targetnames.conf
+changing 'routers2.conf' to be the full pathname of wherever you have installed
+your routers2.conf file.  If you used the install.pl script, this will probably
+be in the same directory as your .rrd files.
+This command will use SNMP to query your routers, and will output on STDOUT
+into targetnames.conf the necessary configuration directives which you can edit
+and add in to your routers2.conf file.
+The script looks in SNMP for the interface names and descriptions (if they are
+available) and formats them for the routers2.conf file.
+
+Installing the files
+--------------------
+Copy the routers.cgi file to the CGI-BIN directory, permission 555 (read
+and execute).  If it is called routers.cgi.pl in the package then rename 
+it to routers.cgi (UNIX, Apache) or routers.pl (NT with IIS)
+
+Copy the htaccess file to the GRAPHS directory as .htaccess, permission 444.
+This is not necessary if your web server does not use htaccess files - you 
+should do the equivalent for your server.  Apache may need mod_expires 
+activated for htaccess to work, and AllowOverride set for the GRAPHS directory.
+
+Copy the *.gif files to the ICONS directory.
+
+Testing the script
+------------------
+It should now work!  Point your browser at the routers.cgi file, and see
+what you get.  Note that you MUST have javascript enabled on your browser
+for the pages to function correctly, and you need cookies enabled if you
+want to use the personal preferences page.
+
+routingtables.cgi
+-----------------
+You may wish to use the experimental Routing Tables extension.  To use this,
+you must do the following:
+* Install Net::SNMP
+* Install the routingtables.cgi script in your CGI bin.
+* Uncomment the 'routingtableurl' directive in the routers2.conf
+This will result in a new link appearing on the 'info' page for each router,
+allowing you to view the current routing table on the router in question.
+Note that this may have problems with NT servers, particularly when used with
+IIS as the web server.
+The link will be hidden in the event that it cannot work out the necessary
+information.
+Also, your community strings will appear in your browser history.  If this is
+a security concern to you, then do not enable this feature.  If you do enable
+it, then make sure your community strings are READ ONLY and preferably 
+restricted to just the IP address of this monitoring server.
+
+Contacting me
+-------------
+Try one of the following:
+web: http://www.steveshipway.org/software (main site)
+     http://www.shipway.org.uk/software (popup ads - yeuchk)
+email: steve@steveshipway.org (preferred), s.shipway@auckland.ac.nz (work), 
+	steve@shipway.org.uk (last chance)
+mailing list: http://www.steveshipway.org/mailman/listinfo/support_steveshipway.org
+forum: http://www.steveshipway.org/forum/index.php
+Yahoo IM: steveshipway
+ICQ: #210588157
+AIM: shipwaysteve
+MSN: s.shipway@auckland.ac.nz
+Please don't telephone me, unless you want to offer me money :-)
+
+Thanking me
+-----------
+Encourage development by sending me something from my Amazon Wishlist
+http://www.amazon.co.uk/exec/obidos/registry/3S0PX0NTU8KDC
+Details on http://www.steveshipway.org/software/wishlist.html
+
+People who send me something have their names added to the Information page,
+and also get a warm, fuzzy feeling deep within from having given something
+back...
+
+-Steve

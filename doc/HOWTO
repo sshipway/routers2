@@ -1,0 +1,1054 @@
+HOWTO file v2.21
+                              Howto file
+                              ----------
+
+This file details how to perform configuration changes you might wish to do.
+Note that, due to changes since v1.x, this file often says 'Routers' instead
+of 'Devices', and 'Interfaces' instead of 'Targets'.
+
+Note that some things can be achieved in multiple ways.  Which method you
+use depends on your own requirements and preferences.  Try not to use all
+of the methods at once as it would get confusing.
+
+------------------------------------------------------------------------------
+Q. How do I change the Router Names in the left-hand menu?
+
+A1. Use the [targetnames] section in the routers2.conf file.  Put in entries
+   keyed by the MRTG .cfg filename, and these will replace the defaults.
+   You can also change the defaults by changing the 'routerdefault' setting in
+   the routers2.conf - sometimes 'ai' works better.
+A2. Use the directive 'routers.cgi*ShortDesc: xxxx' in your MRTG .cfg file.
+   This will set the menu description to xxxx.  You can also use the directive
+   routers.cgi*Icon: to set the icon used for the device.
+------------------------------------------------------------------------------
+Q. How do I group the routers by type in the Routers menu?
+
+A. You need to enable Grouping in the routers2.conf, by using the 'group = yes'
+   option.  Then, split the MRTG .cfg files into different directories, and
+   add these to the 'cfgfiles' directive.  Finally, use the [targetnames]
+   section to define group names, keyed on the (full) path name of the files.
+   eg, if the files are in /mrtg/config/a/*.cfg and /mrtg/config/b/*.cfg,
+       then you should make the following settings:
+       [routers.cgi]
+       confpath = /mrtg/config
+       cfgfiles = a/*.cfg b/*.cfg
+       group = yes
+       [targetnames]
+       /mrtg/config/a = Group A
+       /mrtg/config/b = Group B
+   Note that if you move your MRTG .cfg files like this, you must make sure
+   that your data gathering script still calls them!  Also, people using
+   generic.cgi to view the same files will need to upgrade to v0.13 or later.
+
+   Why do we have both a cfgfiles and confpath defined?  Historical reasons.
+
+   People who still want to call the files via a single MRTG instance should
+   use an 'Include' files over the top.
+  
+   If you also enable the multilevel option, you can define heirachial group
+   names.  See later information on how to do this.
+------------------------------------------------------------------------------
+Q. How do I group the interfaces within a router?
+
+A. You can't - this is what the 'routers' menu is for.  If you split your
+   MRTG .cfg file into two parts, then it will appear as two 'routers' on the
+   menu.  You can use this to group the interfaces.
+   However, since the interfaces are sorted by description, you could prefix
+   the various names with a group code, which would affect the ordering. Use
+   the [targetnames] section of the routers2.conf to do this.
+------------------------------------------------------------------------------
+Q. How do I hide all those PDA entries from the 'Style' menu?
+
+A. You have to modify the 'sorder' option in the routers2.conf.  Be very careful
+   doing this!  Each entry corresponds to a particular style, so you can hide
+   the ones you dont want.
+------------------------------------------------------------------------------
+Q. How do I change the titles that appear in the graphs?
+
+A. Depending on the size of the graph, the title will be either the interface
+   Long or Short description, taken from the [targetdesc] and [targetnames]
+   sections of the routers2.conf.  If you have not defined anything here, then
+   the 'Title[]' directive from the MRTG .cfg file will be used for the long
+   description, and the short description will be worked out from the
+   interface information.
+    You can override everything by defining an explicit title using the
+   directive 'routers.cgi*Description[]:'
+------------------------------------------------------------------------------
+Q. How do I re-scale the graphs, so that they do not always scale relative to
+   the red 'max' line?  I want them to auto-scale to the actual data.
+
+A. Put the directive:
+	routers.cgi*Options[target]: scaled
+   or the directive
+	routers.cgi*UnScaled[target]: none
+   in your MRTG .cfg file for the targets you wish to autoscale.
+
+A. Alternatively, use the 'unscaled = no' option in the routers2.conf (which 
+   affects ALL graphs), and optionally put the directive
+	Unscaled[target]: dwmy
+   in the MRTG .cfg files, for the target(s) that you want to remain unscaled.
+   Note that MRTG defaults to scaled, whereas routers.cgi defaults to
+   unscaled (unless you change this using the 'unscaled = no' directive).
+------------------------------------------------------------------------------
+Q. How do I make the router CPU statistics appear as well?
+
+A. You have to add a new target to your router's MRTG .cfg file for the 
+   CPU statistics.  This will be different depending on your type of router.  
+   The target name MUST contain 'CPU' to indicate to the script that this is 
+   the CPU target.
+
+   For example, if you have a Cisco router, you should use something similar 
+   to the following:
+
+   Target[routername-CPU]: 1.3.6.1.4.1.9.2.1.58.0&1.3.6.1.4.1.9.2.1.58.0:communityname@routername
+   Title[routername-CPU]: CPU Percentage for routername
+   MaxBytes[routername-CPU]: 100
+   Options[routername-CPU]: integer gauge noo
+   PageTop[routername-CPU]: dummy
+   
+   Note the following:
+   1) You MUST have the 'CPU' in the targetname - this is how routers.cgi 
+      identifies which target is the CPU statistics.
+   2) You MUST have a MaxBytes of 100.  routers.cgi uses this as an additional
+      test to verify that it has the correct target.
+   3) You will almost certainly have to have 'Options[...]: gauge integer'
+   4) The OID used in the example Target line is the Cisco 5-minute CPU load 
+      average.  Other manufacturers will have a different OID.
+   5) Only the first OID is used, so, make them both the same.
+
+------------------------------------------------------------------------------
+Q. How do I enable the routingtables.cgi extension?
+
+A. Be aware of the security implications.  Then, do the following:
+   * Install Net::SNMP
+   * Install the routingtables.cgi script in your CGI bin.
+   * Uncomment the 'routingtablesurl' directive in the routers2.conf
+   This will result in a new link appearing on the 'info' page for each router,
+   allowing you to view the current routing table on the router in question.
+   Note that this may have problems with NT servers, particularly when used with
+   IIS as the web server.
+   The link will be hidden in the event that it cannot work out the necessary
+   information.
+   Also, your community strings will appear in your browser history.  If this is
+   a security concern to you, then do not enable this feature.
+
+------------------------------------------------------------------------------
+Q. How do I specify a URL that will only show the graph frame, not the
+   header or menu frames?
+
+A. Put '&page=graph&nomenu=y' at the end of the generated URL.
+
+------------------------------------------------------------------------------
+Q. How do I see the configuration verification pages?
+
+A. Call the script with the 'page=verify' option, eg,
+	http://yourserver/cgi-bin/routers.cgi?page=verify
+
+------------------------------------------------------------------------------
+Q. How do I change the behaviour of downloaded CSV data?
+
+A. This is mostly down to the configuration of your browser and operating
+   system.  However, you can set the options 'csvmimetype' and 'csvfilename'
+   in the [web] section of the routers2.conf to help tune this, if the defaults 
+   are not to your liking.
+   IE/Windows people will need to set the 'csvfilename' to a filename with the
+   appropriate extension for a CSV file in your configuration.  You should then
+   set O/S defaults within File Manager (Windows Explorer) to associate this
+   extension with the appropriate application.
+   Everyone else should tell their web browser to associate the 'csvmimetype'
+   with the appropriate behaviour.
+   Note that in Internet Explorer, filename extension takes priority over MIME
+   type, unlike in the rest of the world.
+
+------------------------------------------------------------------------------
+Q. How do I suppress the devices/targets menus, while still allowing the
+   user to select display options?
+
+A. You can put the 'allowexplore = no' option in the [routers.cgi] section of
+   the routers2.conf to do this.  It will suppress the 'Devices' and 
+   'Targets' menus in the lefthand frame.  If you put 'allowexplore = if'
+   then it will only suppress the Devices menu, not the targets.
+
+------------------------------------------------------------------------------
+Q. How do I get averages over a working day, rather than the full 24hrs?
+
+A. You can set the 'daystart' and 'dayend' hours in the routers2.conf, and the
+   graphs will show the working day averages in addition to the normal data.
+   Note that Saturday and Sunday are defined as the weekend - currently this 
+   cannot be changed (sorry, Israel and the Arab nations). Work hours are only
+   done at an hourly granularity, due to the RRD granularity, so you cannot
+   have a working day that ends at 5:30pm, for example.
+
+------------------------------------------------------------------------------
+Q. How do I change the icon appearing next to the items in the Targets or
+   Devices menus?
+
+A. You can specicy a file name for a 15x15 pixel GIF image by adding a line of
+   the form
+	routers.cgi*Icon[targetname]: icon.gif
+   to your MRTG .cfg file.  The icon.gif file must live in the iconpath
+   directory defined in your routers2.conf file.  It can be given any name.
+   Use the correct targetname as well!
+
+A. You can also specify an Interface icon using the [targeticons] section of
+   your routers2.conf file.  This will override any icon defined in the MRTG
+   file.  To do this, place a line of the form:
+	targetname = icon.gif
+   in the [targeticons] section of routers2.conf, using the appropriate
+   targetname.
+
+A. For devices, you can place a single directive in each MRTG file of the
+   form:
+	routers.cgi*Icon: icon.gif
+   This will set the icon on the Devices menu for that file.
+
+A. Similarly, you can make an entry in the [targeticons] section of your
+   routers2.conf, keyed on the MRTG file name:
+	mrtgfilename.cfg = icon.gif
+
+A. Finally, you can set the default icon to use (in cases where the AI code
+   is unsure what to do) by using the routers2.conf directives filedefault
+   and ifdefault.
+
+  
+------------------------------------------------------------------------------
+Q. I have some interface data that is being classified as a 'non-interface'
+   target.  How can I specify it as an interface?
+
+A. You can add some lines to your MRTG .cfg file as follows:
+
+	routers.cgi*Options[targetname]: interface
+	Options[targetname]: bits
+	YLegend[targetname]: traffic in bits/sec
+	Legend1[targetname]: Incoming traffic
+	Legend2[targetname]: Outgoing traffic
+
+   Remember to use the correct targetname!  The first line tells routers.cgi
+   that it is to be treated as an interface.  The other four are needed
+   because routers.cgi will not set these defaults for you if it is not sure.
+------------------------------------------------------------------------------
+Q. How can I have separate MRTG .cfg files (which is how routers.cgi wants
+   them to be), and yet still have only a single instance of MRTG running
+   for the RRD update cycle?
+
+Q. What is the recommended way to set up my MRTG .cfg files for the routers?
+
+A. The recommended way of defining your MRTG .cfg files is to have one file
+   per router.  This will allow routers.cgi to group the interfaces by router
+   in the menus.  What you should then do is to create a special .cfg file,
+   which should contain nothing but Include: directives, including all of the
+   other .cfg files.  You then pass this special .cfg file to MRTG as the file
+   to update.  MRTG will only have a single instance, but routers.cgi will
+   still be able to work with multiple router configuration files.
+   This 'master' .cfg file should also contain the directive
+	 routers.cgi*Ignore: yes
+   so that routers.cgi does not put it into the menu.
+------------------------------------------------------------------------------
+Q. How do I enable to support for 6-hour graphs for a given router?
+
+A. This requires three steps.
+    1. Add the directive '6hour = yes' to the [routers.cgi] section of
+       your routers2.conf file to enable the support in routers.cgi
+    2. Add the MRTG directive 'Interval: 1' to the appropriate MRTG
+       .cfg file(s) to enable creation of the higher-resolution .rrd file.
+       You may need to delete your old .rrd file in order for it to be
+       re-created with the new resolution.
+    3. Make sure you run MRTG every minute (instead of every 5 mins) in order
+       to collect the data.  If you run it as a daemon you should be OK.
+
+   After making these changes, you should be able to see the new '6 hour' graph
+   option on the routers.cgi pages.
+------------------------------------------------------------------------------
+Q. How do I make the graphs show time relative to the timezone in which the
+   routers are located?
+
+A. Firstly, note that this will probably not work if you are using Windows.
+   It does work under Linux and Solaris, and probably all other UNIX systems.
+   This is due to a limitation of the operating system's 'C' libraries, which
+   are compiled into the RRDTool graphing functions.
+
+   You should add the 'Timezone[]:' directive to your MRTG .cfg file for each
+   target, specifying where the target is located.  How you specify the
+   timezone depends on your operating system - eg, 'GMT+2', 'PST', 'Singapore'
+   and so on.  This will cause the following:
+   1. The timezone will be reported at the bottom of the page, next to the
+      'last update' time.
+   2. The graph will be shown with time relative to the given timezone - if
+      it is not, then your O/S does not support dynamic timezones.
+   3. The 'working day' (if you use it) will now be relative to the target's
+      timezone, and not to the server's.
+------------------------------------------------------------------------------
+Q. How do I make different 'working day' hours for different routers?
+
+A. Currently, you can't.  However, if your O/S supports dynamic timezones, you
+   can place targets within different timezones.  Then, the working day
+   will be defined relative to the router's timezone, and not the server's.
+   See the 'timezone' question for more information.
+------------------------------------------------------------------------------
+Q. How do I change the icon graphcs to something more readable?
+
+A. Some alternative icon schemes are supplied in the altgif directory.
+   Go into this directory,  and choose one of the schemes.  Copy the
+   appropriate icon set (all the *.gif files) into your rrdicons directory,
+   wherever you decided to put it.  Then, flush the cache on your browser, and
+   you should have the new set active!
+
+   If you want to design your own set, then please send a copy to me so that 
+   I can put it on the website for anyone else to use.
+------------------------------------------------------------------------------
+Q. How do I stop an interface from being listed in the 'Interfaces' menu, or
+   the 'Summary' page?
+
+A. Add the directive 'routers.cgi*InMenu[targetname]: no' to the appropriate
+   MRTG .cfg file, for the appropriate target.  This will suppress its 
+   listing in the Interfaces menu, however it will still appear in the 
+   Incoming and Outgoing (if is is an interface) and in the Summary pages.
+
+   You can also use the 'routers.cgi*InSummary[targetname]: no' directive to
+   prevent the target from being listed in the Summary pages.
+
+   You can also use the 'routers.cgi*InOut[targetname]: no' directive to
+   prevent the target from being listed in the Incoming/Outgoing pages.
+
+   Finally, 'routers.cgi*Options[targetname]: ignore' will completely remove
+   the target from any menu, summary or screen.
+------------------------------------------------------------------------------
+Q. How do I change the Interface names appearing in the left-hand menu?
+
+A. There are several ways to do this.  In order of precedence, these are:
+   1. Set an entry in the [targetnames] section of the routers2.conf
+      targetname = Shortdesc
+   2. Set the MRTG_INT_DESCR option in the MRTG .cfg file
+      SetEnv[targetname]: MRTG_INT_DESCR="Shortdesc"
+   3. Change the default behaviour, by using the ifdefault option in the 
+      routers2.conf file.  Set to 'target' to make the targetname the default.
+      ifdefault = target
+------------------------------------------------------------------------------
+Q. How do I prevent a particular target from being processed by routers.cgi?
+
+A. If you want to ignore just some of the targets in a .cfg file, then add the
+   directive:
+	routers.cgi*Options[targetname]: ignore
+   to the MRTG .cfg file.  This will result in the target being completely
+   ignored.
+------------------------------------------------------------------------------
+Q. How do I get the GD libraries installed?
+
+A. If you are using ActiveState Perl for Windows, use the 'ppm' command to 
+   download the GD package.  This installs it automatically. Easy!
+	C:> ppm install GD
+   Note that, if you use a proxy server for Internet access, you will need to
+   set the proxy environment variables as detailed in the ppm documentation.
+   eg:
+		set HTTP_proxy=http://proxy:8080
+		set HTTP_proxy_user=john
+		set HTTP_proxy_pass=secret
+   See http://aspn.activestate.com/ASPN/PPM/FAQ for full instructions.
+
+A. If using UNIX, then the GD C library is already installed by your rrdtool
+   install - although maybe not in the /usr/lib directory.  Download the GD
+   perl package from www.CPAN.org, and follow their installation instructions.
+   Make sure that your libgd.a is of recent enough version for your GD.pm perl
+   libraries!  You may need to download it again from www.boutell.com
+   If you get the yellow 'error' graphic, then GD.pm is not installed fully,
+   or the dynamic libraries are incorrect.
+   If you get nothing but a grey bar graphic, then your libgd.a C library is
+   too old - get a more recent version and then reinstall GD.pm perl library.
+  
+------------------------------------------------------------------------------
+Q. How do I install the Net::SNMP libraries?
+
+A. If using Active Perl, use the PPM command to download:
+	C:> ppm install Net-SNMP
+   Note that, if you use a proxy server for Internet access, you will need to
+   set the proxy environment variables as detailed in the ppm documentation.
+   See http://aspn.activestate.com/ASPN/PPM/FAQ for full instructions.
+
+A. If using UNIX, download the package from http://www.cpan.org/ and follow
+   the instructions contained within.
+------------------------------------------------------------------------------
+Q. How do I stop styles from appearing in the menu?  I don't need all of the
+   PDA and WebTV related styles, just the basic ones.
+
+A. You can modify the 'sorder' directive in the routers2.conf.  Be very 
+   careful though - you must use the correct style names.  
+
+   The letter 'b' in a style mean 'black and white' *unreliable*
+   The letter 'p' means PDA mode - no javascript
+   The '2' means double height
+   The s,t,n,l,x are different widths and data widths.
+
+   l2p : Web TV
+   s, sbp, nbp, sp, np : Various PDAs
+   x, x2 : For 1024x768 screens
+   l, l2 : For 800x600 screens
+   t : Half data width zoomed for 640x480 screens (stretch)
+   n, n2 : For 640x480 screens
+
+   A few examples:
+
+	# all available styles
+	sorder = s t n n2 l l2 x x2 sbp nbp sp np l2p
+	# no PDA or WebTV styles
+	sorder = t n n2 l l2 x x2 
+	# Just small ones and WebTV
+	sorder = t n n2 l l2 l2p
+------------------------------------------------------------------------------
+Q. How do I define a User Defined graph?
+
+A. First, pick a short unique target name for the graph (eg: 'graphtarget').
+   Next, add a line similar to the following to each MRTG target definition
+   that you want in the graph:
+	routers.cgi*Graph[targetname]: graphtarget noo total
+   You can also put a number of different options after the target name -
+	noo		Dont use the Outgoing lines
+	noi		Dont use the Incoming lines
+	total	Add a total line to the graph
+	average	Add an average line to the graph
+	nolegend Dont put a legend at the bottom of the graph
+	active  Only the active sub-targets should be shown
+   You can add these options on any of the Graph lines, they will all be used.
+   Now you can optionally define a new Short Name (for the lefthand menu), a
+   Title (for the graph itself), and an Icon (for the menu and Info page). You
+   do this by adding the appropriate entry in the routers2.conf, eg:
+	[targettitles]
+	graphtarget = Incoming Traffic
+	[targetnames]
+	graphtarget = Incoming
+	[targeticons]
+	graphtarget = incoming-sm.gif
+   All other graph settings (legends, etc) are taken from the first target
+   defined for the user graph.
+
+   Finally, you can add any other graph-related options using directives
+   specific to the graph name target with an underscore prefix...
+	routers.cgi*Ylegend[_graphtarget]: Traffic in bps
+	routers.cgi*InSummary[_graphtarget]: yes
+   This way, you can redefine the 'Total' and 'Average' labels, using the
+    routers.cgi*LabelTI[_graphtarget]: Total incoming
+   directive and its siblings.
+   
+------------------------------------------------------------------------------
+Q. How do I change the default target that is selected by the system?
+
+A. You can modify the 'defaultinterface' option in the routers2.conf.
+   By default, the first target in the list will be used.  However, you may
+   wish instead to specify the first Interface, or the CPU statistics (if
+   available). eg:
+	[routers.cgi]
+	defaultinterface = interface
+   You can also change the sort order of the targets in the menu - by default, 
+   they are sorted alphabetically by description, AFTER being sorted by their
+   mode.  So, incoming/outgoing come first, then CPU, generic, Interfaces and
+   memory, and finally user defined.  You can set this to mode (default),
+   desc or icon:
+	[targetnames]
+	ifsort = desc
+
+   The default device is selected either by the user's personal preferences,
+   or by the defaultrouter directive in the routers2.conf
+
+------------------------------------------------------------------------------
+Q. How do I make the graph units show in the legend?
+
+A. Use the 'legendunits = yes' directive in the routers2.conf file.
+------------------------------------------------------------------------------
+Q. How do I enable the 95th Percentile and Total options?
+
+A. You have to set the 'percentile = yes' option in the routers2.conf
+------------------------------------------------------------------------------
+Q. How do I give individual users personalised routers2.conf files?
+
+A. You can almost achieve this using the 'extra' parameter, or by changing
+   the name of the script, or via a username that has already been 
+   authenticated by your web server.
+
+   Using the 'extra' parameter:
+   First, set up a new section in the routers2.conf for the user or group that
+   you have.  For example, call it 'xxxx'.  Now put extra directives into this
+   section to override the directives in the routers.cgi section. eg:
+	[routers.cgi]
+	confpath = /mrtg/normal
+	cfgfiles = router-*.cfg
+	iconpath = /www/html/rrdicons
+	[extra-xxxx]
+	confpath = /mrtg/special
+	cfgfiles = *.cfg
+   Now, when you call routers.cgi normally, you will use the [routers.cgi] 
+   section, as usual.  However, if you use the parameter 'extra=xxxx', then 
+   the [extra-xxxx] section will override confpath and cfgfiles (although iconpath
+   will remain unchanged). Eg:
+	http://myserver/cgi-bin/routers.cgi?extra=xxxx
+
+   Using the script name:
+   You can achieve the same result by renaming the script - for example, if 
+   the new section was called 'test.cgi', then you could copy the routers.cgi
+   script to 'test.cgi', and when run it would use the [test.cgi] section as
+   an override to the [routers.cgi] section.
+
+   Using the username:
+   First, you must configure your web server to authenticate the user.  This
+   will set the username in the CGI parameters.  Then, create a new section
+   in the routers2.conf file called [user-USERNAME] (for the appropriate
+   USERNAME, of course).  For example, if the user is 'steve', then create
+   [user-steve] and put any per-user settings in here.
+
+   You can make as many override sections as you like, although they will only
+   override the [routers.cgi] section, and you can only use one of each type at 
+   once.  Also, they must not have the same name as any other existing
+   sections, else they won't work correctly.  Note that, if you are really
+   crazy, you can use all three of these methods simultaneously.  I wouldn't
+   advise it, though.
+
+------------------------------------------------------------------------------
+Q. How do I automatically add an archive entry for a graph at a specific time?
+
+A1. There are limited command line options to routers.cgi you can use.  Call
+   a script using your favourite scheduler software to create the archive.
+   First, use the 'bookmark' button to find out the required 'rtr', 'if',
+   'xgstyle' and 'xgtype' parameters for your graph.  Remember the last two 
+   will default if not set.
+   Call routers.cgi like this:
+        perl routers2.cgi -A -D rtrparam -T ifparam -s xgstyleparam -t xgtypeparam
+   eg,
+        perl routers2.cgi -A -D file.cfg -T ezwf -t d
+   This will generate an archive graph for the current time, regardless of
+   the archive settings in the routers2.conf file. 
+   If you omit the -T option, then ALL MENU ITEMS for this device will be
+   archived.
+   MAKE SURE that you are running this as the same user as runs the web server!
+   Otherwise, you may find that either it does not have rights to create the
+   graph archives, or it cannot read the rrd files, or else it can create the
+   files but they are unreadable or undeletable by the routers.cgi interface!
+
+A2. Use your favourite scheduler to run the routers.cgi script interactively, 
+   with the appropriate parameters.  You can find the necessary parameters
+   by using the 'bookmark' button when viewing the graph you want to archive.
+   Then, in your scheduler, call the script like this:
+	(UNIX)
+	perl routers2.cgi 'rtr=routerparam&if=ifparam&page=archive' > /dev/null
+	(Windows)
+	perl routers2.pl "rtr=routerparam&if=ifparam&page=archive" > NUL
+   Dont forget to replace routerparam and ifparam with the appropriate values.
+   You could also add the xgtype and xgstyle parameters if you wish a 
+   specific graph type or style.
+   This will archive the graph into the appropriate subdirectories, to be 
+   viewed by the routers.cgi frontend (provided archiving is enabled).
+
+------------------------------------------------------------------------------
+Q. How do I use the CGI Extension facility?
+Q. How do I add customised links to the generated pages?
+Q. How do I use a plugin?
+
+A. You can attach your own CGI scripts to either a Device (.cfg file), or
+   a Target (MRTG Target name).  You do this using the Extension keyword in
+   the MRTG file.
+   To attach a CGI script to a Device, put something like:
+	routers.cgi*Extension: "Menu desc" /cgi-bin/myextension.cgi
+   in your MRTG file.  A new item for this will appear under the 'Targets'
+   menu.  For a per-target link, use:
+	routers.cgi*Extension[target]: "Menu description" /cgi-bin/myextension.cgi
+   instead.  For this, a link will appear under the graph for this target.
+   To link to another target/device within the routers.cgi frontend (eg, to
+   the router interface at the other end of this WAN link, for example) then
+   use the 
+	routers.cgi*Link[target]: "Menu description" cfgfile.cfg targetname
+   and this will add a new link at the page bottom.  Note that the cfgfile
+   should be named after removing the confpath, so it may have one or more
+   directory parts remaining.
+   
+   To have a new link appear in the Devices menu, use the [menu] section
+   of the routers2.conf file.  These URLs are called as they are specified,
+   with no added parameters.
+
+   In all other cases, the CGI is called with a number of extra parameters in 
+   addition to any already specified.  These are only added IF KNOWN ALREADY.
+   So, if making a per-Device extension, it helps to put the definition at
+   the END of the .cfg file (so that information like hostname, community etc
+   is already known).  
+
+   If you have the keyword 'noopts' added, then this prevents ANY extra
+   parameters from being passed to the plugin.
+
+   The CGI community string is only passed if the keyword 'insecure' is added
+   to the end of the Extension definition, since this is a security risk and
+   rarely required.
+
+   You can also pass a numerical security level, which is compared to the
+   level defined using 'level = ...' in the routers2.conf.  If the defined
+   level is the same or greater than the Extension level, then the Extension
+   is enabled.
+
+   CGI parameters:
+	fi = MRTG file name (within confpath)
+	ta = MRTG target name
+	c = Community string (potential security risk: only enabled with 'insecure' keyword)
+	h = host name (if known)
+	ifno = interface number, if appropriate
+	t = HTTP target page object name
+	b = a URL that will take you back to the routers.cgi screen
+	conf = The filename of the routers.cgi configuration file
+	url = The URL of the routers.cgi script
+        L = effective security level
+
+   An example template for creating these scripts is available in the extras
+   directory.
+------------------------------------------------------------------------------
+Q. How do I write a plugin Extension script?
+
+A. A plugin is a CGI script that is passed a number of parameters by the
+   routers.cgi script, and then produces an HTML page.
+
+   CGI parameters:
+	fi = MRTG .cfg file name
+	ta = MRTG target name
+	c = Community string (potential security risk, only passed if Extension is defined using 'insecure' option)
+	h = host name
+	ifno = interface number, if appropriate
+	t = HTTP target page object name
+	b = a URL that will take you back to the routers.cgi screen
+	conf = The filename of the routers2.conf configuration file
+	url = The URL of the routers.cgi script 
+        L = effective security level
+   Not all of these are necessarily passed by the calling link.
+
+   The generated page should:
+	be directed towards the frame specified in the 't' parameter
+	refer to the routers2.conf and 'fi' parameters if necessary
+	
+   If you really want to be flash, you can add the following Javascript to
+   the page's onLoad() event:
+
+	{
+	parent.menu.location = '<url parameter>?page=menu&rtr=<fi parameter>&if=__none&xmtype=options#top';
+	}
+
+   which will remove the selection on the previous selected interface.
+
+   A template for creating plugin extensions is available in the extras 
+   directory.  It takes care of all of this extra stuff for you.
+  
+   If you create plugins, then they are separate programs and therefore not
+   necessarily covered by the GNU GPL that covers routers.cgi.  So, you can
+   give away routers2.cgi, but charge for your own personally-created
+   extension scripts, should you so wish.  The template in the extras 
+   directory is distributed Public Domain, so feel free to use it as the basis
+   of any extension scripts you create. 
+
+------------------------------------------------------------------------------
+Q. How do I use the 'extended time' options?
+
+A. In order to do this you need the option enabled in the routers2.conf file,
+   and your .rrd files extended.  
+
+   You can use 'yes' which will enable 'yesterday' graphs, or 'full' which
+   will enable a calendar popu to select from aailable days.  The 'full' mode
+   will also DISABLE the RRD archive features, if enabled, as it replaces it.
+
+   If you have the latest MRTG, you can probably use the 
+	RRDRowCount[_]: 1000
+   option to set the generated RRAs to be larger (default size is ~600, if
+   you have a default Interval).  This however will only take effect when
+   creating an .rrd file, so you'd have to delete all your old saved data.
+   As a rule of thumb, about 400 rows are regquired for one graph, so setting
+   to 4000 will give you 10 days at 5min, 10weeks at 30min, and so on.
+
+   The other way is by using rrdresize, which preserves your old data.
+
+   You should not do this unless you are sure you know what you are doing!  
+   Doing this could severely damage your MRTG data!
+
+   The 'rrdextend.pl' script in the extras directory will take a MRTG .cfg
+   file, and will extend all the associated .rrd files to double length. After
+   this has been done, you can enable the 'extendedtime' option in the
+   routers2.conf file, and then use 'Yesterday' and 'Last week' time windows.
+   If you want to extend to even larger sizes, so that the popup calendar
+   tool works better, then you will need to edit the script.
+
+   Be aware of what the rrdextend utility does before you use it!
+
+   Last warning - be sure you know what you are doing before you try this!
+   The rrdextend utility simply automates running multiple repeats of the
+   rrdtool resize command on the appropriate .rrd files.  Enabling the 
+   extendedtime option can cause odd behaviour if you do not have correctly
+   extended .rrd files.  
+------------------------------------------------------------------------------
+Q. How can I stop people setting the preferences for other users?
+
+A. The personal preferences are set using cookies, on a per-browser basis.
+   If you use a  multiple-config browser (eg, IE or Netscape) then these cookies
+   are stored on a per-user basis.  Therefore, people can only set their own
+   preferences, and this does not affect the other users of the system.
+
+   Note that if you use Authentication or personal parameters (see previous)
+   then you can set the routers2.conf parameters on a per-user basis as well.
+------------------------------------------------------------------------------
+Q. How can I have the graph date and time added to the graph itself?
+
+A. Use the 'withdate = yes' optionin the routers2.conf.
+   This will add a date/time stamp in the lower righthand corner of the graph
+   showing when it was created.  This timestamp is in the local short date
+   format - if it is incorrect,modify the 'shortdateformat' directive in
+   the routers2.conf to have the correct style for your locale.
+
+------------------------------------------------------------------------------
+Q. How can I give each of my customers their own page, automatically set up
+   by the system?
+
+A. To do this, you have to combine several steps.  Basically, they are as
+   follows:
+	1. Write a small script that calls the MRTG 'cfgmaker' script on a daily
+ 	  or weekly basis.  Your script should take a 'seed' file of router IPs, 
+	  and generate the necessary .cfg files.  You may need to modify the
+	  cfgmaker script to your preferences, or use the Include: directive.
+	  Of course you can skip this step, and generate the .cfg files
+	  manually if you prefer to.
+	2. Set up your web server to use authentication, and make sure that the
+	  routers2.cgi script is protected. Alternatively, use the built-in
+	  authentication with LDAP or MySQL etc (see elsewhere).
+	3. Use the per-user configs (as detailed previously).  For each client,
+	  set up a new section in the routers2.conf that overrides the confpath
+	  and cfgfiles directives, to give access ONLY to their own .cfg files.
+	  You also want the default cfgfiles directive to be invalid, so set
+	  it to 'none'.
+	4. Set up the script in the extras directory to clean up the graphs
+	  directory on a periodic basis.
+
+  Example routers2.conf lines:
+
+	[routers.cgi]
+	confpath = /mrtg/conf
+	cfgfiles = none
+	group = no
+	archive = no
+	[user-usera]
+	cfgfiles = usera/*.cfg
+	[user-userb]
+	cfgfiles = userb/*.cfg
+	[user-adminuser]
+	group = yes
+	cfgfiles = */*.cfg
+	archive = yes
+	[targetnames]
+	/mrtg/conf/usera = User A's routers
+	/mrtg/conf/userb = User B's routers
+
+  Of course, if each client has only one router, you could use the 
+  'allowexplore = no' directive, and just give them the correct URL for their
+  own router.  This is a 'security by obscurity' method, though, although it
+  removes the need for user authentication or special routers2.conf sections.
+
+------------------------------------------------------------------------------
+Q. How do I link to just the graph graphic, with no surrounding HTML at all?
+
+A. If you really want to do this, then you can create your own IMG tags that
+   pull graphs from routers.cgi.  
+   First, identify the complete URL to link to.  Using routers.cgi, display
+   the desired graph, and click the Bookmark button.  To the generated URL,
+   add a suffix '&page=image'.
+   Now, generate your own IMG tag similar to this:
+
+	<IMG src="/cgi-bin/routers2.cgi?rtr=routername&if=targetname&xgtype=d&page=image" alt="Graph of targetname">
+
+   Obviously, use the URL you generated in the earlier stage.  Note that not
+   all graphs are compatible with this -- summary, compact, multi-graph, some
+   user defineds, and so on will not work.  Also, do not use the width or
+   height parameters in the IMG tag, since the graph dimensions are variable.
+
+   If you get an 'Error' graphic, then you probably have passed incorrect
+   parameters to the IMG tag, or are asking for an incompatible graph.
+------------------------------------------------------------------------------
+Q. How do I enable the server monitoring extensions?
+
+A. First of all, you can only monitor UNIX servers this way.  I've been unable
+   to write an agent for the Windows servers due to a kernel limitation.
+
+   In order to enable it, you need to do three things.
+	1) Install the getstats module on each server to be monitored, and link it
+	  in to the inetd.conf file.  The getstats script is in the extras 
+	  directory, and contains instructions.
+	2) Set up the gather script to run every 5 minutes on your routers.cgi
+	  server.  This script will contact all the monitored servers, and collect
+	  the data.  Make sure you make the necessary changes to the gather script.
+	  This is also located in the extras directory.
+	3) Set up the new sections in the routers2.conf file.  Examples are at the
+	  end of the sample file.
+	[servers]
+	servername = Server Description
+	  You can also set icons in a similar way.
+	  Now you should enable the Servers extension in the routers2.conf with
+	  the directive
+	[routers.cgi]
+	servers = yes
+	  And you will see a new group (if you are using Groups) for the
+	  servers.  Data collected is CPU usage, user count, and paging.
+------------------------------------------------------------------------------
+Q. How do I configure routers.cgi to correctly display a range -- for example,
+   a high and low Ping round trip time?
+
+A. You can use the  'routers.cgi*GraphStyle[]: range' directive.  
+
+   For example, say you use the mrtg-ping-probe utility to obtain a high and
+   a low ping round trip time.  You can set your MRTG optins as follows:
+
+Target[x]: `/usr/local/lib/mrtg-ping-probe -q x`
+routers.cgi*InCompact[x]: no
+MaxBytes[x]: 10000
+Title[x]: ping times
+Options[x]: gauge nopercent
+YLegend[x]: milliseconds
+ShortLegend[x]: ms
+Legend1[x]: Round Trip Time range 
+Legend2[x]: Round Trip Time range
+Legend3[x]: High Peak 5min RTT 
+Legend4[x]: Low Peak 5min RTT 
+LegendI[x]: High:
+LegendO[x]: Low :
+routers.cgi*Options[x]: nomax fixunit nototal 
+routers.cgi*GraphStyle[x]: range
+
+    See the EXAMPLES file for more details.
+------------------------------------------------------------------------------
+Q. How can I use the built-in authentication?
+
+A. First, decide whether you are going to use LDAP, MySQL or a password file to
+   hold the passwords.  Then, configure the necessary lines in the [web]
+   section of the routers2.conf file.  Note that you will need the appropriate
+   perl modules installed if you intend to use LDAP or LDAPS!
+
+   You should decide if you want to force authentication, or make it optional
+   (in order to view additional devices).  Also, decide how quickly you want
+   the authentication to expire.
+
+   Edit the routers2.cgi file to set CHOCOLATE_CHIP to something random. This
+   is the secret key used in cookie authentication, along with IP address and
+   user name.  You dont /have/ to do this, but it is more secure if you do.
+
+   Set up the per-user sections to override the [routers.cgi] section and
+   grant the users access to different cfgfiles.
+
+   eg:
+[web]
+auth-required = optional
+auth-key = secretmessage
+auth-expire = +60min
+ldap-server = ldap.auckland.ac.nz
+ldap-context = ou=People,O=University,c=NZ
+[routers.cgi]
+cfgfiles = public/*.cfg
+[user-admin]
+cfgfiles = private/*.cfg public/*.cfg
+group = yes
+
+    In this setup, anyone can view the public files without having to log in,
+   but you must log in as 'admin' to see the private files.  Authentication
+   is done via the LDAP server, and expires after 1 hour of inactivity.
+
+   To authenticate using MySQL or password files, use the other directives.
+------------------------------------------------------------------------------
+Q. How do I enable the rrd-archiving facility?
+
+A. First remember this can increase the size of your rrd directory by a 
+   factor of 40 in order to hold a month's detailed data!
+
+   Secondly ; this is not compatible with extendedtime=full.  Indeed, if you
+   are using extendedtime=full, you should instead simply extend the RRAs in
+   your RRD files and add RRDRowCount directives for new cfg files.
+
+   To enable, take the following steps:
+   1) Modify the rrd-archive.pl script to specify the correct location for
+      your perl executable, and the routers2.conf file.
+   2) If you have an unusual routers.conf setup, then add the necessary
+      [archive] section as in the example file
+   3) Use your scheduler to run the rrd-archive.pl script every night just 
+      before midnight (or alternatively every Sunday night at midnight if you 
+      only want weekly archives)
+   4) run the rrd-archive.pl script once manually (as the same user that 
+      runs the schedule and MRTG jobs!)
+
+   Routers.cgi should now spot the existance of the archive directory, and
+   you will get a new date option under the Graphs menu.
+
+   You can tune the archiving on a per-target basis if you require.  The
+   date menu will only appear if archives exist for the current target.
+   To do this, use the .cfg file directive
+	routers.cgi*Archive[targetname]: daily xx monthly yy
+   to specify to keep rrd files for xx days, and the 1st of each month for
+   yy months.  Note that if xx and yy are zero, no archiving occurs.  You 
+   can also use
+	routers.cgi*Archive[targetname]: no
+   to disable archiving of a target.  If no archives exist for a target,
+   then the archive selection box will not appear.
+
+   Defaults for the cfgfiles and expiredaily/expiremonthly settings can be
+   located in the [archive] section of the routers2.conf file.
+
+------------------------------------------------------------------------------
+Q. How do I make routers.cgi work with SpeedyCGI?
+
+A. Modify the script to use
+      #!/usr/bin/speedy -- -M10 -t3600 -r500
+   Then, in the routers2.conf, in the [routers.cgi] section, put the directive
+      cache = yes
+   This will cause the .cfg files to be cached between instances.  
+   WARNING: if you modify the .cfg files, it will NOT BE NOTICED.  You will
+   need to wait for the speedycgi timeout (1 hour in this setup) or execution
+   limit (500 times) before they are re-read, and they may come back outof
+   synch until all instances restart.  The best thing is to touch the
+   routers2.cgi script (touch cgi-bin/routers2.cgi) to force speedycgi to
+   reload it immediately.
+
+------------------------------------------------------------------------------
+Q. How do I make routers.cgi work with mod_perl?
+
+A.  First, configure your web server to use mod_perl on this script.
+   Then, in the routers2.conf, in the [routers.cgi] section, put the directive
+      cache = yes
+   This will cause the .cfg files to be cached between instances.  
+   WARNING: if you modify the .cfg files, it will NOT BE NOTICED.  You will
+   need to restart your web server so that it restarts the mod_perl instances.
+
+------------------------------------------------------------------------------
+Q. How can I use the trend analysis?
+
+A. You can install the trend.cgi script found in the extras directory into
+   your cgi-bin.  Make sure you make the necessary changes for your perl
+   location, and work directory, as described in the comments.
+
+   If you then add the line
+	trendurl = /cgi-bin/trend.cgi
+   to your [routers.cgi] section of the routers2.conf, or add the line
+	routers.cgi*Extension[targetname]: "Trend Analysis" /cgi-bin/trend.cgi graph-sm.gif
+   to your MRTG .cfg files for each appropriate targetname, you should get
+   a new link at the bottom of the graph for viewing trending analysis.
+
+   trend.cgi does not require the SNMP community string, so you do not need
+   to add the 'insecure' keyword and your community string is not revealed.
+
+------------------------------------------------------------------------------
+Q. How can I add multiple language support?
+
+A. First, download the language pack from the web site.
+
+   Next, install the lang_xx.conf files you need in the same directory as your
+   routers2.conf file (you can change this dir using langdir= in routers2.conf)
+
+   Then, copy the xx icon directory to your rrdicons/xx directory.  There may
+   not be a special xx icon directory for all of the languages.  Do not
+   overwrite the default icons in the rrdicons directory!
+
+   Finally, you should use the 'language = xx' option in the ruoters2.conf to
+   set the default language to xx.  This can be done globally or on a per-user
+   basis.  Individual users can also set a language in their Preferences.
+
+------------------------------------------------------------------------------
+Q. How do I create a new language pack?
+
+A. Download the lang_en.conf template language pack (English UK) from the
+   website.  You can then change the various icons and messages in the conf
+   file.
+
+   When yuo have finished, email the pack back to me, so that it can be
+   included in the next release of the language pack?
+------------------------------------------------------------------------------
+Q. How can I run my MRTG installation seamlessly over multiple servers?
+
+A. First, install MRTG, RRDTool, your web server and routers2 on all the
+   servers, and make sure that they work.
+
+   Next, split your MRTG .cfg files between the different servers.  On all
+   servers, keep the same subdirectories.  So, for example, on server A
+   you might have 
+	a1/foo.cfg, a1/bar.cfg, a2/fish.cfg
+   and on server B you can have
+        b1/cheese.cfg
+   Check that these are all working correctly in isolation.
+
+   Now, you need to make the links between the servers.  On each server, 
+   create cfg files corresponding to the cfg files on the other servers, which
+   should contain the line
+        routers.cgi*Redirect: http://otherserver/cgi-bin/routers2.cgi
+   to specify the routers.cgi URL on the server which holds the real cfg file.
+   You can also inclide routers.cgi*Icon: and routers.cgi*ShortDesc: if you
+   want, but nothing else will be used.
+
+   So, in the above example, you would need to create b1/cheese.cfg on server A
+   which would specify http://B/cgi-bin/routers2.cgi and then create a1/foo.cfg
+   a1/bar.cfg and a2/fish.cfg on server B which should point to server A.
+
+   The Devices menus on both servers should now look the same, except that 
+   the links will sometimes redirect you between servers.  
+
+   WARNING: Make sure that you have the same routers2.conf file on all servers!
+   WARNING: Do not create a circular redirect.  This is a Bad Thing.
+
+   There is an alternative way to achieve this - use rrdcached.
+   If you have MRTG 2.17.2 or later, and RRDTool 1.4.trunk or later, you 
+   can run MRTG over rrdcached.  You can then have Routers2 also work with
+   rrdcached, from a different host, although this disables the 'rrd archive' 
+   feature.  It still works with the 'extendedtime=full' extended RRAs though.
+   You need the latest RRDTool because only then does rrdcached support remote
+   info and create requests which are required by MRTG.
+------------------------------------------------------------------------------
+Q. How do I get multi-level grouping in the Devices menu?
+
+A. First, enable grouping: 'group = yes' in the routers2.conf
+   Then, enable this with the 'multilevel = yes' directive in the
+   [routers.cgi] section of your routers2.conf
+   Next, make sure the [targetnames] for each of your defined groups is named
+   in this fashion:
+	/path/to/files = Groupname:Groupname
+   This will spearate group heirachies according the the COLON in the group
+   descriptions. THE PATH IS IRRELEVANT IN DEFINING GROUP HEIRACHIES.
+
+   You can redefine the separator character (by default, a colon ':') by 
+   using the 'groupsep = x' directive to set it to x.  Therefore, if you set
+   it to the path separator character, you can have the simple group path
+   name as the group description -- you may wish this if you have not already
+   redefined the group names in the [targetnames] section.
+------------------------------------------------------------------------------
+Q. How do I make routers2 work with stylesheets?
+
+A. You need to put the line
+	stylesheet = /rrdicons/routers2.css
+   into the [routers.cgi] section of the routers2.conf file.  This should 
+   already be there, but commented out.  Alternatively, use your own css
+   file, based on the supplied one.
+------------------------------------------------------------------------------
+Q. How do I get the actual data values in the time popup?
+
+A. You need to put the following lines in the routers2.conf:
+        javascript = yes
+        actuals = yes
+   The first enables javascript (and the time popup), the second puts the 
+   actual data in there.  Note that the actual data is only shown on normal
+   graphs, not on userdefined graphs or summary pages.
+------------------------------------------------------------------------------
+Q. How do I set option on the autogenerates Summary page?
+
+A. routers.cgi*Summary: options...
+
+   However, only two options are available: 'active' and 'nodetails'.
+------------------------------------------------------------------------------
+Q. How do I use extendedtime=full and the date selector popup?
+
+A. This method of archiving uses a single RRD file per Target that has a
+   lot more rows, instead of archived copies of RRD files.
+
+   To use, this, place 'extendedtime=full' in your routers2.conf.
+
+   You should disable any use of rrd-archive.pl as this will no longer be
+   required.
+
+   Next, you should set your default MRTG config files to have RRDRowCount[_]
+   set to an appropriately large number, covering the number of days you wish
+   to archive.
+
+   If you previously used rrd-archive, you need to merge your existing .rrd 
+   files with the archives.  Use the extras/rrdmerge.pl script to achieve
+   this, which should result in a single, much larger RRD file.
+
+   Now, you should get a date selector popup to pick historical dates; it 
+   will grey out dates for which there are no data at the requested resolution.
+   
+------------------------------------------------------------------------------

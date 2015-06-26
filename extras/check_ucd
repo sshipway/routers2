@@ -1,0 +1,87 @@
+#!/usr/bin/perl -w
+#
+# check_ucd : pull results from a UCD SNMPD extension
+#
+# usage: check_ucd -H hostname -C community -t timeout -d -v modulename
+#
+
+use strict;
+use Net::SNMP;
+use Getopt::Std;
+use vars qw/$opt_h $opt_H $opt_C $opt_t $opt_v $opt_d $opt_M/;
+
+my($UCD) = "1.3.6.1.4.1.2021.8.1";
+
+my($HOSTNAME,$COMMUNITY,$MODULE) = ('localhost','public','');
+my($TIMEOUT) = 10;
+my($DEBUG) = 0;
+my($STATUS,$MESSAGE) = (3,"Unable to check plugin");
+my($V) = "";
+my($W) = "";
+my($snmp,$snmperr,$resp);
+my($instance) = -1;
+my($oid);
+
+sub dohelp {
+	print "Usage: check_ucd -d -M -H host -C community [-t timeout] -v module\n";
+}
+
+# Process the arguments
+getopts('H:C:t:v:dhM');
+if($opt_h) { dohelp(); exit(0); }
+$TIMEOUT   = $opt_t if($opt_t);
+$COMMUNITY = $opt_C if($opt_C);
+$HOSTNAME  = $opt_H if($opt_H);
+$MODULE    = $opt_v if($opt_v);
+$DEBUG = 1 if($opt_d);
+if($opt_h) { dohelp; exit 3; }
+
+if(!$MODULE) { print "No module name specified!\n"; exit 3; }
+
+# Open the SNMP connection
+($snmp,$snmperr) = Net::SNMP->session( -hostname=>$HOSTNAME,
+        -community=>$COMMUNITY, -timeout=>$TIMEOUT );
+if($snmperr) { print "Error: $snmperr\n"; exit 3; }
+
+# Now, we want to avoid running plugins where not necessary, so we just query
+# the plugin name until we find a match, or no response.
+$resp = $snmp->get_table( -baseoid=>"$UCD.2" );
+if(!$resp) { print "Error: Not a UCD SNMP daemon, or else no extensions defined.\n"; exit 3; }
+foreach $oid ( keys %$resp ) {
+	print "Module ".$resp->{$oid}." found...\n" if($DEBUG);
+	if($resp->{$oid} eq $MODULE) {
+		$instance=$1 if( $oid =~ /\.(\d+)$/ );
+		last;
+	}
+}
+if($instance<1) {
+	print "The $MODULE module is not present on $HOSTNAME\n";
+	exit 3;
+}
+
+# Now we know the module number, we can pull out the return code and text.
+# This will cause the module to be run, and so might time out.  Also, it 
+# will be run at most 1 time every 30s (the output is cached)
+print "Calling the module...\n" if($DEBUG);
+$resp = $snmp->get_request( -varbindlist=>[ "$UCD.100.$instance", "$UCD.101.$instance" ] );
+if(!$resp) {
+	print "Plugin error: ".$snmp->errmsg()."\n";
+	exit 3;
+}
+$STATUS = $resp->{"$UCD.100.$instance"};
+$MESSAGE = $resp->{"$UCD.101.$instance"};
+$STATUS = 3 if(!defined $STATUS);
+$MESSAGE = "(No output)" if(!$MESSAGE);
+
+if( $opt_M ) {
+	($V,$W) = ($1,$2) 
+		if(!$STATUS and $MESSAGE =~ /(\d+\.?\d*)[^\d]*(\d+\.?\d*)?/ );
+	$V = "U" if($STATUS or ($V eq ""));
+	$W = "U" if($STATUS or (!defined $W) or ($W eq ""));
+	print "$V\n$W\n";
+	print "\n$MESSAGE\n";
+} else {
+	print "$MESSAGE\n";
+	exit $STATUS;
+}
+exit 0;

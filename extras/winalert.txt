@@ -1,0 +1,19 @@
+winalert.pl
+
+Steve Shipway 2004
+
+This is a simple alerting script to use with MRTG thresholding.
+
+It requires: Perl, SAMBA, UNIX
+
+It will generate a windows popup message to the specified users/workstations 
+using NetBios name.
+
+You can call it directly, or use it in the MRTG Threshold program.  If you use
+it via MRTG, then it will be passed the 4 parameters
+	router threshold value thresholddesc
+It will work out which notify group and message to use by 
+   1) using regexp matches in the .conf file
+   2) useing the 'default' message or group
+   3) predefined default message, notify noone
+

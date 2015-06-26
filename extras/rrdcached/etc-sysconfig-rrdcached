@@ -1,0 +1,28 @@
+# The rrdcached executable
+#RRDCACHED=/usr/local/rrdtool-1.4/bin/rrdcached
+# Where to store PID
+#PIDFILE=/var/tmp/rrdcached.pid
+# For TCP socket ( port 42217 )
+#SOCKET=myhostname
+# For unix domain socket
+#SOCKFILE=/var/tmp/rrdcached.sock
+#USER=mrtg
+#SGROUP=mrtg
+# Socket mode
+#SMODE=0660
+# Cache delay (seconds) for spreading out writes; default is usually OK
+#CDELAY=60
+# Update threads: can increase if queue keeps growin
+#THREADS=4
+# Default directory
+#RRDBASE=/var/rrdtool
+# Journal file for updates
+#JOURNAL=$RRDBASE/journal
+# Update window (dont cache longer than this: could increase for performance
+#WINDOW=1800
+# Dead data flushed by default after 1 hour
+
+# -O specifies no overwrite for create
+# -C hostname specifies to chain updates on to the specified host
+# -a number sets allocation unit
+#OPTIONS=""

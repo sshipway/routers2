@@ -1,0 +1,18 @@
+check_ucd
+
+This data collection plugin allows you to remotely query a server via a
+plugin to the UCD SNMP agent.  It works with Nagios plugins.
+
+On the remote host, you configure the SNMP agent by adding a line to the
+snmpd.conf file specifying the remote plugin to run (this can be a Nagios
+plugin)
+
+exec pluginname /path/to/plugin parameters
+
+Then you can call check_ucd in MRTG mode with the -M flag:
+
+Target[xxxx]: `check_ucd -M -C community -H hostname -v pluginname`
+
+Provided the plugin returns zero status, the first number in the text output 
+will be extracted and used for the output.
+

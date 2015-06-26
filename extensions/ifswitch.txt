@@ -1,0 +1,43 @@
+Name:
+ifswitch.cgi
+
+Author:
+Brian Dietz 
+brian.dietz@caremark.com
+
+Requires:
+ Net::Telnet::Cisco 
+
+Example:
+routers.cgi*Extension[targetname]: "Show port counters" /cgi-bin/ifswitch.cgi camera2-sm.gif
+
+Description:
+
+This script will log into a Cisco switch run the command "show port counters"
+and display the relevant information. I've removed all of the xxxx = 0 lines
+so the output will fit on the screen without scrolling.
+
+This is an Extension script for the routers.cgi program, supposed to be used
+ as a per-target extension, not a per-device extension.  Install it
+ in your cgi-bin directory, and modify your MRTG .cfg files to call it:
+
+routers.cgi*Extension[targetname]: "Show port counters" /cgi-bin/ifswitch.cgi camera2-sm.gif
+
+ See the routers.cgi documentation for more information about how to link
+ this script in to your MRTG .cfg files.
+
+Inside the script, you must modify the password and enablepass to your switch.
+
+ Remember that the SNMP community string is passed as a parameter to this
+ script, and be aware of the security implications of this.
+ You may also need to change its name (use a .pl extension for the IIS web
+ server, a .cgi extension for Apache) or alter the first line to give your
+ Perl location.
+
+ You must have the Net::Telnet::Cisco perl module installed for this to work.
+
+Brian Dietz 
+brian.dietz@caremark.com
+
+
+

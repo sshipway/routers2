@@ -1,0 +1,33 @@
+routers2 and Style Sheets
+-------------------------
+
+routers2 now supports stylesheets, although by default they are disabled.
+
+To enable, you need to add the line:
+
+stylesheet = /rrdicons/routers2.css
+
+into the [routers.cgi] section of the routers2.conf file.  This is commented
+out normally.
+
+Note that any colour settings you add in the routers2.conf (eg: fgcolour) will
+override the settings in the stylesheet.  Similarly, any Background[] directive
+in a MRTG .cfg file will take precedent over everything.
+
+You can use the stylesheet to set default colours etc for different page types
+and different target types.
+
+There is also a section in the stylesheet for printing, which will hide the
+various options and icons when printing a web page, so you just get the image,
+the text, and the footer.  You may wish to alter this, although usually people
+aren't interested in printing out the control buttons.
+
+The supplied stylesheet is optimised for sans-serif fonts under MSIE, but is
+also tested under Firefox.  Classes and divisions are defined for most screen
+sections to help with customisation, however due to the need for backwards
+compatibiilty and PDA compatibility there is still use of the B and I tags.
+
+The trending plugin also supports stylesheets, although none of the others have
+been extended in this way as yet.
+
+Steve

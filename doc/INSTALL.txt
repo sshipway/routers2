@@ -1,0 +1,110 @@
+Installation Instructions for Windows Users
+-------------------------------------------
+
+This is a step-by-step guide for windows users (NT, 2000, XP) in order to 
+install and use this software.  You are expected to have a certain level
+of Systems Administration knowledge!
+
+
+1. Prerequisite software.
+
+In order to use routers.cgi, you must first install certain prerequisite
+software.  Make sure all of these are installed before continuing to step 2.
+
+1.1. A web server
+
+You can install IIS from your server disk, or, if you are not using the server
+version of the operating system, then download the Windows version of Apache
+web server from http://www.apache.org/
+This comes with it's own installation instructions.
+
+Check your web server is up and running correctly, and displaying its default
+page to your browser.  If using Apache, make sure you have mod_expires
+installed (you probably have, it is the default).
+
+1.2. ActivePerl
+
+Download and install ActivePerl from the http://www.activestate.com/ web site.
+Remember to also configure the .pl extension to be associated with the perl.exe
+executable, and configure your web server to support Perl CGI scripts.  The
+ActiveState site has full instructions for how to do this.
+
+You should be able to test your perl installation.  Put the following line
+into a file called 'test.pl' and try to run it.
+
+	print "Hello, world \n";
+
+1.3. MRTG and RRDTool
+
+These can be downloaded from Tobi's sites at http://www.mrtg.org/ and
+http://www.rrdtool.org/
+Make sure you install the RRDTool Perl libraries correctly, instructions for
+this are included with the RRDTool documentation.
+
+1.4. Perl GD libraries
+
+These can be installed via the ppm package manager.  Use the command
+   ppm install GD
+and they will be downloaded and installed.  If you use a proxy server for 
+internet access then you will first need to set the proxy environment
+variables - see the PPM documentation.
+
+If you have problems at this step, then do not worry - you can always disable 
+the 'compact summary' option of routers.cgi and the GD libraries will not
+be required.
+
+2. Configure MRTG
+
+Full documentation for this step is available with the MRTG documentation.
+You should always have the line
+	Logformat: rrdtool
+in your configuration files, to make the system use RRDTool format logs. Also,
+routers.cgi works better when you have one configuration file per device, 
+although you can subsequently call them for update via a dummy file that uses
+the Include: directive to include all the sub-files.
+I would suggest that you place your MRTG .cfg files in a separate  folder, or
+folders, for neatness.  If you have a lot of files and wish to use grouping,
+then place them in different subfolders of the main folder.
+
+Once you have set up your MRTG files, run MRTG for a few minutes to create the
+rrd files and initially update them.  This also verifies your MRTG file
+configuration before you move on to configure the routers.cgi frontend.
+
+Verify that you have your .rrd files created, and that there were no errors
+when running MRTG.
+
+3. Install routers.cgi
+
+To install routers.cgi, first unpack the archive (you have probably already 
+done this) using software such as WinZip from http://www.winzip.com/
+
+Next, run the installation script
+	perl install.pl
+and this should take care of the installation, provided you have installed
+the prerequisite software in the usual place.  If not, you may have to tell
+the install script where to find the various parts of your system,
+
+Take note of any extra messages you receive while installing and at the end, 
+as these may give you extra instructions.  Particularly, Apache users will
+have to set some expiry options, and all users will probably want to check
+the permissions on created directories.
+
+4. Test the web interface
+
+Do this from a web browser.  Assuming your server is called 'myserver', and
+you have the default web server configuration, then you should be able to 
+give your browser the URL
+	http://myserver/cgi-bin/routers2.pl
+and you will see the menu page with the graph of your first target.  The graph
+will probably be all grey at the moment, since the data has not yet been 
+collected.  If you receive an error message about 'rrd file not found' then
+you probably have not yet run MRTG successfully to create the rrd database.
+The PROBLEMS file has a lot of extra help to track down any problems you have
+at this stage.
+
+You may also wish to look at the page on
+	http://myserver/cgi-bin/routers2.pl?page=verify
+which will run some extra tests on your configuration - provided, of course,
+that you have the web server installed and configured correctly!
+
+------------------------------------------------------------------------------

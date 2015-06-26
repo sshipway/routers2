@@ -1,0 +1,1507 @@
+# Changes file 
+
++ Enhancement (Suggesting person in brackets)
+! Bugfix (Notifying person in brackets)
+= Contrib (Contributing person in brackets)
+* Announcements and notes
+
+The MRTG/RRD/Routers2 book can be obtained from Lulu.com in physical or
+digital format.  See here for more details:
+http://www.steveshipway.org/book/
+
+Thanks to everyone mentioned below who has helped with either suggestions,
+bug reports, or gifts!  People sending gifts get listed in the online help
+as well... 
+http://www.steveshipway.org/software/wishlist.html
+http://www.amazon.co.uk/exec/obidos/registry/3S0PX0NTU8KDC
+Search the Amazon.co.uk wishlists for 'Steve Shipway'!  Send me an Amazon gift
+token if you'd just like to send $ (or if your purchase order system balks)
+
+Contact: steve@steveshipway.org
+Support forum: see http://www.steveshipway.org/forum
+Mailing list: see http://www.steveshipway.org/software
+Last chance contact: s.shipway@auckland.ac.nz (Working as UNIX support)
+Please do not telephone me directly, unless you want to offer me lots of money.
+##############################################################################.
+
+v2.23 11/4/14
++ Different rrd-archiving mode -- hash -- to allow better filesystem management
+  when thousands of Targets (though this is likely superceeded by the new
+  extendedtime=full archiving method)
++ New directive in routers2.conf : archive-mode
+! mrtg-pnsclient.pl fixed to work with NC_Net (no chained queries)
++ (Tage Lauritsen) Allow decimal values for MaxBytes, AbsMax, UpperLimit etc
++ Add percent=95 option in routers2.conf to configure 95th percentile to have
+  other percentages.  Should we use the percentile and xport functions in
+  rrd 1.4.x instead of doing it ourself if we detect them? Would be more 
+  efficient but require some awkward coding.
+! RRDcached support for summary pages was incorrect (not stripping path)
+! Pango layout issues caused by trailing \r if DOS format cfg files used
+  in a UNIX environment.  Trim trailing whitespace and \r.
++ Support for extendedtime=full to have popup date selector based on available
+  dates.  This uses JSCal2 which is covered by the LGPL
+  Read the license if you need to. http://dynarch.com/projects/calendar
+  To convert your existing rrd-archive format archives to an extendedtime=full
+  format single RRD file, use the rrdmerge utility in the extras directory.
++ Added symbol %INTERVAL% (rrd file interval, usually 300)
++ Added symbol %AVGINT% -- averaging interval for this graph, 300 for daily,
+  1800 for weekly, 7200 for monthly, 24*3600 for yearly.
++ Added support for Shibboleth optional authentication (see documentation)
++ Process [user-NONE] section if no user is logged in.
+! The 'integer' option was not observed when making jscript popup values
++ Added routers.cgi*Comment[] directive to add text under legend (vars allowed)
+! Fixed so unscaled[] option works on summary graphs, and on 'yesterday', 'last
+  week' etc historic graphs.
+! Fixed 'max' line on mirror graphs to appear below as well as above.
+^Beta1 8/1/13
+! Fix problem with background shading not handling when y-axis can be <0
+! Highlight zero axis if y goes <0.
+! Fixes for Refresh in http-equiv header in some cases (when replacement 
+  charset is specified)
+= (Doug Rorem, USA) Thanks for the book!
+= (Andrew Turner) Thanks for the book!
+^Beta2 13/6/13
+! (RoLO) routers.cgi*Summary: was not allowing 'nodetails' to be set.
+! (Stefano Birmani) PageTop was not working for userdefined graphs; and the
+  withpagetop/foot options only worked on summary pages, not graph pages
++ New routers.cgi*SortBy[] to order userdefined components.  Can be set to
+  either of: name, average, max (default is in order of definition).  Can
+  also prefix with 'rev' (eg: revaverage) to do sort in reverse
+! (Stefano Birmani) Fix JSCal2 install error in install.pl
+! (Stefano Birmani) RRDs was not loaded in time if in extendedtime=full and
+  not in caching mode.
+^Beta3 12/7/13
+! Some fixes to rrd-archive.pl
+! Fixes to mrtg-pnsclient.c to handle COUNTER types with NSClient++ and
+  backwards compatibility
++ Added rrdmerge utilty script for migrating from rrd-archive to extendedtime
+! (Stefano Birmani) Directory[] did not allow optional routers.cgi* prefix
+! (Dan Lukes) Fix checkagent and mrtg-nrpe.pl for compatibility with more
+  recent versions of Perl/SSLeay
++ Allow routers2.cgi*Include: directive, which does not fail on not found
+  like the MRTG form does.
+! New workaround for current-is-unknown race condition (requires rrd 1.2+)
+! Fix rescale option for mirror mode graphs
+^Beta4 8/11/13
++ Add support for Kilo[] MRTG directive, at last.
+^Beta5 10/11/13
+! The routers.cgi* prefix was not optional on Kilo or Kmg!
++ Make MAX RRA use reduce=MAX if RRDtool ver>1.4 for more accuracy
++ Fix CSS to use scrollbars if summary detail box is unreasonably tall
+! Allow routers.cgi*HRule to have negative numbers
+! Correct formatting for negative numbers
+! Fix formatting in legends of userdefineds so that columns line up
+! rrdmerge: fix problem with missing DS detection, add --version and --libpath
+  also correct options parsing issues with -d being --ds and not --debug
+! Slight offset position issue for actuals popup if RRDTool 1.4+
+
+v2.22 20/5/11
+! Popup actuals gave wrong suffix for value <1
+! tzset was not being called after restoring saved timezones.  Oops.
++ Add support for rrdcached via env var, cfg file directive, or routers2.conf
++ Add auto flush of rrdcached cache if necessary
++ Add tests for RRD version and rrdcached settings in verify page
++ Automatic detection of speedycgi, fastcgi, mod_perl
++ Add thumbnail mode graphs with gstyle=A or gstyle=B.  This requires RRD1.4
+  as it uses the no-axis option.
++ Full support for experimental RRD 1.4.999 rrdcached/TCP allowing RRD files
+  to exist on remote server.  Note that this kills off RRD Archiving though as
+  there is no way to remotely detect the archives.
+^Beta1 10/8/10
++ Proper wildcard support for Include: (to match MRTG 2.17)
+! (Lyle Giese) square brackets could not be in routers2.conf data
+! trend.cgi would not work with RRD caching daemon.  Still doesnt work, but
+  now disables env var if set
+! trend.cgi did not support libadd directive correctly.
+! Type 6s was missing.
++ Allow 'routers.cgi*HRule[]: value "desc" #xxxxxx' to specify a colour
+
+v2.21 6/8/10
+! Popup javascript was not suppressed when in a /p/ style.  This broke the
+  pdfreport.cgi PDF conversion as the script tag was too large.
+! Added 'nomenu' option to routers2 call from pdfreport.cgi
+! Javascript test so no errors if graph pane used standalone with IE
+= (Matthew Elmore) Thanks for the book!
+= (Timothy Graham) Thanks for the book!
+! CSV export for 'dorelpercent' Targets was missing columns
++ Allow %EXEC(command)% in variable expansion. DANGER!  Must enable with
+  allow-execs = yes in routers2.conf (BETA)
+! %COMMUNITY% and %HOSTNAME% use device-level values if interface-level values
+  are not defined or are unavailable.
++ Initial checks for %OID()% ready for expansion (Not supported)
+= 250 Book sales so far!  Thankyou for your support...
+! Fix for mrtg-nrpe.pl where line starts with a number
+^Beta1 12/11/9
++ Add %OID()% symbol expansion: Watch out for performance issues!
+= (Fernando Feijo) Thanks for the DVDs!
+! %IPADDRESS% symbol was not working correctly at interface level
+! (Eric Brander) Factor[] was not being applied to thresholds
++ New extended option 'nothresholds': Suppress threshold lines on graph
++ New gaugexml3.cgi to work with Slickboard ( www.maani.us ) to make
+  animated dashboard gauges for MRTG/Routers2 Targets.
+= 300 Book sales so far! Thankyou for your support...
++ Add "percentile" extended option (reverse of "nopercentile") and allow it
+  to override "percentile=no" in the routers2.conf
+! Percentile was being calculated even if not required due to nopercentile 
+^Beta 2 15/7/10
+! Data CSV export should multiply by Factor[] before export
+! CSV export increased to 4dp from previous 1dp
+
+v2.20 24/7/9
+* v2.20 dedicated to the memory of my father, Jolyon Shipway, 1938-2009
++ Some additional documentation in README
++ Add caching mode to C version of mrtg-nrpe
+! Fix offset bug in mrtg-nrpe that put offset=0 for first cmd if 2nd given
+! Fix problem with 'active' option when no subtargets are active...
+^Beta1 18/11/08
+! Fix pdfreport.cgi so that it works with v2.19 and later (HTTP header parse
+  problem reported by ramu_dodda)
++ Allow pdfreport.cgi to work as Target-level extension as well as device-level
+! Extensions on user-defined graphs needed '_' prefix, now autoadded.
+! 'Active' checks on userdefined graphs within summaries now done correctly
+  (although not necessarily how you'd prefer it to be)
++ Can now format milli-items (IE 1,000ths) in actuals popup
+^Beta2 23/12/08
++ (Marco Chiavacci) MySQL authentication module added
+! Fixed edge-of-window detection for javascript popup with horiz. scroll
++ New symbol: %LASTUPDATEH% - human-readable last update time
++ Titles of graph type displayed when in 'All Graphs' display type.
++ Symbols can now be used in Extension link labels (and Link as well)
++ New symbols: CFGFILE, STYLENAME, TYPENAME
+! Slight adjustment to layout in Compact graph display type
++ User-defined symbols via routers.cgi*SetSymbol
++ Graph style 'lines' to show as 2 lines instead of line+area
+! Fix pdfreport to work with archived RRDs
++ Add 'dwmy=' param to pdfreport to allow short or long term reports with
+  &dwmy=dw or &dwmy=my added to the URL when defining the Extension
++ Add new symbols: CMSYSTEM CMDESC CMCONTACT CMLOCATION CMIDESC for info
+  parsed from config files generated by cfgmaker.  Unreliable but requested.
+= (Fernando Feijo) Thanks for the DVDs!
++ Set max title length to 128chr, configurable via maxtitle=xxx in the
+  routers2.conf file.  Avoids crash with excessive title lengths.
++ Add altygrid=y option in routers2.conf
+! Last Update time now uses 'longdate' format instead of server locale format
+  so it can be internationalised correctly
+! Graph type 6dwmy is also named 'All Graphs'
++ More documentation for MySQL checks, better error responses
+= (Gil Obradors) Catalan translation language pack
+^Beta 3 3/2/09
+! Bug affecting execution with speedycgi and some versions of perl
++ 'nodetails' can now apply to normal graphs as well as userdefined
+! 'nolegend' on normal graph did not hide the details, only the colour key
+! 'nolegend' on normal graphs did not correctly hide peak line colour keys
+^Beta 4 5/2/09
++ New symbol: %ENV(xxx)% adds environment variable xxx contents
++ New symbol: %INCLUDE(xxx)% adds contents of file xxx (processed before all
+  other symbols, so file can contain symbols as well)
+! Last update was not setting longdate format correctly because...
+! POSIX module was being loaded twice and failing
+! Default units labels were setting bits/bytes incorrectly, or using Bps when
+  it should have used bps.  Went wrong in v2.19 apparently.  Fixed now.
+! Symbol CMIDESC was not replacing if not defined
+! Overlong titles of component targets prevented in userdefined graphs
+^Beta 5 24/2/9
+! Legend formatting bug in userdefined graph if some but not all the component
+  targets have noo and userdefined does not.
++ Added %GRAPHURL%, %IFNO%, %MAXBYTES% symbols
++ Added support for logscale option
++ Added routers.cgi*Ylegend2[] to set secondary Y legends (required RRD 1.3.x)
++ Added routers.cgi*ScaleShift[] to set scale shift for secondary axis 
+  (requires RRD 1.3.x) param: scale:shift  EXPERIMENTAL
++ Added version watermark at bottom of graph if using RRD 1.3.x
++ Added routers2.conf file option 'pango=yes' to enable Pango markup in graph
+  labels (Requires RRD 1.3.x)
+! (Andrew Radke) Error in withpeak/CF sanity test code
+= (Jonathan Ashton) Thanks for the book!
+= (Jim Avery) Thanks for the DVDs!
++ SecondScale now works on userdefined graphs, use the 'altscale' extended
+  option to indicate if components are wholly on second scale or in/out split
+  this is VERY BETA! 
+! nodetails/nolegend should also suppres percentile/total calcs at bottom
+! ifsort was not correctly sorting items where both were not in menu 
++ routers.cgi*ShortLegend2[] added for SecondScale mode but still EXPERIMENTAL
+! SetSymbol now allows single quotes as well as double on the symbol value
++ Updated documentation for new symbols in MRTG_INFO
+! c2fi and c2fo were only working on userdefineds, not in normal graphs
+! scaleshift had ops in reverse for undoing - so shift didn't work
+^Beta6 23/6/9
+* Tested under RRDTool 1.3.8, MRTG 2.16.2
+= (Dave Diamond) Thanks for the DVD box set!
+= (Ciaran Anscomb) Use stylesheets for Compact bars if available
+
+v2.19 23/10/08
+! Userdefined graphs can now work if stack and mirror both set.  Really.
+! Slightly better AI in determining default unit labels (bits/bytes)
+! Bytes/sec now abbreviated to Bps and bits/sec to bps
+! YES! Finally fixed the IE mouse popup in scrolled window position problem!
++ UnScaled[] can now take option 'n' as in MRTG specification
+! Correct parsing of SetEnv to allow quotes
+! Incorrect checks for RRD existance when userdefined graphs fixed
+! -C option was still outputting HTML headers in some cases
++ %RRD% added to symbol replacement list
+! Code workaround for RRDs v1.3.0 bug
++ Improve formatting in actuals popup
+! Fix trend.cgi bugs
+! Correct ifstatus comments
+^Beta1 Aug 08
+! Fix actuals popup if dorelpercent or aspercent options active
++ exportcsv now also outputs raw data if in dorelpercent mode 
+! Make dorelpercent work in compact summary pages
+! Fix multilevel grouping bug under Windows
+! 2-pixel x-offset position error for actuals popup under RRD 1.2.x
++ Allow the 'maximum' extended option to work with normal graphs as
+  well as with userdefined graphs.  Should imply withpeak=n though.
+! 'reverse' mode did not also reverse the value in the actuals popup
+* Added link for buying the Book in the information screen.
++ Add C versions of the mrtg-nrpe and mrtg-pnsclient data collection plugins
+
+v2.18 9/6/8
+! Fixes to install.pl (was overwriting .css file and icons)
+! Added correct attribution of the overlib code to Eric Bosrup
++ Added extra symbols for head/foot - %COMMUNITY% and %HOSTNAME%
++ Changed installation default options - withdate, legendunits, size=l2
+! Make Average of Average report more sensibly in userdefined graphs with
+  some of the values in greyout (unknown, without unknasprev or unknaszero)
+! Added extra colours to default if Colour[] stanza unparseable
++ More support for ifdefault=cfgmaker option with new cfgmaker formats
+= (Peter Hall) Thanks for sending me DVDs!
+= (Casey Scott) Thanks for sending me DVDs!
++ Added persistent caching between invocations (routerscache only).  This will
+  help even if you dont use mod_perl or speedycgi.  Must be enabled with
+  cachepath=/path/to/tmp/workspace and cache=yes
+! Fixed bug with mod_perl not checking for new archives in cache mode
++ Added doc/PERFORMANCE file for hints in improving performance.
+! Device menu had problems with uninitialised group name if multilevel groups
+  enabled on first run of caching invocation.
++ Popup can now contain actual data values, default disabled (actuals = yes)
+= (Steve Litchfield) Thanks for sending me some DVDs!
+^Beta2 3/5/7
+! Corrected minor caching bug for archive dates
+! Identifying archive date from .rrd file was using last file modify date, 
+  which could be wildly inaccurate.  Now uses 23:59 on archive date.
+= (Rodrigo Schneider) Thanks for sending me a DVD!
+! Workaround for IIS buggy pathinfo implementation: disable pathinfo support
+  if Windows and IIS are detected!
+= (Christopher Noyes) Thanks for the DVD box set!
+! Bug in data popup with using 't' (stretch) graph style. 
++ Added D and H graph style modifiers to display wider dataset. 
+  Also 'y' graph style for even wider than 'x'.  More combinations possible.
+! Sometimes colours could not be specified with capital letters?
+! (Frank Pena) Threshold percentages were not done correctly in default target
+= (GroundWork Open Systems) Thanks for the DVD set!
+! Fix for 1-min interval instead of 5-min when calculating last update step
++ More paranoia: if paranoia=yes set, then error messages and verify page
+  are hidden to protect sensitive information
+^Beta4 21/9/7
+= (Ask.com) Thanks for the DVDs!
+= (Andrew Lewis) Thanks for the DVDs!
+= (Yuriy Vlasov) Thanks for the DVD!
+= (Scott Neader) Thanks for the DVD voucher!
+! Fix for default group names so it works with groupsep=/ and multilevel=y
+^Beta5 28/12/7
+= (Pili in Spain) Thanks for the DVD!
+! Make routers.cgi*options[]:nomax imply routers.cgi*options[]:nopercent
+! Fix stylesheet to remove bottom margin on forms
++ New option: nodesc (hides Target title headings in userdefined graphs)
++ New option: nogroup (makes one userdefined total/average for all values
+  instead of one for in, one for out)
+! It doesnt make sense to have percentage if you have nomax set
+! Allow Interval to be a decimal or min:sec
+
+v2.17 5/12/6
+! (keithj) Corrected display of AbsMax value in summary page to 2dp, not 0dp
++ Userdefined graphs now have links to sub-graphs under the main graph
+= (Marcel Wiget) Thanks for sending me many DVDs!
+! problems with mirror not working (working day highlights, stacking)
+! when in mirror mode, in/out colours should be the same.
+! mirror mode was incorrectly putting legend into small graphs
++ Added VMWare data collector (beta)
++ Further corrections to text display in mirror mode.
+^Beta 1
++ Added 'T' prefix for dealing with terabyte totals
+! Correct version number for adding --force-hrule option
++ Added routers.cgi*HRule[] directive.
+! AI was incorrectly seeing 'port' in 'support' and thinking it was an interface
+! allow a gtype of ds,ws,ms or ys for small popup graphs with no legend
+! routers.cgi*Link[] would not work with userdefineds
+! userdefineds without a Max would fail if withpercent was set
++ Added time popup javascript on graph image
++ Added graphtype option to routers2.conf for default graph type
++ Confirmed rrdtool 1.2 compatibility.  Different graph proportions for popup.
+! Corrected some of the documentation
+! (atanur) nomenu option was incorrectly not being propagated to buttons
+= (Steve McDonald) Thanks for sending me a DVD!
+= (Innokentiy Georgievskiy) Thanks for sending me a DVD!
++ Added 'nolines' option to userdefined graphs (beta)
+= (Ruedi Kehl) Thanks for sending me a DVD!
+! Bug in javascript for graph time popup
++ New 'slope=y' option for routers2.conf to have smooth slopes
+^Beta 2
+! libadd and LibAdd: now add to front of @INC not to end (for multiple versions)
+! Time report to give actual CPU seconds used, if available
+! RRD 1.2 version number reporting, and load module early if required for 1.2
+! Report load average, if available
++ New options in routers2.conf - authfgcolour, authbgcolour for login pages
++ New option in routers2.conf - paranoia - will hide more info on pages
++ (Xavier Beaudouin) Enhancements for buildwan and cfgmaker_host
+! (Scott Neader) The missing zoomin icon for the SRG icon set.
++ Add extra output for CSV export if aspercent option set
+= (Jan Skovsgaard) Danish language pack (text only)
++ New extras: scripts to obtain data for mrtg from apache, ESX, Foundry swtches
++ New extras: updated vmware_monitor
++ Directory of optional favicons for your use
+^Beta 3
+= (Saul Herbert/Hugh David, ADV Films) Thanks for the DVDs! 
+  (Whole box set... mmm, Azumangary anime goodness)
++ CSS support included: Use stylesheet option in routers2.conf
++ If using stylesheets, then when printing icons and links are hidden
++ Added stylesheet support to trend.cgi as well
++ install script now also installs .css file into rrdicons directory
+^Beta 4
+! Yet another attempt to get around the current=0 race condition.
+= (Harry Edmondson) Thanks for sending me a DVD!
++ overridelegend option for userdefined graphs with components who have the
+  same legendi or legendo
+! Missing TR opening tag sometimes in summary pages
+! Attempt to identify IIS CGI myurl bug and work around it, if your browser can
+! Correct time window for 'Last day/week/month/year' if uselastupdate set, or
+  viewing an archived rrd
+! (Herman Poon) Time popup was not working correctly on summary page
+! (Herman Poon) Lazy mode was causing stats on summary page to disappear
++ New option: maximum makes userdefined graph show maximum values, not averages.
++ New option for userdefined graph/summary: active suppresses any targets
+  which have had no activity in the time window (ie, MAX=0).
+! Using page=image did not work correctly for archived graphs
+* Updated Amazon wishlist to remove items that can't be shipped to a wishlist
+  address.  How about visiting amazon.co.uk and searching for Steve Shipway's
+  wishlist, and sending me a thankyou present?
+! Some documentation changes
+^Beta 5 1/8/6
++ Command line: -I (image mode), -a (specify archive date)
+! Verification page didn't work if .cfg file had userdefined graphs in it
+! Some corrections to table tags in summary page if nodetails and/or errors
++ New options 'withpagetop' 'withpagefoot' for user-defined summaries to add
+  pagetop/foot defs from sub-graphs to the page
++ A bit more diagnostics for GD on verify page (canGIF, canPNG, version)
+! routers.cgi*Redirect did not work if cross-site scripting disabled
++ A bit more optimisation in menu refresh code (don't refresh devices menu if
+  only the target has changed)
++ Spot when cfg files have been changed, and re-read them 
++ Cache the list of archive date, and spot when it changes (dir modify times)
+! Fixed bug in date caching routines (it wasn't caching at all any more...)
+! Archived graphs were not acting correctly if data was not available
++ Added %STYLE% %TYPE% %LASTUPDATE% %ARCHDATE% to symbols that can be in the
+  pagetop or pagefoot
+^Beta 6
++ Added unknasprev option (like unknaszero but uses previous value instead of 0)
+  This gives graphs like native MRTG (horiz line fill-in when data unknown)
+! Oops, routers2 didn't support RRD <1.0.39.  Now it does again.
+! Greyout problem if unknazero or unknasprev on userdefineds fixed
+! Fix pdfreport.cgi extension plugin to work with latest htmldoc utility (1.9)
+! Yet more attempts to fix the trailing-unknown race condition.
++ Add -U option to pass a username when running from command line
++ Added '6hour=always' option to show 6hour graph even if RRD is wrong interval
+= (Carlos Velasco) Spanish language pack for routers2!
+! isactive code was not checking far enough back
+! T prefix value was not getting correctly set.
+!! Security problem in username identification
+^Beta 7 8/9/6
+! (Holger Steppke) A couple of checks for config var existence missed out
+! Problem with time popup if target, browser, server in different timezones
++ Added URL option, noheader=1, to suppress header bar entirely.
++ Pirate-speak language pack for Talk Like A Pirate Day. Yarr, I know tis silly.
+! Problem with device-level Link: directive disappearing
+= (F Duranti) Thanks for sending me a DVD!
+! FINALLY!  Found the bug in timezone calculations - local/global var confusion
+  and javascript using different sign for offset to perl.  Grr.  Popup works!
++ Extension API now also passes the archive date, if using archived rrd, to
+  both a Link[]ed page and to a plugin (although no plugins support it yet)
++ Userdefined graphs now have check for RRD sub-file existence
++ Improve the rescale functions to rescale better (particularly when no current
+  data available)
+! Slight change to mrtg-pnsclient to help with NC_Net bug avoidance
+! unknasprev did not work correctly on userdefined graphs
+! Cosmetic minor fix to devices menu icons
++ Added CSV export to Compact page, at request of Auckland University
+! Corrected formatting in Total/Percentile table on userdefined graphs
+! Graph now bases to last 5min boundary if possible (to match RRD file and
+  prevent race conditions)
+! Fixed install script to not overwrite .css file without permission
++ Improved mrtg-nrpe.pl with caching function
+^Beta 8 10/11/6
+! Make sure userdefineds cannot inherit pagetop/pagefoot definitions
+! Fix to mrtg-pnsclient.pl for ActivePerl 5.8 compatibility
++ Change default configuration to be unscaled=no since nowadays everyone has
+  at least 100Mb networks cards and unscaled=yes is no longer wanted
+! Popup code trys to spot Americans to give m/d/y instead of d/m/y
+! Archive list trys to use shortdateformat instead of d/m/y
++ routers2.conf option: dateonlyformat ( in [web] and lang_xx.conf )
+! Timezone calcs had to be moved to global instead of graph function so they
+  were available for the time popup as well.
++ New routers.cgi*Options[] option: default.  Set this target to be the default
+  for this device, unless overridden by personal preferences.
++ Compact summary support for dorelpercent targets (experimental)
+= (Herman Poon) Thanks for sending me some DVDs!
++ Slight change to bar generation code for future flexibility
+! Allow you to remove language preferences once set (previously couldn't)
+! Compact summary had missing DIV for CSS on icons header
+! 'active' did not suppress total/percentile footers
+
+v2.16 15/11/05
+* NOTE: First attempt at multi-lanugage support!
+= There may not be any more major updates for some time due to the arrival
+  of Steve v2.0 in August - 9 months hard developing work from Meiling, now we
+  have to support the product for the next 18 years.  Just like software, eh?
+  ---
+! If ifdefault was Interface, but the only interface target had InMenu:no, then
+  it was still being selected.  Should instead go to first menu item.
++ Initial version of International multi-language support.  See doc/LANGUAGE
+! InSummary and InOut could not be overridden per-target for included file
+  targets after the Include.  Now processes special targets after all parsing
+! Angle brackets were wrong way round on Information page.  A bit ugly.
++ A bit more for MRTG Bundle upgrade support.
+! Problems with caching when using mod_perl.  Now mod_perl and speedycgi people
+  need to have cache=yes in their routers2.conf
+! Full cache mode broke RRD-archive in some cases.
++ 'routers.cgi*Redirect: url' allows frontend to be split over multiple hosts
++ (William Owen) Allow routers.cgi*Graph[] for undefined targets (implicit def)
++ Allow 'routers.cgi*Target[]' to define special targets.
+^Beta 3
+! Some changes to default handling of userdefined graphs with virtual members
+! defaultrouter=none did not work
+! allowexplore=no/if did not hide the options in the Preferences page
+^Beta 4
+! More corrections for multilanguage support
+^Beta 5
++ 95th Percentile and Total now work for userdefined graphs as well
+! Option 'total'/'nototal' slightly inconsistent between usergraphs (should add
+  a total line) and normal graphs (should total data).  Were not correctly 
+  independent.  Did not matter before because no 'total' calcs on usergraphs.
++ Basic device search function.  Disable with 'showfindbox=no'.
+! Caching caused problems if you had multiple languages in operation as once
+= (James Karimi) Thanks for sending me some DVDs!
+= (Cyrus Mohit) Thanks for sending me a DVD!
+= (Steve W) Thanks for sending me a DVD!
+= (Alan Dean) Thanks for sending me a DVD!
+= (Arnold) Thanks for sending me a DVD!
+= (Pete G LaForge) Thanks for sending me a DVD!
+! (Ralf Honert) end_html was incorrectly in the login/out pages
++ (Ralf Honert) Set focus to login field in login page
+! (Ralf Honert) The [menu] extensions are better off if sorted by key.  Changed
+  back from the previous alteration in beta1.
+! (Ralf Honert) The Information page did not correctly display IP address
+! (Vern Diaz) Thresholds did not take into account 'bits' or Factor[]
++ New 'optimise' option for routers.conf.  This speeds things up if you
+  have correctly formatted cfg files. READ THE DOCS FIRST BEFORE USING IT!
+= Icon sets now available in a separate download.  Lots of new sets from
+  Ralf Honert.  
+! Timezone handling under Windows improved
+^Beta6
+! For rrdtool>1.0.48 need to add -F option to graph call
++ New routers.cgi*LowerLimit[] option for non-zero-based graphs (beta)
+! Upper and Lower limits should multiply by bits if necessary, but not Factor
+= (Gary Christopher) Thanks to Nordstrom, Inc for sending me a book!
+= (Anon) Thanks for sending me some DVDs!
++ new directive libadd= for routers2.conf in [web] section
++ More info about archives on Verification page.
+! Odd problems with caching and RRD archiving if run simultaneously 
++ routers.cgi*Link now works at device level as well as target level
+! Userdefined summary pages will no longer add the same target multiple times
++ c2fi/o option for centigrade to farenheit conversion (for Americans!)
+  (not fully tested though)
++ EXPERIMENTAL attempt at multi-level collapsible menus. See HOWTO
++ Slight changes to trend.cgi and routers2 for RRD v1.2.x compatibility (in
+  the escaping of colons in the COMMENT directive)
+! trend.cgi was displaying 'Zero for...' messages ignoring noo and noi
+^Beta 7
+! Multilevel grouping was not working correctly if leaves at different levels
++ Install script now sets src directory for benefit of FileManager clickers.
+! (J Rubino) Old style $#{@$var} was causing problem, replace with $#$var
+! extra= parameter: section name changed to [extra-xxx] to overcome security
+  problem.
++ Added %DEVICE% %TARGET% symbol expansion in pagetop and pagefoot.
+
+v2.15
+Files changed: routers2.cgi routers2.conf trend.cgi mrtg-nrpe.sh install.pl
+  rrd-archive-clean.pl mrtg-nrpe.pl
+Files added: tonagios.* pdfreport.* altgif/ocean/* pdf-sm.gif 
+* NOTE: RRDTool v1.0.39 or later now required for full features.
+= Version 2.15 is dedicated to my recently-conceived son or daughter.  See the
+  web page for the countdown to due date! (Steve v2.0 is in production, expected
+  release date Aug'05)
+  ---
++ (Octavio Hernandez) linewidth option in routers2.conf
+! (mpdharley) Don't use PREV() in code if RRDs version < 1.0.39
++ trend.cgi now reports error if target cannot be identified
++ Support Thresholds given as percentages of MaxBytes.
+! Cached archive days lists did not rebuild descriptions, now corrected
+! Amazon have changed the URL of their wishlist pages
++ More documentation.  This really needs to be HTMLised.
+! cfgfiles list was being calculated twice, waste of time.
+!(Benoit Sebastien) routers2.conf gave directive csvmimefilename incorrectly
++ New routers.cgi*Summary summary type userdefined page.
++ Old Summary page becomes automatically defined userdefined summary page.
++ tonagios.cgi plugin for Nagios integration.
+! mrtg-nrpe parsing error corrected, -o option defaults extended
+^Beta1
+! Archiving (rrd-archive.pl) had ceased to work in some circumstances.
+! install.pl script removes trailing path separator from default RRD directory
++ pdfreport.cgi v0.1beta plugin added to make PDF output 
++ pdf-sm.gif adobe icon.
++ routers.cgi*ClearExtensions: directive to remove all device-level ext defs
+= (Gerhard Lischer) ocean icon set
+! Directory[_] now supported correctly by routers2.cgi.
+^Beta2
+! charset option now sets even more places to try and make it acceptable to 
+  different browsers
+! userdefined graphs should not take extension definitions from primary target
+^Beta 3
+! Allow Factor[] to be a negative number (but still not zero)
++ trend.cgi goes v1.0 as we finally remove XML stage and external rrdtool call
++ trend.cgi now reports more errors correctly, including missing RRDs.pm.  Also
+  verified as working correctly with Windows. (trend.cgi v1.0b3)
++ CSV export now also exports Peak data, if available, in 2 new columns
+= () rescale.gif for simple icon set.
+! Problem with graph archiving persistence when using speedycgi/mod_perl
+! rrd-archive-clean had bug that deleted base rrd file for non-archive rrds!
+! Don't display Interface IP, Name or Address in Summary if they are blank.
+! Workaround for out-of-sequence .cfg files (where Target[] is not first)
+! Sorting of the compact summary seemed to have stopped working in some cases.
+= (Robert Gibson) Thanks for sending me a DVD!
+= (Innokentiy Georievskiy) Thanks for sending me a DVD!
+= (Kirsten Johnson) Thanks for sending me a DVD!
+= (Matti Wiersmuller) Thanks for sending me a DVD!
+^Beta 4
+! (Ryan Cayton) Borderwidth of 0 was not being accepted.
+! Peaks for incoming were being shown on stack and range graphstyle.  Ugly.
++ Command line arguments supported for Archive mode: see HOWTO
+! Problem with page=image and archive= at same time not returning image
+= (Steven Hay) Thanks for sending me some DVDs!
+! trend.cgi added better checks for URL, removed unnecessary hostname stuff
++ New logourl option for changing the graphic on RHS of title bar.
++ New ifdefault option in routers.conf: 'cfgmaker': assume it was generated
+  by cfgmaker, and parse the PageTop for descriptions.
+^Beta 5
++ install.pl now checks for a MRTG-Bundle install and upgrades appropriately
+! Fixed mrtg-nrpe.pl problem with offsets.
++ mrtg-nrpe.pl now supports multiple requests for MRTG output. (two -c options)
++ Support for LogDir (location of .rrd files, overrides WorkDir)
++ trend.cgi changed to give different base options, defaulting to current value
+  rather than weighted average (as it did before)
++ Added support for dorelpercent option
++ noheader option added to tonagios.cgi for better embedding.
+^Beta 6
+! (Cristian Zanni) mrtg-pnsclient did not support , as a decimal separator.
+= (Alan Dean) Thanks for sending me a DVD!
+= (Thomas Thong) Thanks for sending me a DVD!
+= (Dan Lowry) Thanks for sending me some DVDs!
+^Beta 7
++ New directive routers.cgi*FixUnits[] to specify which exponent to fix to
++ New graph style: mirror. This places Outgoing below the X axis and incoming
+  above it. Not fully reliable yet.
+^Beta 8 and final
+
+v2.14
+Files changed: routers2.cgi trend.cgi doc/MRTG_INFO doc/HOWTO doc/ROUTERS_CONF
+  routers2.conf mrtg-nrpe mrtg-pnsclient ifrouters.cgi ifswitch.cgi
+  rrd-archive.pl rrdicons/index.html
+Files added: rescale.gif compaq-sm.gif dell-sm.gif rrd-archive-clean.pl
+  doc/SECURITY extras/winalert.pl routers2.gif altgif/jharbin/*
+* NOTE: Changes to Extension directive.  If your plugin script requires the
+  passing of the SNMP community string, you MUST add the 'insecure' keyword
+  to the end of the Extension definition.
+* NOTE: [menu] directives have changed syntax, but should be backwards 
+  compatible.
+  ---
++ More documentation in the HOWTO
+! Archive graphs sometimes showed wrong year on some POSIX::strftime versions
+! routers.cgi*Options[]: nototal for userdefined graphs did not work
+! trend.cgi fixed to work with speedycgi (v0.3)
+= (unknown) Thanks for sending me some DVDs!
+= (Mike Evans) New link icons -- compaq-sm and dell-sm
+! (Brian Dietz) Corrected Directory[] support in routers.cgi, added it 
+  to rrd-archive.pl
++ 'insecure' option to pass to Extensions to allow community string param
++ Security level number to pass to Extension/Link for access level
++ 'level = <number>' new parameter in routers2.conf to set access level
++ Restructure of extras directory
+= (Brian Dietz) New plugins -- ifrouter and ifswitch
+=!(Jean-Pierre Verrue) Created the missing arslanagic set icons
+! trend.cgi did not support Directory[] correctly (v0.4)
+! rrd-archive was not always correctly ignoring disabled targets
++ A few example templates for configuring MRTG with routers.cgi
++ rrd-archive-clean.pl to delete old archived .rrd files from rrd-archive
++ routers.cgi*Options[]:reverse to show (maxbytes - value) instead of value
++ routers.cgi*Options[]:aspercent to show (value/maxbytes)*100% instead of 
+  value, ie, to show it as a percentage of maximum.
++ Yet more detail in the documentation
++ Improvements to [menu] directives, now same as routers.cgi*Extension
+! mrtg-nrpe wrapper was returning '20' when remote agent timed out.
++ (Michael Hahn) Allow config of CSV 'comma', to cope with German bug
++ Rescale button -- gives 3 different y zooms (default, 2xAvg, Avg) to let
+  you see data with spikes.
+! Slight bug in average calculations (0.25% fencepost error)
+! cross/tick on compact screen were displayed backwards!
+= (Andrew McClure) Thanks for sending me a DVD!
++ routers.cgi*UpperLimit[] option to fix minimum graph upper limit
++ routers.cgi*Options[]:rigid for fixed graph upper limit (use with UpperLimit)
+! per-mode default background colours removed, it just causes confusion.
++ New routers2.cgi icon, RRD icon moved to page footer.
++ rrd archive menu now sorted newest first.
++ fgcolour and menufgcolour settings in the routers2.conf now available
+! More debug info in trend.cgi.  Background colour support added.
+! Internal URLs now given as path without server, in order to support servers
+  with multiple names under SSL certificates.  Extensions still passed routers
+  URL as a full and absolute.
+= (J Harbin) New grey icon set in altgif/jharbin [accidentally omitted in
+  previous version]
+[^beta 3]
+! (Ralf Honert) There was an H1/h1 typo in the code for the logout page.
+! Rescale was not being sensible when rescaling userdefined graphs
+= Two more DVDs!  Thankyou for your support...
++ Some changes to package directory structure (new dir for extensions)
+! (Luis Allegra) extension parsing was not correctly using frame name
++ Working day highlighting now on userdefined graphs as well
+! servers option was only 1/0 not y/n ('no' was taken as '1'!)
+= (Innokentiy Georgievskiy) Thanks for sending a DVD!
+! Slight bug in extension.cgi.pl example script headers
++ showcfg.cgi extension script for demo purposes.
++ Can also use routers2.cgi* as prefix in addition to routers.cgi*
+[^beta 4]
++ .cfg file Description now shown in header of Summary and Compact pages
++ doc/SECURITY file added: discussion of how to tighten routers2.cgi security
+! Fixed big security hole that allowed archiving even if it was disabled!
+[^beta 5]
++ rrd-archive now allows you to archive under yesterdays date instead of today
++ winalert.pl now uses regular expression matching for MRTG thresholddesc.
++ Show alert threshold lines on the large graphs
++ If cannot find group match in targetnames, check in all lower case.  Helps
+  Windows users with uncertain case definitions
++ 'Huge' graph now 3x vertical size
+! mrtg-nrpe was not correctly supporting arguments to check_nrpe
+! mrtg-pnsclient returned U instead of UNKNOWN when it couldnt read data.
+! Page heading now uses font size+3 instead of h1 so that it displays correctly
+  under non-IE browsers.
+! Alert threshold legends were not displaying correctly if multiple thresholds
+[^beta 6]
++ WithPeak[] is now supported
++ routers.cgi should now work with mod_perl and speedycgi with no changes
++ routers.cgi CAN cache files if in mod_perl or speedycgi mode.  This makes a
+  big speed improvement, but if you change the .cfg files you need to refresh
+  the instances!
++ More documentation for the new caching/speedycgi/mod_perl code.
++ mrtg-pnsclient now supports the -t timeout parameter.
++ devices with >25 targets will get list positioning in the Targets list as
+  well as in the Devices list (the Target list positioning was not working)
+[^beta 7]
+! Cache mode was not working correctly if different users have different 
+  cfgfiles definitions
+= (Markus Gander) new icon set
++ install script now takes care of caching option
+! mrtg-pnsclient.pl timeout only applied to connect, not to read
++ Percentage mode argument for mrtg-pnsclient
+! If legend[1234] contained a colon, they were not correctly displayed.
++ Allow userdefined graphs to be in the summary (default remains no, though)
+! Suppress percentile/total/interface-info for Userdefined graphs in summary
+! Totals in userdefineds where one param was UNKN were giving UNKN.  Should
+  treat UNKN as zero in this case.
+! Totals and averages in userdefineds were giving wrong label.
+! Summary graph labels for userdefineds now give right names.
++ Caching (for speedycgi/mod_perl) now also caches archive directory reads.
+! Suppress[] was not causing a change in default gtype if current gtype was
+  not valid for target
+! Legend[AT][IO][] could not contain colon.  Fixed.
+! UserGraph Total/Average were not using usergerph's own LegendI/O if avaiable
+! UserGraph Total/Average often showed "last=0" even when it shouldn't be
+[^beta 8]
+! Bug in Totalling code -- perminute/perhour was treated as persecond, so final
+  totals were out by a factor of 60.  Not sure when this bug was first
+  introduced.  Caught in final testing stage (phew).
+
+v2.13a
+! Problem running with rrd-archiving under NT corrected
++ More enhancements to trending analysis prototype (v0.2)
+! Correct ambiguity in install instructions
+= (Robert Gibson) Thanks for sending me a DVD!
+
+v2.13 16/12/03
+* Version 2.13 is dedicated to Meiling Kuo, my wife as of 31/8/3!
+! (Michael Heiming) Factor[] was not working for non-integer parameters
+! Corrected many URLs for new web site
+= New support forum on http://www.steveshipway.org/forum/index.php
+! Summary page did not show Wait values on CPU graphs when using server extns
+! No Target: line on summary page if null target (Server monitoring)
++ Can now click on graph in summary screen to get details
++ Now menufgcolo(u)r available as option in routers2.conf
++ Formatting changes to menu - frame width reduced.  New icon, nothing-sm.gif
+! Better sanity checking in readconf for routers2.conf parsing
+= (Matevz Turk) Thanks for sending me a DVD box set!
+= (Babul Mukherjee) Thanks for sending me a DVD!
++ install.pl now attempts to enable authentication for you (not very well!)
++ New borderwidth option in routers2.conf for frame border width
++ (Jim Harbin) Added myurl setting in routers2.conf for broken web servers
++ mrtg-pnsclient and mrtg-nrpe in extras directory for collecting stats
+  from netsaint/nagios agents, along with config examples to use them.
++ Some more icons - flags, and various others
+! (Andrew Hammond) Tests were not testing in encryption routine.
++ Allow exporting to CSV of userdefined graphs (but not in a very good way)
++ Support for rrd archives. *Experimental*! See extras/rrd-archive.pl
+! If max(outgoing)<incmoing, max outgoing line was overwritten by incoming
+  area block since lines were rendered in wrong order.
++ Added 'charset' option to [web] section of routers2.conf for multilanguage
+  character set support
++ Better error reporting when .rrd file does not exist.
+= (Gary Higgs) Thanks for sending me a DVD!
+= (Barry Basselgia) Wow - 4 DVDs and 3 books!  The most generous so far...!
++ You can now use 'windowtitle' and 'pagetitle' in the routers2.conf
++ Default window title changes to 'Systems Monitor' instead of 'Router Monitor'
+= (Scott Monk) Thanks for sending me a DVD!
++ (Ralf Vroomen) Solved the speedyCGI problem -- see HOWTO
++ Extra links in help page
++ Support for unknaszero option
+! Working day highlighting was not always correct, and was inefficient
++ prototype trending plugin module in extras (v0.1).
+
+v2.12 (only ever published as beta)
++ Add LDAP and Password file support and internal authentications (BIG)
++ Support for the Suppress[] keyword in MRTG
++ Allow quoted graph name in routers.cgi*Graph[] directive
++ Allow spaces in targetnames (for windows users and Graph[] directive)
+! Sort was ASCIIbetically rather than alphabetically (case insensitive)
++ Experimental 'Big Brother' integration support.  Do not use!
+! Fix formatting in header
++ Some additional commenting in web pages for debug purposes
++ Email and web contact addresses change
++ Added percent to 95th percentile report
++ New graph mode - 'ping' for mrtg-ping-probe and similar
+! Fix problems with Total units if userdefined unit.  Better guessing.
+! Now only greyout if no 'in' AND no 'out' data (was just no 'in')
+! When in twin menu mode, Link[] options were not preserving this.
+! The Factor[] was not used in the compact or percentile calcs.
+! Bug caused crash when using Icon[] on a userdefined graph
++ cfgmaker_host.pl script in extras directory to make nice .cfg files
++ Show data availability percentage at bottom of graph (*Options[]: available)
++ The userdefined graphs will now greyout if no data is available for that time
+= Thanks to Joseph Truong for a DVD!
++ Allow hournumber to be set in routers2.conf, for people with broken strftime
++ Compact now rounds to 1dp for bars, so they can be cached and load faster
+! (Bruce,Herold Keiko) The % was not being correctly escaped in Legend{IO}
+= (Daniel Wolk) SCO UNIX support in getstats.pl
+! (Flavio Astorino) Bug was preventing routers.cgi*Descr: from working in the
+  Device Information screen.
++ New [menu] section for routers2.conf for userdefined links in Devices menu
+
+v2.11 2003
+! I don't believe it -- the install.pl was STILL ignoring the 'dont send email'
+
+v2.10a
+! Oops, a slight problem in the support of Factor[]
+
+v2.10
+! (Frank Clatterbaugh) InCompact and InSummary were getting mixed up
+! Max calculations did not always correctly use the Factor[] option
+! Some tests for y/n did not also support 1/0
++ A few more examples and documentation
+! buildwan.pl shouldnt add unknaszero as this prevents uptime calculations
+! D'oh! install.pl tried to mail even when asked not to!
+
+v2.9
+! (M Hahn) Problem with defaultrouter containing NT path separator
+! install.pl changes to eval the NT rights setting for people without Everyone.
+! Use of --units-exponent now checks RRD version >= 1.0.30
+! Target parse was not parsing calculations correctly (needed .*? not .*)
++ Support for Factor[]: directive
+! Max bandwidth was being listed as in,out even when in==out.
+= (Unknown) Thanks for sending me some DVDs!
+= (M Williams) Thanks for sending me a DVD!
+= (Todd Wiese) New icon set submission
++ Modified Icons list to give samples of alternative icon sets
+= (Andreas) Thanks for sending me some $!
+! 95th perc calcs for a Range graph now give the perc band, not 95th perc of
+  the high and low ranges independently. ie, band that value is within 95% of
+  the time.  This is much more meaningful, although hard to explain.
++ A bit more icon identification and guessing AI
+! Range graphs did not show workday highlighting below range band.  May have
+  a bad effect in conjunction with Windows RRDTool higlighting bug, though
++ Install script now offers to email author with notification
++ Add routers.cgi*Link[]: as a special form of Extension[]: linking to another
+  routers.cgi graph target.
+! buildwan.pl was commenting out all targets and had no community strings
+! page=image did not work for some browsers, apparently
+! (Keith Johnson) routers2.conf section names are now case-insensitive
+! (Tom) Needed binmode when using page=image to read graph under windows
++ buildwan.pl now uses the new Link directive, and guesses Memory/CPU OIDs
+
+v2.8
+! Ignore:y now works correctly (it was previously doing an InMenu:n)
+! Documentation typos, inaccuracies, incompleteness, omissions, etc
+! fixunits and integer not always correct in Compact Summary screen
+! (dis) Spacing issue with number/unit formatting
+! (dis) Don't allow graphs with an upper limit <1
+! (dis) Make sure fixunit applies to the y-axis as well
+! (dis) cfg file post-processing was not being done if no .ok file existed
+! (Yariv Hakim) Include did not recognise Windows drives as absolute paths
++ Added routers.cgi*TotalLegend[]: directive for 'Total' units.
+! (Justin Myers) Zoom In/Out not showing for 6-hour graph
+! Preference: 6-hour was not working (went to daily instead)
+! 'none' device now working to suppress default selection (prefs page)
++ Allow 'none' as a default target/interface in routers2.conf
+= (Kristin Gorman) Thanks for sending me a DVD!
+= (J Herrera) Thanks for sending me a DVD!
+! Interface descriptions containing spaces in Targets were not tasty
++ Improvements for buildwan.pl (multiple SNMP communities etc)
+! Bandwidths were being stated rounded up to integers!
+= (Inigo Storm) Thanks for sending me 2 DVD box sets (wow)
++ Support for MaxBytes1 and MaxBytes2, in most cases.
+! Escape char not being recognised in Target: line.
+! Opera doesnt support images[] array in javascript & gave errors
+
+v2.7 12/8/2
+! Summary page was not reacting to integer or fixunit options.
+! 'range' graph style not displaying if high and low ranges were equal
++ Verify page now checks rrd file format for Interval, type and Extended
+! Correct the HOWTO documentation
+! Graph page javascript checks for null parent.menu frame
+! Problems with InOut if multiple includes, or if userdefined called incoming
+! Userdefined graphs problem with legend units display
++ Split javascript generation into separate functionfor easy maintenance
+
+v2.6 6/8/2
++ routers.cgi*GraphStyle[] directive added, and new EXAMPLE.
++ Added 'fixunit' option, to disable kMG for this target, still keeping decimal
++ page=image option added (trial)
++ Added defaultrouter directive in routers2.conf
++ Had to add new routers.cgi*Label{AT}{IO}[_target]: for userdefined graphs
++ Allow 'readonly' option to archive in routers.conf
++ Verify page now states RRD version as well as routers.cgi version
+= (Roche Diagnostics) Thanks for sending me some DVDs!
+! Many icons did not have transparent backgrounds, fixed.
++ Headers in CSV export now give units
+= (Keith Johnson) Thanks for sending me a DVD!
+! routers.cgi*ShortName: not correctly being parsed in MRTG .cfg files
+= (Steffen Donner) Thanks for sending me a CD!
+! Style/Graph menus were still visible if no target was selected
+! (Michael Hahn) Compact screen was not always sorting by the requested values
++ Set backurl to blank to disable MainMenu button
+! (dis) missing <BR> in the Archive menu
+! (dis) routers.cgi*Desc[] not working for userdefineds.
++ Allow 'defaulttarget' instead of 'defaultinterface' in the routers2.conf
+! 'No Preference' personal preferences were not working correctly
++ install.pl now backs up old version of routers2.cgi as routers2-old.cgi
+! Fix group ordering to be alphabetical by description in Devices menu
+! Processing noi/noo not being done correctly in userdefineds
+! Userdefined graphs of all noo/noi were not correctly defaulting to noo/noi
++ Servers extension scripts added to extras directory
+! Missing space in summary screen Percentile/Total between value and unit
+= (Ruedi Kehl) Thanks for sending me (more) DVDs! (Fawlty Towers box set)
+! rrdextend.pl will still process rrd files, even if they dont have 8 rras
+! Userdefined Total/Average were not using legend1/2 correctly
+! Userdefined Average was not autodisabling if 0 valid data sources (/0! eek!)
++ More documentation in HOWTO, PROBLEMS, INSTALL and MRTG_INFO
+! (Garry Cook) Help page was not updating menus correctly in twinmenu mode
+! (Garry Cook) __none interface type incorrectly giving error on graph page
+! Workaround for x-axis numbering bug in RRDTool for windows <v1.0.39
+! Activeperl doesnt support %V in strftime, changed to default to %W
++ More hooks for future servers.cgi merging (now roughly working)
+
+v2.5a
+! Fix display bug that eliminated space in lhs menu top headings
++ New 'nopercentile' option to suppress 95th percentile calcs per-target
+! Some more diagnostics and error trapping in date functions
+! Default shortdateformat did not work under all Windows versions of perl
+! No need to escape : in COMMENT strings
++ Initial hooks for merging servers.cgi into routers.cgi in the future
+
+v2.5 12/7/2
++ Allow backurl to be placed in the [routers.cgi] section as well as the [web]
+  section of the routers2.conf
++ Sort order of grouped devices menu altered, group headings in bold
++ Verify page now shows complete configuration settings
++ Let authenticated username activate new section in routers2.conf file
+! Fix bugette in extras/graphprune.pl
+! Windows CGI.pm doesnt have dump function, commented out.
++ New link to switch between twin menu views
+! routingtable extension not correctly reacting to url parameter
++ Extension script now passed interface number as well
++ New extension script, ifstatus.cgi.pl, in the extras directory
++ Simplified some code in Extensions parsing
+! Fixed bug in rrdextend.pl
+! (Peter Enzerink) Activeperl 5.6 doesnt have Win32::FileSecurity, 
+  changed install.pl to check for this.
+! Added check for people still using old iconpath directive and not iconurl
+= (Luis Alegria) Many new link icons for your perusal in rrdicons
++ Added link to a new index page for all the link icons
++ Added some tests for default icons to use new vendor icon set
++ A bit more in the README
+! Bookmarks now have absolute URL, not javascript, to remove problem with
+  groups and M$ backslash pathseps not being properly escaped...
++ New option in routers2.conf to allow date to appear in LRH graph corner
+! Buggy colour cycling for large userdefined graphs fixed
+
+-- code slush --
+From this point on, no more large changes!  Only bug fixes, cosmetics and
+small functionality improvements.
+----------------
+
+v2.4 17/6/2
+= (Leo Artnts) New icons - win-sm, novell-sm, linux-sm
+! Problem with specifying frame target in per-Target[] user extensions fixed
++ Allow user to specify target and not icon in Extension[]: keyword
++ Added routers.cgi*ShortDesc[targetname]:
++ Add 'test' option to 'extendedtime' option.
++ New buildwan.pl script in extras directory, to create all MRTG .cfg files 
+  for entire network in one automagic go, with cross-links for PtP connections.
+= (Garry Cook) New icons - phone2-sm.gif, modem*-sm.gif for modems.
+! Use eval{} for the archive glob as some perls treat a null glob as an error
+! (Jorgen Thomsen) double path separator in verify page caused apache problems
++ Clarify licensing on code in extras directory (it is public domain, not gpl)
+  Remember that routers.cgi remains GPL, however.
+= (Aid Arslanagic) New icon set
+! Verify screen was not showing correct per-target icons
++ Experimental code for AbsMax, *MBLegend and *AMLegend (see MRTG_INFO)
++ menuwidth option in routers2.conf
+= (Anonymous) Thanks for sending me a DVD! Hooray, motivation...
+! Allow 6-hour graphs to be chosen as personal preference
+! Fix non-dropping of .00 when formatting numbers link .001 to 2dp.
++ rrdextend.pl script in extras to extend rra time window in .rrd files.
+! Allow ShortLegend to be null
++ Make install script pause at end if run under Windows
++ Added debug switch for all sorts of extra uninteresting output
++ Some support for the RRDRowCount[] option in MRTG (before it even goes live!)
++ Some support for the WeekFormat[] option in MRTG (before it even goes live!)
+! Colours[] was not being correctly supported
++ A bit more intelligence when picking max graph title length
+
+v2.3 27/5/2
+! Includes were *really* broken.  Allow them to use relative paths.
+! (Nikolas Breuer) Compact summary always used PNGs and didn't take notice 
+  of PNG setting in the routers.conf!
+! Change calculation of weeknumber to use %V instead of %U in strftime, make
+  this configurable in the routers2.conf.
++ Add requirement for RRDTool v1.0.29 or later
+= (Andy Jezierski) New icon set for HP Top Tools feel
+= (James Keane) New icon set in green/yellow for an Irish/Australian feel...
+! American spelling of defbgcolor was being ignored
++ Added linkcolour option in routers2.conf to complement bgcolour
+! Potential problem with grouping icon URLs on non-UNIX web servers
++ More helpful messages in comments to help people with install problems.
+! Parameters were not always being correctly escaped in links in top page 
+  and bookmarks, causing problems for people with odd chars in confpath
++ Experimental code to support extended RRAs (a bit rough)
++ General tidying up of some messy code in a few places.
++ Allow user to specify target frame in Extension directive in MRTG .cfg
++ Tidied up the altgif directory tree
++ A bit more shininess added to install.pl script
+
+v2.2b 16/5/2
+! More checks for undefined's in the pattern matching
+! (Paul Davies) Eek!  Somehow includes have been broken!  Now fixed.
+! (Jurgen Brandle) Graph title in Summary (short version) was calculated 
+  incorrectly
+
+v2.2a 16/5/2
++ Added url param to CGI extension call, updated routingtable.cgi and 
+  extension.pl accordingly.  Fixes problem for IIS users.
++ (James Sizemore) Add minrefreshtime option in routers.conf and dynamic 
+  refresh times
+
+v2.2 15/5/2
+! (Gary Cook) Problem with twin menu and preferences screen refresh
+= (Gary Cook) Yet more icons to replace my messy efforts!
++ Extra parameters passed to interface for CGI extension scripts
+! (Ruedi Kehl) 'Merkin spelling for menubgcolor was not working
+! Get rid of some of those annoying 'Uninitialised value' warning messages.
++ The new graphprune utility added
++ The new template for user-written extension scripts added
+= We've reached our 150,000th download of routers.cgi/generic.cgi.  Wow.
++ routingtable.cgi modified to correctly update routers2.cgi menu frames
++ New icon for Summary page
++ Use 'Information' instead of 'Info' (looks better to Mgmt)
++ Removed need to call import_names (it was very ugly in any case and caused
+  problems for speedycgi work)
+
+v2.1 7/5/2
++ Make Total/Average lines in userdef graphs as LINE1 not 2.
++ Info page now shows count of archived graphs, and also user defined graphs
+! (Lischer Gerhard) Upgraded BER.pm etc to more recent version to avoid bug
++ (Ruedi Kehl) Optional 'twin menu' screen format available
++ Increased bar length in normal mode compact screen to fill available width
+! (Ruedi Kehl) Occasional error in compact screen sort ordering
+! (Frank Clatterbaugh) Some directives not correctly parsed in Devices menu
++ Changed icon for 'Graphs' to a clock to indicate time period.
++ Slightly alter AI code for identifying target type CPU
+= (Garry Cook) Some new icons: pbrush-sm, etc
++ Changed icon for 'Styles' to a paintbrush for clarity.
++ Now uses POSIX locale information if available for formatting Archive dates
+! Fix a couple of pattern match problems in the parsing routines
+! Fix a bug in the AI mode identification code
++ (Luis Alegria) Added a generalised user extension facility for plugins
++ Routing table link appears in Targets menu if defined and available.
++ RoutingTable optionin .cfg to suppress routing table link for file
+
+v2.0a 9-4-2
+! (Reuben Farrelly) __first target was not always working
+
+v2.0 8-4-2
++ Initial code for archiving added but not enabled by default
+! Slight reordering of target mode identification AI code
++ Yet more documentation for people who want to RTFM.
+! (Reuben Farrelly) Install was not installing the rrdicons files
+! (David Hares) Cannot modify $1 in some versions of ActivePerl
+! (Reuben Farrelly) Archiving was incorrectly incrementing month counter
+= (Reuben Farrelly) Thanks for sending me a DVD!
+= (David Hares) Thanks for sending me a whole box of DVDs!
+
+v2.0b11
++ An extra check for graphpath == graphurl in the verify page.
+! Weird typo caused bug in error check on graph page.
+= (Garry Cook) More icons - firewall[23]-sm.gif, switch2-sm.gif
+! legendunits, not legendunit
+! (F Duranti) The allowexplore option had vanished...
+! (Albert Hybl) Accept spaces in Directory[] strings
++ Extra option: extra=sectionname for overriding routers.conf
++ (F Duranti) Use filename to indicate routers.cgi override section in 
+	routers.conf
+! Oops, [targeticons] was not being read correctly
+
+v2.0b10
+! Fix png and NT options to take 'yes' as well as '1' for true
+! Tidy up the MIME header code
+! Bug in export CSV code (no comma between values)
+! Pattern match [\w-\.]+ doesnt work sensibly under Perl v5.6
++ Put a link to the verify page in the Error messages.
+
+v2.0b9
+! routers.cgi*Icon[] not being processed correctly.
+= (Garry Cook) New icons - interface2-sm.gif, router2-sm.gif, router3-sm.gif
+! (Brian Wilson) Support multiple Options lines in MRTG file
+! (Brian Wilson) Behave sensibly if multiple 'bits' options defined
++ When setting CPU mode, dont noo if user set Legend2
+! (Francesco Duranti) routerdefault=hostname in routers.conf was not working
++ Reassigned default background colours.
++ Added bgcolor/menubgcolor directive to routers.conf
++ Added legendunits option to allow units to be shown in graph legend
++ Put a time header in the compact screen
++ Dont show shdesc AND desc if shdesc==desc in compact screen.
+
+v2.0b8
+! (Ed Stalnaker) NT path separator STILL causing problems!  
+! Fixed some formatting issues with total/percentile calc outputs
+! Fixed more formatting in Summary screen by using embedded table
+
+v2.0b7
+! .cfg files with no targets were not bing correctly ignored
+! NT path separator still causing problems
+
+v2.0b6
++ page=verify mode for configuration checking.
+! Fix routingtable.cgi to spot missing Net::SNMP, and to identify non-Netscape
+  browsers.
+! Oops, routers2.conf was not being included in the package
+! Fix AI code identifying the icons to use for Devices menu, I think.
+
+v2.0b5
+! InCompact option
++ Export format changed slightly
+= (David Hare) Thanks for sending me some DVDs!
+! compact, lastupdate and 95thpercentile didn't all work at same time
+! changed 'iconpath' to 'iconurl' in routers.conf
+
+v2.0b4
+! Fixed fat bug in install.pl
+! Fixed fat bug in defaultinterface option processing
+
+v2.0b3
+! Bookmarks on Summary and Compact pages incorrect
+! Not recognising ATM as type 'Interface'
+! Graph options being ignored
+! Info page not reporting interface numbers
+! Working day calcs not using timezone when calculating /day/ of week!
+! 95th perc calcs not reporting errors in compact summary screen
+= (Jay Christopherson) Thanks for the $ contribution via PayPal!
++ All average/total/nolegend/nodetail options for userdefined graphs
++ More HOWTO and documentation
+
+v2.0b2
++ User defineable graphs
+
+v2.0b1
++ Major rewrite of entire parsing routines
++ Merge with generic.cgi
++ Supprt for many more directives
++ Optimise parsing - dont parse files if you dont need to
+
+v1.33
++ Added routers.cgi*InOut[]: directive to control the Incoing/Outgoing graph
+= (Brian Wilson) A new set of icons (the ncsu black and white set)
++ Change to packing - altgif now in normal package, rrdicons separate dir
+! Glitch in install.pl when routers.conf already exists now fixed
+! Catch error in Incoming graph when no interface targets available
+! (Brian Wilson) Bug in Legend processing was having problems with : and nbsp;
++ Support for LegendI/LegendO on Summary and Compact pages
++ Support for LegendI/LegendO in 95th/Total page foot.  Damn colons.
+! (Gary Cook) Zoom buttons not working in Summary page (fixed)
++ Allow legends and UnScaled to be specified as routers.cgi* directives.
++ Added WebTV style support
+
+v1.32 6/2/2
++ Added 'compact' option in routers.conf to switch off compact summary (if you
+  dont have the GD libraries installed, for example)
++ A bit more helpful text in the install.pl script.
++ Added Zoomin and Zoomout buttons to compact page
+! Oops, target-sm.gif was missing from the package!
+
+v1.31 30/1/2
++ Added better error reporting in targetnames.pl
++ Added [icons] section in routers.conf to override interface icons in menu
+! Fixed *Icon[] option in MRTG file to default to iconpath directory
++ More help in HOWTO
++ Install now modifies existing routers.conf file (if found), if user asks.
++ (John Martin) Add compressed summary view with bar graphs.
+! For consistency, the CSV export now exports traffic data in BITS and not in
+  bytes (as it did before - ie, the raw RRD data)
++ New options within Compact summary to select which bars are shown
++ Allow sort by in or out in compact, also add 95th Percentile bar option.
++ Compact view bars now resize according to current selected style
+! Made text order in graphs more consistant
++ Add support for Options: noo noi
+= (Peter Cohen) Thanks to Peter Cohen from Telia for sending an Internet Map!
++ (John Marandola) Add support for Timezone[]: directive in MRTG .cfg file
++ More in HOWTO, PROBLEMS and README regarding timezone support under Windows
++ Added check for required libraries to install.pl
++ Alternative icon graphic schemes shipped in the altgif.tar/zip files
++ Added *InMenu[]: directive for MRTG file to suppress menu listing
++ Added *InSummary[]: directive for MRTG file to suppress summary listing
+! Working day calculations are now applied to CPU graph, if defined.
++ Add 'title' option to ifdefault in routers.conf
++ Added 'scaled' option to routers.cgi*Options[]: directive
++ Thought about rewriting entire parsing routine and ran away in horror
+! Problem with external-script data collection targets sort of resolved
++ New option for routers.cgi*Options[]: ignore tocompletely ignore target
+
+v1.30 12/11/01
+! (Reuben Farrelly) Take account of timezones when calculating working day!
++ Added 'timezone' option to routers.conf in case you want to override system
++ Added PayPal details for contributions
+
+v1.29 1/11/01
++ Put sizes in IMG tags for graphs, to speed up page rendering. 
+! (Garry Cook) Fix problem with router links in side menu not resetting 
+  interface key
++ Put 'go to default page' link on the options page.
++ (Kerry Brabble) Added CPU graph (if available) to the summary page
++ Set Content-Disposition header on CSV export for the benefit of MSIE.  Also
+  csvmimefilename option in routers.conf
++ Allow suppression of menu elements in lefthand menu frame (global setting
+  in routers.conf)
++ (Steve Huie) Calculate working day averages (optional in routers.conf)
+  Also visually identify where the working day is on the graph (only Mon-Fri
+  working week at the moment)
++ Support for the YLegend[] and Legend[IO1234][] directives
++ More in README and PROBLEMS for defining MRTG .cfg file support
+! Correct regexp for matching description targets to allow '-' prefix
++ Support for MAC address targets
++ Identify 'non interface' targets, give them a separate icon in the menu, and
+  do not include them in the IN/OUT summary graph.  routers.cgi seems to be 
+  heading in the direction of generic.cgi, rather than the reverse!
++ Suppress 'Max bandwidth' line for non-interface targets, default scaled.
+> With non-interface targets, the script tries to guess the best way to 
+  display them.  You may need to use the MRTG options to tailor this behaviour.
++ Code for bits/bytes put in place but not fully enabled
++ Sort the interface menu on the left alphabetically rather than by ifno.
+! (Sam Iaam) Correctly HTML escape the URL for the graph graphic, to allow for
+  people who have dodgy characters in the router name.
++ Allow configuration of page and window title (for non-English speakers) 
+  using windowtitle in the routers.conf
+! Fix early return where CPU count not recognised if no .ok file exists
++ Add support for interface description targets in MRTG .cfg file
++ Correct any misconfigured paths with trailing separators in .conf file
++ Some error reporting improvements 
+! Fixed problem of correctly identifying 'first' interface if you have a CPU
+  interface defined.
++ Changed descriptions for 'Full' and 'Summary' graphs to 'All' and 'Compact'
++ Allow CPU Stats to be the default graph type.
+! Trim trailing spaces in routers.conf entries, fixing many parameter problems
+! Stop the "Count" appearing in quotes in CSV export to Excel
+! (Charles Pippin) Fix bug preventing CSV export if using 'uselastupdate = yes'
+
+v1.28 30/7/1
++ Changed router icon, and user icon (so it looks like me!)
++ (Kerry Brabble) Added 'group' option for people with many router definitions
++ Yet more info in the PROBLEMS file and README file to update things.
+! (Hendrick van der Veen) Ignore any SetEnv[] directives that set the 
+  description to blank!
+! Fix the correct escaping of arguments in the URL links and router keys.
++ Added HOWTO file to give some more information on how to use the system.
+  The PROBLEMS file still deals with difficulties in making it work, the HOWTO
+  deals with hints and tips.
+! Fixed bug with Maxbytes[_]: not multiplying by 8 for bits.
++ (Kerry Brabble and others) Added support for router CPU load statistics 
+  (read HOWTO).  This is a fairly big piece of new code, that needs to be 
+  activated in the routers.conf
++ Increased border size to 1 from 0 on frameset to allow resize of frames, per
+  several user requests.
+! Fixed errors when changing router to one with no CPU data if CPU graph 
+  selected.  Also allowed default interface to be 'cpu'.
++ Added 'CSV File' button to export data from current graph to a CSV file.
+  This has a configurable MIME type, although default is text/comma-separated
+  Note that date is always in yyyy/mm/dd format.
+
+v1.27 11/7/1
++ Support for LibAdd MRTG directive - maybe you don't need the site-perl
+  install of RRDs anymore.
++ Streamlined number formatting code
++ More help in the PROBLEMS file
++ Added 'zoom in' and 'zoom out' buttons on graph pages.
+= (Rob) Thanks for sending me a DVD!
++ Greatly streamlined the URL options code
+! (Wagner Vieira) Fixed support for multiple routers in the same MRTG .cfg 
+  file, and also correctly identify calculated sums of multiple interfaces.
+! A few fixes to generated HTML to make it work correctly with Netscape 6
+  and Opera (mostly adding <NOBR> tags)
++ Catch 'missing RRDs.pm' error, and tell the user properly.
+
+v1.26 ?/4/1
+= (Ruedi Kehl) Thanks for sending me a DVD!
++ Added 'autopositioning' for router menu, to help people with long lists (this
+  is already done in generic.cgi)
++ Added 'pagetop' and 'pagefoot' options in the routers.conf
++ Added optional support for the MRTG PageTop[] and PageFoot[] directives.
+= (Ruedi Kehl) work on Page{top,foot} directives
++ Added 'menufontsize' option for routers.conf
++ Incoming/outgoing now specify the available bandwidth for each interfaces
++ Incoming/outgoing also give the 'short' name for the Target in the legend
++ Some more info in the INSTALL file
+
+v1.25 28/3/01
++ Added 'unscaled' option to routers.conf
++ Added support for 'Unscaled[]' MRTG directive to override routers.conf
++ Added routingtable.cgi, and corresponding option in routers.conf, to show
+  routing table in router on systems with Net::SNMP installed.
++ Modified install.pl to install routingtable.cgi if present 
++ install.pl now only installs routingtable.cgi if you have Net::SNMP installed
+  and lets you activate it if you do.
+! Fixed the '#' interface problem (I really mean it this time)
++ Some minor improvements to install.pl
++ More added to README and INSTALL about the experimental routingtable.cgi
++ Support for '#ifdesc' type Target[]s in MRTG .conf file
+! Fixed problem where incoming/outgoing fails in certain cases (#ifdesc)
+! Maxbytes[_] is now supported, and so are a few more MRTG defaults.
+! Fixed support for MRTG default ([_]) options.
++ Added 'mixed' option in usebigk for different definitions of 1Mbit
++ Enhanced install.pl for different installation options.
+! Fixed use of 1000 instead of $k in Summary screen
+! Fixed definition of 1Gbit to coincide with definition of 'usebigk'
+
+v1.24
+! Fixed bug introduced by the NT-drive letter fix that broke 'incoming' graph
++ Added support for IP address targets to targetnames.pl
+
+v1.23
+! Finally fixed the need for dbdrive in NT.  Now NT users can give a drive
+  letter in their path names.  Tested OK with Apache/NT/Activeperl.
+! Fixed bug for NT users with MRTG and RRD on different drives.
++ Support for Directory[] MRTG directive.
+! Made 'usebigk' have an effect on the RRDTool graphs, as well as the figures.
++ Added 'hostname' as an option to 'routerdefault' in the routers.conf
+! Fixed parsing of MRTG .conf files for Target[]s starting with '-'
++ Added display of interface IP address in Summary, if known
++ Added 'withpeak' as well as 'maxima' to suppress peak lines in graphs.
+! Fixed to exit with status 0 if config file not found (for Apache under NT)
+! Move NT tests to readconf() in order to help file identification
++ Yet more help in the PROBLEMS file.  Thinking about splitting it into NT and
+  UNIX sections.
++ A few NT-friendly changes and improvements to the install script.
+! Fixed bug in install.pl script, not creating the routers.conf
++ Enhanced install.pl for better behaviour under NT, and with more IIS-friendly
+  behaviour.
+
+v1.22 22/2/1
+! Added error reporting to targetnames.pl
++ More information in PROBLEMS file.
+! Fixed info and summary screen to support the IP address targets correctly
+! Added checks for rogue targets in displays (stop those blank records!)
+
+v1.21 20/2/1
+! Corrected code for default graph style that I broke a couple of versions back
++ Improved Target[] support, including better user defined and added IP address
+  targets.
++ Added sorder directive to routers.conf (so you can disable PDA support)
++ Added interface IP address to summary screen, if known
++ Added support for (non-Javascript) PDAs
++ Added options for what the default menu names are. (routerdefault, ifdefault)
+
+v1.20 16/2/1
++ Changed install.pl to cope with drive letter under NT, and to ask for which
+  NT drives to check for software.
++ Added targetnames.pl script to help create [targetnames] and [targettitles]
+  sections of routers.conf. Set it to use the MRTG SNMP Perl modules.
++ Added [targettitles] section in routers.conf to override the Title[] 
+  directivein MRTG .conf files.
+
+v1.19 15/2/1
+! Oops, error in install script.
+
+v1.18 15/2/1
+! Added check for undef filenames, in case filespec matches nothing
+= (EDS Europe) Thanks for giving me a Psion 5MX!
++ Added extra styles - Palm and Psion5. Changed menu to not disable special
+  styles when in summary mode (snice the script cleans up inappropriate styles
+  already)
+! Corrected htaccess file to have correct filespecs for expiry
++ Added first version of the install script for UNIX and NT.
+
+v1.17
++ Added vertical label to graphs (this should really use the YLegend[] option,
+  but it doesnt)
++ Added option to routers.conf to allow you to choose if you want your Ks to
+  be 1024 or 1000. (usebigk = yes)
++ Added support for SetEnv[...]: MRTG_INT_DESCR="..." to determine interface
+  name.  This required using Text::ParseWords, which is in the standard library
+= (Mike Bernhardt) Thanks for sending me a DVD!
+
+v1.16
++ Altered contact information in documentation etc.
+! Fixed problem in 95th percentilc calcs when data unavailable
+! Made sort routines more robust
++ Added 'uselastupdate' option, to end graph on last update time instead of 
+  current time.  Useful for demos.
+
+v1.15
++ Changed to using File::Basename package for filename parsing, to eliminate
+  problems with identifying NT paths.
+! Fixed error in htaccess file
+
+v1.14
+! Was unable to read MRTG files with leading spaces
++ Added some credits to the online Information pages.
++ Added a bit more information to the 'Info' pages.
++ Added more to INSTALL about 95th Percentile calculations, and contacts.
++ Replaced old [routerdesc] config section with new [targetnames] section in
+  routers.conf file.  Old section still works, though. You should change to
+  using the [targetnames] section instead as soon as possible.
++ Interfaces can now be renamed via the [targetnames] section.
++ Added support for WorkDir: directive in MRTG .conf file.  This should help.
+  I'm not so sure how well it will work under NT, though.
+= (Ben Higgins) Thanks for sending me a DVD!
++ 'Incoming' icon changed from red to green to match colour of graph lines.
+
+v1.13
+! Oops, didnt have the &nbsp; in the graph styles description links.
++ (Mike Rose) Added calculations for 95th percentile and total data transfer.
+  These are still being verified, and must be enabled in the routers.conf
+
+v1.12
+= (Pall Wiberg Joensen) Thanks for sending me some DVDs!
++ Modified summary so that you can have different sized graphs. (Now half width
+  of your standard graph)
+
+v1.11
+! Small change to Javascript to fix problem with speedycgi race condition.
++ More NT-centric help to the INSTALL and PROBLEMS files. Finally I've managed
+  to get Apache/ActivePerl/routers.cgi installed on an NT test box here!
+! More changes to clean global variables in order to try and make it work with 
+  speedycgi.
+! Changed description of 4-hour graphs to 6-hour, more accurately reflecting
+  their size (can't change graph width as we are already 1 pixel/data point)
+
+v1.10
++ (Trey Valenta) Changed tarball to be in a subdirectory.
++ (Pall Wiberg Joensen) Added 'incoming' and 'outgoing' interface summaries.
++ (Pall Wiberg Joensen) Increased information on Summary page to show numbers.
+
+v1.9
++ Added 'Bookmark' button on graphs pages to create a bookmarkable URL leading
+  to this graph page.
+! Various additional checks for undefined parameters in case things go amiss.
+
+v1.8
++ Added a few more helpful error messages for misconfigured routers.conf and
+  MRTG .cfg files.
+! Put in a few more checks for undefined values to stop those web server log
+  messages.
++ Added support for 4-hour graphs, if the Sample Interval < 5min.  Also 4hour
+  option to routers.conf file.
+
+v1.7
+!(Manodj Bisoen) ActivePerl doesnt like %k and so X-axis labels weren't being
+  printed on Daily graphs.  Replaced with %H on ActivePerl installations.
++ Make the script try and identify ActivePerl automatically and enable various
+  compatibility options.
++ New 'NT' option in conf file to activate NT compatibility things.
+! Used '$pathsep' in a URL when it should only be for filenames, this messed up
+  NT support a bit.
++ Added legal jargon to more clearly assert GPL status of code
+
+v1.6 15-12-0 NT Compatibility changes
+! A number of changes in order to try and make it run more smoothly under NT.
++ A few additions to the PROBLEMS and other documentation files.
++ Split the path separator out into a separate variable to help with NT use.
++ Added 'dbdrive' option to allow NT users to specify which drive the RRDTool
+  databases live on (you cant have a drive in the path in an RRDTool function)
+  This is not fully tested as I dont have an NT Perl server to test it on.
+
+v1.5b 23-11-0
+! Interimn bugfix release
+! Removed most (all?) of the constructs that confuse ActivePerl under NT
+
+v1.5 16-11-0
++(Trey Valenta) Added 'png' option in [web] section of .conf file to make the
+  system use PNGs instead of GIFs for the graphs.
+
+v1.4a 6-11-0
++(Isaac Grover) Added new option 'maxima' to routers.conf.  This allows you to
+  say 'no' and switch off the red 'Max Bandwidth' line, giving auto scaling.
++ Added the example graphstyle line to config file for feature added in v1.2
+
+v1.4 3-11-0
++ Yet more error trapping and sanity checks for people who dont have my style
+ of MRTG conf files
+=(Isaac Grover) Added extra parsing to cope with user defined OIDs in conf file
+!(Paul Joensen) Removed many uses of "$hash{opt}{opt}" which doesnt work well
+  in ActivePerl under NT for some reason.  Replaced with string concatenation.
+
+v1.3 1-11-0
++ Added more detailed error messages when parsing errors occur.
+!(Scott Neitch, Daniel Szarowicz, Marcelo Rosa) Corrected a few other parsing
+ problems affecting the Title and Target lines with non-alpha characters.
+
+v1.2b - not for release.  Interim bugfix version.
+
+v1.2a (bugfix) 19-10-0
+!(Scott Shipley) Modified 'Short Name' calculations to take all non-space
+ characters, rather than all alpha characters.  This may cause problems on
+ some people's configurations.
+! Oops, left the mainmenu-red.gif file out of the distro.  Now it's back.
+!(Scott Shipley) Fixed reading of interface names to support interface names
+ containing '/'.
+
+v1.2
++(Andy Stranks) Added graph Styles options and defaults, for people with
+ different sized screens.
+
+v1.1
+=(Andy Stranks) Added default interface option in .conf file, instead of
+ having it always default to the first interface.
+
+v1.0 21-Aug-2000
++Big modification.  System now takes configuration from a separate conf file,
+ and not hardcoded into the script itself!  We've also gone 1.0 as it now has
+ relative stability and configurability.  I think.
+
+v0.13  16-Aug-2000
++Added extra code to work out short interface description in case the .ok file
+ is not available
+!Calculation of .ok file no longer assumes .conf suffix on conf file.
++Added links to web site and acknowledgement at bottom of page
+
+v0.12  11-Aug-2000
+!Oops.  Replaced accidentally deleted graphs-type array initialisation.
+
+v0.11  10-Aug-2000
+!Various CGI - unititialised checks
++Configuration for BACK button and so on
++Numerous small changes
+
+v0.10  June 2000
++First release!

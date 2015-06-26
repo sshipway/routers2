@@ -1,0 +1,22 @@
+#
+# Template for DNS
+#
+# Global relpace: SHNAME LHNAME IPADDR MAXMEM(Mbytes) DISKC
+
+##########################################################################
+# Targets
+
+Target[SHNAME-dns-response]: `mrtg-dns-check IPADDR voyager.auckland.ac.nz`
+Title[SHNAME-dns-response]: DNS response time (SHNAME)
+MaxBytes[SHNAME-dns-response]: 10
+PageTop[SHNAME-dns-response]: null
+LegendI[SHNAME-dns-response]: dns:
+Options[SHNAME-dns-response]: gauge growright noo
+Ylegend[SHNAME-dns-response]: seconds
+ShortLegend[SHNAME-dns-response]: s
+Legend1[SHNAME-dns-response]: response time
+Legend3[SHNAME-dns-response]: Peak response time
+SetEnv[SHNAME-dns-response]: MRTG_INT_DESCR="DNS Response"
+routers.cgi*Options[SHNAME-dns-response]: nototal nopercent noo
+routers.cgi*Icon[SHNAME-dns-response]: clock-sm.gif
+

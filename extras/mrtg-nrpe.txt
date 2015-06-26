@@ -1,0 +1,44 @@
+mrtg-nrpe.sh
+
+This will call an NRPE agent on a remote host, in much the same may as Nagios
+would do.  The -n option is to disable SSL.  This is in fact a wrapper that
+calls the normal Nagios check_nrpe script, so you muct have that already
+installed.  The -o option is the offest -- so, -o 2 would take the second
+numerical value in the returned string.
+
+To use this: (1) install NRPE on remote (client) host. Note if you are using
+                 SSL since this will be needed later.
+             (2) install check_nrpe on local (monitoring) host
+             (3) install mrtg-nrpe.sh with appropriate configuration
+             (4) use example .cfg template to generate custom .cfg file
+
+Note this is a shellscript, so it will not run under NT.
+
+-------------------------------------------------------------------------
+mrtg-nrpe.pl
+
+This is a pure-perl version of check_nrpe that can also produce (with the -M
+option) MRTG format output.  Use -h for help.  For SSL, you will require the
+perl module Net::SSLeay to be installed.
+
+It uses the same options as check_nrpe, but with the addition of -M for MRTG
+output, and one or more -o options to give the (zero base) count of which
+number in the output text to use for the MRTG value. HOWEVER IT IS NOT
+IDENTICAL.  Use -b to specify options for the second command (if used).  Use
+oneoption per -a flag.  Offsets are based from 0, not from 1 as in the
+shellscript version.  You can also use -x as an option to parse the
+perfcounter part of the reply sting -- the bit after the | symbol, not
+normally displayed by Nagios.
+
+This version is quicker and less resource-hungry (in processes) that the shell
+version -- and can be run under NT.
+
+This also has a new 'caching' option which will cause the returned value to
+be cached for a few minutes.  Useful for something which returns multiple
+related values that you want to be stored in different RRDs (eg, a CPU query
+that returns user/system/wait which you want stored in 3 separate RRD files
+and hence would result in 3 queries which otherwise could total to >100%)
+
+If there is no number with the appropriate sequence in the output, then UNKN
+is used.
+

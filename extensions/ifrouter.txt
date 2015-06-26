@@ -1,0 +1,38 @@
+Name:
+ifrouter.cgi
+
+Author:
+ Brian Dietz 
+ brian.dietz@caremark.com
+
+Example:
+routers.cgi*Extension[targetname]: "Show interface" /cgi-bin/ifrouter.cgi camera2-sm.gif insecure
+
+Requires:
+ Net::Telnet::Cisco 
+
+Description:
+This script will log into a Cisco router run the command "show interface" 
+on the selected interface, or "show frame-relay pvc interface" on a sub interface.
+and display the relevant information. The the output is searched for keywords (chang them
+inside the script) so the output will fit on the screen without scrolling.
+
+This is an Extension script for the routers.cgi program, supposed to be used
+ as a per-target extension, not a per-device extension.  Install it
+ in your cgi-bin directory, and modify your MRTG .cfg files to call it:
+
+ See the routers.cgi documentation for more information about how to link
+ this script in to your MRTG .cfg files.
+
+Inside the script, you must modify the password and enablepass to your router.
+
+ Remember that the SNMP community string is passed as a parameter to this
+ script, and be aware of the security implications of this.
+ You may also need to change its name (use a .pl extension for the IIS web
+ server, a .cgi extension for Apache) or alter the first line to give your
+ Perl location.
+
+ You must have the Net::Telnet::Cisco perl module installed for this to work.
+
+Note that this may not work with all versions of CiscoIOS - in particular, it
+only specifies a password, not a username.

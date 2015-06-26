@@ -1,0 +1,128 @@
+/* Default style sheet: match default colours without stylesheet */
+
+/* SUBFRAMES */
+FRAMESET.main { background: gainsboro }
+FRAME.main { margin: 2; background: gainsboro }
+/*
+FRAME.main#graphframe { }
+FRAME.main#topframe { }
+FRAME.main#leftframe { }
+FRAME.main#rightframe { }
+*/
+
+/* MAIN FRAME */
+/* default */
+/* this works best for firefox */
+/* body { color: black; background: white; font-family: sans-serif; font-size-adjust: 0.46 } */
+/* this works best for MSIE */
+body { color: black; background: white; font-family: sans-serif; font-size: smaller }
+/* side menu */
+body.sidemenu { color: black; background: gainsboro; white-space: nowrap; font-weight: normal }
+.sidemenuform { }
+B.sidemenu { font-weight: normal } /* disable the B tag */
+/* header */
+body.header { color: black; background: gainsboro }
+TD.header#htmiddle { text-align: center }
+/* ALL userdefineds - graphs or summary pages */
+body.USER { }
+/* special pages: override the colours if you want to */
+body.summary { background: lightyellow }
+body.compact { background: lightyellow }
+body.archive { background: gainsboro }
+body.info {  }
+body.help {  }
+body.config {  }
+body.verify {  }
+body.empty { background: gainsboro }
+/* modes */
+body.generic { background: #ffd0ff }
+body.interface {  }
+body.cpu {  }
+body.memory {  }
+body.ping {  }
+body.percent {  }
+body.relpercent {  }
+body.extension {  } /* for extension plugins */
+/* authentication pages */
+body.auth { color: black; background: #ffd0ff }
+/* error pages */
+body.error { color: black; background: #ffd0d0 }
+
+/* login stuff */
+div.login { 
+	display: block; 
+	border: none; 
+	width: 100px; height: 20px; overflow: hidden;
+	background: #800000;
+	color: #ff0000;
+	padding: 0px 2px 0px 2px;
+	margin: none;
+	font-style: italic;
+	font-family: sans-serif; font-size: 15px;
+}
+div.username { 
+	display:inline;
+	font-size: smaller;
+}
+
+/* trending plugin stuff */
+body.trend { background: lightblue  } /* for trending plugin */
+/*body.trend H1 { font-size: smaller; text-align: center }*/
+body.trend TD { font-size: smaller }
+/*body.trend DIV.icons { font-size: smaller }*/
+
+/* global defaults */
+IMG { border-style: none }
+A:link { color: #2020ff; text-decoration: none }
+A:visited { color: #2020ff; text-decoration: none }
+A:hover { color: #2020ff; text-decoration: underline overline }
+/* default tables */
+TABLE { border-style: none }
+TR { }
+TD { }
+/* side text on summary page */
+TABLE.summary TD { font-size: smaller }
+/* side tables on summary page */
+TABLE.summarydata { border-style: ridge }
+/* TABLE.summarydata TD { font-size: smaller } */
+/* verify page */
+body.verify TABLE { border-style: ridge }
+TD.no { background: red; color: white }
+TD.yes { background: green; color: black }
+
+/* PAGE SECTIONS */
+/* pagefoot/top and mrtgpagefoot/top if defined */
+div.pagefoot { font-size: smaller }
+div.pagetop { font-size: smaller }
+/* icons on graph page */
+div.icons { border-style: none }
+/* graph page footer */
+div.footer { color: #202020; font-size: smaller }
+div.footer A:link { color: #202020; text-decoration: underline }
+div.footer A:visited { color: #202020; text-decoration: underline }
+div.footer A:hover { color: #808080; text-decoration: underline overline }
+/* div.footer SMALL { font-size: xx-small } */
+/* popup on graphs */
+div.popup { color: black; background-color: transparent; font-family: sans-serif }
+/* summary page */
+div.summarydetails { max-height: 100%; overflow: auto; }
+
+@media print {
+	/* for printing : pick which things you want to appear */
+	/* force the page background to be white */
+	body, body.summary, body.archive, body.compact, body.interface, body.cpu, body.memory, body.generic { color: black; background: white }
+/*	div.sidemenu { display: none }               */
+	div.sidemenuoptions { display: none }
+/*	div.header { display: none }                 */
+	A { text-decoration: none; color: black }
+	div.extensions { display: none } /* we dont want to print the links */
+	div.icons { display: none } /* we dont want to print the icons */
+/*	div.footer { display: none }                 */
+	div.footer A:link { text-decoration: none }
+	div.footer A:visited { text-decoration: none }
+	div.popup { display: none }	/* hide the time popup */
+	TD#htleft { display: none }	/* hide the header butons */
+/* these two do not work in firefox, but do work in MSIE and hide the side menus */
+	FRAME#leftframe { display: none; width: 0 }
+	FRAME#rightframe { display: none; width: 0 }
+}

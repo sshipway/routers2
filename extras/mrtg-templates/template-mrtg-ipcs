@@ -1,0 +1,23 @@
+#Workdir: /u01/rrdtool
+#LogFormat: rrdtool
+#routers.cgi*Icon: WINVER-sm.gif
+#routers.cgi*Desc: LHNAME (IPADDR)
+#routers.cgi*ShortName: SHNAME
+#routers.cgi*Mode[_]: generic
+
+#  ipcs monitoring
+Target[SHNAME-ipcs]: `mrtg-nrpe NRPEOPTS -H SHNAME -v check_ipcs `
+Title[SHNAME-ipcs]: SHNAME Shared Memory 
+MaxBytes[SHNAME-ipcs]: 10240000000
+PageTop[SHNAME-ipcs]: null
+LegendI[SHNAME-ipcs]: used:
+ShortLegend[SHNAME-ipcs]: b
+YLegend[SHNAME-ipcs]: bytes used
+Options[SHNAME-ipcs]: gauge growright noo
+Legend1[SHNAME-ipcs]: Shared mem usage
+Legend3[SHNAME-ipcs]: Peak shared mem usage
+SetEnv[SHNAME-ipcs]: MRTG_INT_DESCR="Shared Mem"
+routers.cgi*Options[SHNAME-ipcs]: nopercent nototal nomax
+routers.cgi*Icon[SHNAME-ipcs]: chip-sm.gif
+
+

@@ -1,0 +1,4 @@
+If you copy any of these files into the documentroot of your web server, and 
+change its name to 'favicon.ico' then many web browsers will use that icon as
+the site icon.  We use a lightbulb.
+

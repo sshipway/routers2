@@ -1,0 +1,34 @@
+Increasing performance of the frontend
+
+* Overview
+The main things affecting the performance of routers2 are the number of .cfg
+files you have, and the speed of your disk.  By far the most important is the 
+number of cfg files.
+There are a number of things you can do to speed up performance, in your web
+server, in the routers2.conf, and in your hardware.
+
+* Perl enhancements
+The best thing you can do is to use mod_perl (under Apache) or speedycgi (under
+UNIX) to make your Perl engine persistant.  If you use one of these, then make
+sure you have 'cache=yes' enabled in the routers2.conf so that caching of
+configs will be enabled.
+
+* Config file enhancements
+If you can guarantee that all of your .cfg files have Target before all other
+config lines, and all global definitions before the first Target line, then you
+can put optimise=yes in the routers2.conf.  This will have the menu code
+bail out on finding the first Target, speeding up the parsing of the cfg files.
+
+* Disk-based config caching
+If you have cache=yes in the routers2.conf, you can also define cachepath to
+point to a writeable directory.  This will then allow routers2 to save 
+pre-parsed config information to files in this directory between invocations.
+This will speed things up when a speedycgi child is reloaded or when Apache
+with mod_perl is first started, and will give a good speed boost if you use
+neither mod_perl nor speedycgi as it will not need to reparse all the config
+files each menu iteration.
+
+* Hardware enhancements
+Basically, all you can do here is to add more memory to your system (to stop
+any swap activity, and permit more disk caching) and to have as fast a disk
+subsystem as possible.

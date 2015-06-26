@@ -1,0 +1,640 @@
+PROBLEMS file v1.29
+                              Having Problems?
+                              ----------------
+
+These are a few common problems that you might like to check.
+They are roughly split into Installation problems, Running problems,
+NT problems and PDA Browser problems.  Please check all of these before
+you contact me with your problems, as you may well find the solution here!
+
+Win2k/ME/XP users - all of the NT problems/solutions below apply to you as well.
+
+Mac users - I haven't tested this under MacOS, but it should work.  Please let
+me know of any issues (management-speak for 'bugs' :-) under MacOS.
+
+These problems are not split into groups very well, so you should read
+all of them and make sure that none of them match your problem before trying
+the mailing list or my email address.
+
+If you have a problem NOT listed here, then try the mailing list for support,
+or mail me. If you have problems and then overcome them, please let me know
+so I can add the information here and help future users of this system.
+The mailing list is hosted on
+http://www.steveshipway.org/mailman/listinfo/support_steveshipway.org
+
+You might want to try the inbuilt configuration checker - call routers2.cgi
+with the paramter 'page=verify', eg:
+	http://myserver.mycompany.com/cgi-bin/routers2.cgi?page=verify
+or (windows servers)
+	http://myserver.mycompany.com/cgi-bin/routers2.pl?page=verify
+This will help to identify some of the more common setup config problems.
+
+If your problem is more of a 'how do I?' question, check the HOWTO file,
+there are more instructions in there.
+-------------------------------------------------------------------------------
+
+Q. It doesn't run at all!
+
+A. Do you have Perl installed?  If you are running UNIX, is Perl in 
+   /usr/local/bin/perl ?  If not, change the first line of the script to 
+   point to the correct location.  Do you have RRDTool installed?
+   If you are using NT, have you correctly configured the O/S and Web server
+   for your Perl installation?
+
+Q. I just get a 'Server Error' page.
+
+A. If using Apache, make sure you have the correct #!perl.exe path at the 
+   beginning of the script.  If using IIS, you may need to rename the script
+   to routers.pl and associate .pl with the perl.exe application.
+   Check your perl version and RRDTool version.  Make sure that the RRDs.pm
+   library has been installed in your perl library directory.
+   See later entries in this file as well.
+   Look at the error log file that your web server produces.
+
+Q. I get an error 'Cannot find RRDs.pm'
+
+A. This means that the RRDTool libraries cannot be found.  Have you installed
+   them yet?  Did you install them into the site-perl directory?  Usually
+   this is done with the 'make site-perl-install' or similar.  You could also
+   use the LibAdd: directive in the MRTG .cfg files.
+   Check that the file RRDs.pm is readable, and located in one of the paths
+   listed in the error message.  Also, check that auto/RRDs/RRDs.so exists
+   under the same area - this is called by the RRDs.pm Perl library.  Under
+   Windows, this file is called RRDs.dll instead.
+   If using Windows, did you do the 'ppm install rrds.ppd' command in the 
+   perl-shared directory, as instructed in the install instructions?
+   If using UNIX, did you remember to do the 'make site-perl-install' command 
+   after you installed the main code?
+
+Q. I get a message saying 'Offline mode: enter name=value pairs'
+
+A. You are running the script interactively.  It is not supposed to be run
+   in this manner - you are supposed to use a web browser and access the
+   script via a web server.  Check the INSTALL file for information on how
+   to install the package correctly.
+
+Q. I'm using NT, and I get nothing but a single page telling me it can't find
+   the configuration file.
+
+A. Did you remember to set the configuration file location in the routers.cgi
+   file?  Note that under NT, the path separator is a backstroke ('\'), and so 
+   you have to use a DOUBLE backstroke (it is the Perl escape character).
+   For example, "d:\\mrtg\\routers2.conf"
+
+Q. I have installed it all, and all I get is blank pages/error messages.
+
+A. Try running the script manually at the command line.  This may present
+   you with an error message that was hidden by the CGI web interface. Also
+   check the routers2.conf file to make sure that all the paths are correctly
+   specified.  If running UNIX, Perl should be in /usr/local/bin/perl.  If it
+   isnt, then modify the first line of the script to be correct.
+   If using UNIX, or Apache under NT, you will probably need to modify the
+   '#!/usr/local/bin/perl' at the start of the scripts.
+   Note that the supplied install.pl script should have made these changes for
+   you.
+
+Q. I get one or more frames with a 'Server Error' page!  
+
+A. This is usually a CGI problem.  Does your server have CGI Exec set for the
+   script directory?  Does the script have execute permission for the HTTPD
+   user?  Have you put something incorrect in the .conf file?  Have you been
+   editing the routers.cgi script yourself?
+   Try running the routers.cgi script from the command line and look for a more
+   detailed error message.  If it works, check that the HTTP daemon user has
+   rights to the necessary directories.
+
+Q. The menu of routers appears OK, but the main graph window is blank.
+
+A. Have you installed the RRDs Perl libraries?  Check the web server error
+   logs and see if any more helpful error emssages are in there.
+   Make sure your RRDs.pm library file is under the site_perl directory.  With
+   NT, this is something like c:\Perl\site\lib, in UNIX it is something like
+   /usr/lib/perl5/site_perl/5.005/
+
+Q. I get a web page appearing with the error 
+   "No RRD file defined for interface  ''"
+   and none of the routers are listed on the left-hand menu.
+
+A. This is a problem locating the MRTG configuration files.  Check your
+   routers2.conf file has the correct confpath and cfgfiles entries, and (if
+   you are using a UNIX system) that you have not saved your routers2.conf in
+   DOS format.  If you are using NT, you are NOT allowed any spaces in the
+   file names or path names.
+
+Q. I have a 64k line, and defined the max bandwidth as 8000 bytes. Now this
+   is being reported as something like 62.5kbit.  Why isnt it 64kbit?
+
+A. Remember that 1k = 1024.  So, 64kbit = 64x1024 bit = 8192 bytes.  However,
+   1Mbit = 1x1000x1024bit.  This is all down to the wonders of networking.
+   If you really want 1k=1000, put the 'usebigk = no' option in the routers2.conf
+   Alternatively, you can put 'usebigk = yes' to make 1M=1024x104bit
+
+Q. I get strange numbers, such as 62kbit when I know it is 64kbit.
+
+A. Sounds like a conflict in size of a K.  You can use the 'usebigk = no'
+   directive in the routers2.conf to force 1k=1000 instead of 1k=1024.
+   See the previous question.
+
+Q. I get an RRD error message mentioning 'RPN' and 'in,,*'
+
+A. This is a knock-on error caused by failure to correctly parse the MRTG
+   .conf files.  Make sure you have the latest version of routers.cgi from
+   the web site!
+   If this does not correct the problem, please email the error message, 
+   and .conf files, to me so that I can track down the problem.
+
+Q. I get an error: 'Could not find file /usr/locl/etc/webdev.conf'
+
+A. This means that the CGI script is still looking for its configuration file
+   (the routers2.conf file shipped with the script) in the default location.
+   You should modify the indicated line at the beginning of the script to
+   indicate where you have installed the script configuration file.
+   Note that if you use the servers.cgi, rrdbar.cgi or pandaplay.cgi scripts,
+   they can all share the same .conf file.
+
+Q. No graphs are created, but everything else is OK
+
+A. Check you have given write permission for the httpd process to the graphs
+   directory.  Check the paths for the graphs directory, and the database 
+   directory, are set correctly in routers.cgi.
+   Check that you have the 'logformat: rrd' option set in your MRTG .conf files.
+   Check that you have the 'graphurl' and 'graphpath' options set correctly.
+   Remeber that the 'graphurl' should start and end with a /.
+   Check that the HTTP daemon process can write to the 'graphpath' directory.
+
+Q. The graphs are created, but never seem to refresh or update.
+
+A. Check you have the .htaccess file in the graphs directory.  Check that 
+   your web server has enabled the Override and Expires options for this
+   directory.  If your web server does not support .htaccess, find out the
+   appropriate way to set expiry or 'never cache' on the graphs directory.
+   If you are using a shortened interval (<5min) then make sure you have 
+   appropriately shortened your expiry interval too.
+
+Q. The script runs, but there is no list of routers.
+
+A1. Check you have the correct path for the MRTG config files.
+A2. If you have windows, make sure there are no spaces in the path name or
+   cfg filenames.
+
+Q. The interface descriptions come up as numbers, not as their names.
+
+A. Check that the MRTG program is correctly running.  If it fails, it will
+   not create the .ok files, which are used by routers.cgi to identify the
+   interface descriptions.
+
+Q. I have no maximum bandwidth line on the graph!
+
+A. Make sure you have the MaxBytes[....] option set for that interface.  Using
+   a default (MaxBytes[_]:) is not good enough. (This is now corrected)
+   Have you set the maxima=no option in the routers2.conf?  Have you set it to
+   be scaled, and so the max bandwidth line is off the top of the page?
+   Do you have the 'nomax' option set?
+
+Q. The daily graphs are fine, but the weekly, monthly and yearly fail.
+
+A. Have you disabled the WithPeak options in the .cfg files?  You need to
+   have the WithPeak set as the graphs use the value.  
+
+Q. It all seems to run, but the lefthand frame has lots of broken images in it.
+
+A. Check you have the .gif files in the ICONS directory, and that the 
+   routers.cgi script is correctly giving the URL of this directory.
+   Check your routers2.conf file specified the correct iconurl URL.
+
+Q. I have very little traffic on my interface, and the scale means that it
+   appears as almost nothing.  How can I change the graph Y scale?
+
+A1.The graph Y Max value will always be >= MaxBytes[] for the interface, if
+   it is set.  This is the red line on the graph. 
+   You can change the default behaviour of routers.cgi by using the 
+   'unscaled = no' option in the routers2.conf, to remove the max line.  Note 
+   also that routers.cgi support the 'Unscaled[]: dwmy' directive in the 
+   MRTG .cfg file, although it defaults to unscaled.  See the HOWTO file.
+
+A2.You can also use the 'Rescale' button to change the vertical scaling between
+   the three different options.  One of these should show the data correctly.
+
+Q. When I want to go back to a previous graph, I have to hit the 'Back'
+   button on my browser twice!
+
+A. This is a known problem due to the way in which the pages update.  The menu
+   frame is updated at the same time as the graph frame, and it counts as two 
+   updates.  There /is/ a way to fix this, but it's a lot of work and not due
+   for inclusion until a later release.  So, just live with it - sorry!
+
+Q. Although all the .conf files are there, not all my routers appear in the
+   list.  What has happenned?
+
+A. This may be down to the format of your .conf files.  Maybe there are 
+   strange characters in your community strings, or in the Target[] names?
+   The current version tries to produce visible error messages for all .conf
+   files that it is unable to understand.
+
+Q. I get a router/interface called 'Parse Error' on my screen.
+
+A. This means that the routers.cgi script is having problems understanding
+   your MRTG .conf file.  You may be using a strange Title[] line, or have
+   explicit OIDs or interface names in your Target[] line.  Select the router,
+   and then go to the Info page.  This gives the detailed error messages.  If
+   this is no help, email me the offending .conf file and this page of error
+   messages so that I can investigate.
+
+Q. I get an error: 'RRD Error: Cant parse DEF'.  I am running under NT.
+
+A. This is probably a path name issue.  Check that you have the correct type
+   of strokes '/' and '\' in the appropriate places in the routers2.conf.
+   Set the 'NT = 1' option in the routers2.conf to for NT operation.
+   If this doesnt fix it, look in the routers.cgi file for a variable called
+   '$pathsep'.  Change the line to say:
+	my ($pathsep) = "\\";
+   This might fix things.  If you make any other changes necessary to ensure
+   working under Windows NT, please email me and let me know so they can be
+   incorporated into the next release.
+
+Q. There are no Hour numbers on the X-axis of the Daily graph
+Q. There are no week numbers on the x-axis of the Monthly graph
+
+A. Your version of Perl does not support all the options to strftime.  This is
+   particularly a problem with ActivePerl.  Try setting 'NT=1' in the [web]
+   section of the routers2.conf file, if you have NT.  Otherwise, modify the
+   'my ($dailylabel) = "%k";' line to have '%H' instead.
+   Week numbers can be set in the routers2.conf - style 'V' does not work 
+   under ActivePerl.  Set it to U or W for it to become visible.
+
+Q. I have just upgraded, and my 4-hour graphs no longer appear!
+
+A. They are now (more accurately) called 6-hour graphs.  The routers2.conf
+   directive has also changed to '6hour = yes'.
+
+Q. I am getting very odd behaviour, all interfaces appearing in the routers
+   list and some pages blank or in separate windows.  I am using speedycgi
+   or mod_perl to run the script.
+
+A. Sometimes the script does not work reliably with mod_perl or speedycgi.
+   In this case, you should stop using mod_perl and use '-r 1' as a speedycgi
+   option.
+
+Q. The frames are not working - sometimes new windows start up, and sometimes
+   one frame will take over the entire window.
+
+A. You might be running speedycgi (see other question), or you might be trying
+   to run multiple instances of your web browser, all going to routers.cgi
+   pages.  Because of the way routers.cgi names the frames, you may get strange
+   behaviour if you try to have more than one frameset active at once.
+
+Q. When I use my monochrome PDA to view the pages, I cant read the titles.
+
+A. Make sure you select one of the black&white Styles - Psion or Palm.
+
+Q. When I use my PDA to view the graphs, everything appears except the graphs
+   themselves!
+
+A. Your PDA browser may not support PNGs.  Make sure you have PNG=0 in the
+   routers2.conf file , so that you will only generate GIFs.
+
+Q. When I'm using my PDA, the entire screen redraws, not just the graph window.
+
+A. This is deliberate - many PDA browsers do not support JavaScript, and so
+   when you are using a PDA Style, the links change to remove the need for
+   Javascript (at the cost of some efficiency and speed).
+
+Q. I can't make the targetnames.pl script work.
+
+A. Make sure you are specifying the correct name and locating for your 
+   routers2.conf file on the command line.
+   You must be in the SAME DIRECTORY as the MRTG SNMP_Util.pm when you run
+   the script, or else have these perl modules in your Perl library path.
+   Dont forget to redirect the output to a temporary output file for inclusion
+   into your current routers2.conf!
+
+Q. The install script doesn't work/can't find my web server/etc
+
+A. There are an almost infinite number of possible system configurations, and
+   I can only support a few - Apache, NT, UNIX, and IIS.  Also, there is no
+   guarantee that your system has things installed in the 'expected' places.
+   Make sure you have Perl in your path, and that (on NT) you specify all of 
+   your local hard drive letters.
+   Also, install.pl can make no changes to your NT registry or web server
+   configuration, so it's up to you to get mod_expires enabled under Apache,
+   and Perl CGI scripts enabled under NT (see the ActivePerl website for
+   instructions on how to do this).
+   If you can work out how to improve install.pl, then I'd be glad to hear from
+   you.
+
+Q. The install script runs, and I get a 'drive not ready' message.  I am using
+   Windows.
+
+A. You should make sure that, when it asks, you tell it the drive letters of
+   your FIXED DISKS only, not your CDROM or floppy.
+
+Q. I can't  find any 'CPU Load' pages for my router
+
+A. Have you added a CPU Load MRTG target in the MRTG .cfg file?  Read the 
+   HOWTO file to see how to add a CPU Load target to your existing MRTG 
+   configuration.  Make sure the target name has 'CPU' (in capitals) in it,
+   and has MaxBytes set to 100.
+
+Q. Everything works fine apart from the Compact summary page.  The bars all
+   appear with an error message in them about 'GD'.
+
+A. This happens because you have not installed the GD Perl libraries.  Download
+   these from the www.CPAN.org website, install them, and it should be OK.
+   If you are using NT and ActivePerl, then use the PPM program to install
+   the GD library - see the ActivePerl documentation on 
+   http://aspn.activestate.com/ASPN/PPM/FAQ
+
+   UNIX users should visit http://www.boutell.com/gd/ and download v1.8 of the
+   gd libraries in addition to the GD.pm perl interface.  Note that the version
+   of the gd libraries shipped with Linux is often too old!  Don't install
+   the GD.pm perl interface until you have the right version of the gd library
+   installed - if you do, it will compile in the wrong static libraries.
+
+   Alternatively, you can disable the Compact Summary page by placin the
+   directive 'compact = no' in the routers2.conf.
+
+Q. There are no 'working day' averages on the Yearly graph!
+
+A. This is because the Yearly data is summarised by day, and so it is not
+   possible to separate out the working hours from the RRD, due to the lossy
+   nature of the RRD data.  At this level, the granularity is too high.
+
+Q. I cant see the working day summary data!
+
+A. Make sure you enable it by setting the daystart and dayend values in the
+   routers2.conf file.
+
+Q. I'm using windows, and all I get is a download of the Perl script, not the
+   generated pages.
+
+A. This is because you have not configured your Web Server or Windows to 
+   correctly deal with a Perl script.  Your web server does not understand
+   that this is a program to be passed to perl.exe for running.  Check the
+   activeperl website for instructions on how to correctly configure both
+   Windows and Apache/IIS.  You will probably have to associate the .pl 
+   extension with the Perl executable.
+
+Q. I have put a directive in the MRTG .cfg file, but the format of the graphs
+   displayed has not changed.
+
+A. Check that you dont have a graph already in the cache, or in the graphs
+   directory on the web server.
+   Check that the directive you have used is supported by routers.cgi - look
+   at the list in the MRTG_INFO file.
+
+Q. I am Israeli/Arab and my working week is not Mon-Fri.  How can you be so 
+   predjudiced and not support Sun-Thu/Sat-Wed ?
+
+A. It is actually extremely hard to identify the day of the week using just
+   5 RPN functions when you have only the number of seconds since 1/1/70. To
+   make this calculation generic would be incredibly awkward.  It is in the
+   WISHILST but has not been done just yet.  This has not been omitted due to
+   any prejudice, just due to practicality.  If this is important to you,
+   then you could always encourage me by sending a gift from the wishlist...
+
+Q. My graphs have all come out grey, with the figures below being listed
+   as 'nan' in all cases.
+
+A. This means you have no data gathered.  Make sure MRTG is running correctly
+   with no errors for at least 15 mins before looking at the data (ie, you have
+   at least 3 consecutive samples in the database).
+
+Q. Some of my interfaces have appeared in the menu with a target icon, and not
+   an interface icon.  They also appear to be graphed differently.
+
+A. This is because the definition in the Target[] line was not fully understood
+   by the routers.cgi script, so it was assumed to be a user defined target.
+   It is also assumed to be something other than router traffic data.  If this
+   is not the case, read the HOWTO, and optionally use the options:
+	routers.cgi*Options[targetname]: interface
+	routers.cgi*InSummary[targetname]: yes
+	routers.cgi*InOut[targetname]: yes
+   You can also set the 'mode' for this target to 'interface', 'cpu', 'memory'
+   or 'generic'.  This is done with
+	routers.cgi*Mode[targetname]: interface
+   which will set all the appropriate defaults for that mode.
+   Make sure your Target[]: line comes BEFORE any other option lines for 
+   that target!
+
+Q. I've installed the GD libraries, and now my bar graphs appear as just
+   grey bars.  Why isn't it working?
+
+A. This usually happens on UNIX systems that have a version of the GD C
+   library that is too old.  Download the latest libgd.a from www.boutell.com,
+   and then reinstall the GD perl libraries.
+
+Q. I cannot make the graphs time show relative to the correct timezone!
+
+A. Are you using Windows?  Much of the timezone code does not work under
+   Windows as it will not support the TZ variable.  Under windows, everything
+   must be relative to the server's timezone (although you can change this 
+   globally in the routers2.conf [web] section).
+   For more information, check the HOWTO.
+
+Q. The AVERAGE line in my graphs doesnt seem to have an 'average' or 'max'
+   that matches the values I expect.  This is for a userdefined graph.
+
+A. Remember that this represents the AVERAGE of the TOTAL of the data, rather
+   than the TOTAL of the AVERAGE.  Similarly, it is the max of the average,
+   rather than the average of the max values.  This shows more when looking
+   at yearly graphs (the line shows the daily average) and comparing the max
+   values (when the individual peaks are not shown).
+
+Q. I've upgraded Perl, and now routers.cgi no longer works!
+
+A. When you upgraded, did you change the location of the Perl executable?
+   If so, remember to change the first #! line in the routers.cgi file, so that
+   your web server can run it.  Also, you may need to change file extension
+   associations (in Windows) or your web server configuration, in order for
+   Perl to work correctly.  Finally, you may need to reinstall any Perl 
+   modules that you installed with the old version -- for example, the GD
+   perl module, and the RRD perl libraries.
+
+Q. I cant seem to use Windows pathnames of the \\hostname\share\path format
+
+A. This is because the RRDTool libraries do not support this sort of name.
+   Instead, map a drive letter and use something like Z:\path instead.
+
+Q. The 'Bookmark' button doesn't create a bookmark in my Favorites list!
+
+A. It isn't supposed to.  The Bookmark button creates a bookmarkable URL in
+   the target address, so that you can then subsequently use your browser's
+   'Add bookmark' (or 'Add to favorites' in MSIE) function.  There is no
+   standard javascript function to cause a bookmark to be automatically added
+   to your browser, although MSIE has a non-standard way of achieving this.
+
+Q. The date format in the Archive menu is wrong!  I want d/m/y or m/d/y etc...
+
+A. This is because your server is not correctly setting or reacting to the 
+   locale settings.  You can override this by uncommenting the correct line
+   in the routers2.conf file for 'shortdateformat'.
+
+Q. My per-Device user defined Extension script is not being passed the 
+   hostname and community string!
+
+A. Move the definition in the .cfg file to the end, so that it is after a
+   target definition that holds this information.  Also, if you require the
+   SNMP community string, you need to add the keyword 'insecure' to the end
+   of the Extension definition in the .cfg file.
+
+Q. I get some error messages in the log that say 'Cant locate object method
+   "png" via package "GD::Image"' or similar.
+
+A. You have an old version of the GD libraries that only support GIF.  Either
+   upgrade to the latest GD libraries, or disable PNG in your routers2.conf
+   file by changing to 'png = 0' in the [web] section.
+
+Q. The labels on the 'Monthly' graph are wrong!
+Q. The timezone is not changing the graph times!
+
+A. Upgrade your version of RRDTool to 1.0.36 or later.  This behavour is 
+   caused by a bug in the RRDTool library prior to v1.0.36.  Windows users
+   should be aware that a bug in ActivePerl means that the 'V' week numbering
+   style does not work, and should use U or W instead.
+
+Q. I have just upgraded from v1.x to this version, and now none of my
+   bookmarks work!
+
+A. Between v1.x and v2.x, the internal key system was vastly improved.  
+   However, this meant that old v1.x style bookmarks could no longer be
+   supported.  Sorry, but you'll have to re-create your bookmarked graphs.
+   See the UPGRADING documentation for more details.
+
+Q. All of my data appear to be multiplied by 8 and shown in bits, when it is
+   supposed to be in bytes or some other unit
+
+A. This is either because (1) the target is being incorrectly identified as
+   an interface, or (2) you have specified Options[]: bits which is causing
+   the behaviour.
+   To stop (1), add the directive below (replace the targetname).  Youc an
+   identify the mode a target is being identified as by looking at the word 
+   in the curly braces {} on the file's Info screen for this target.
+	routers.cgi*Mode[targetname]: generic
+   To stop (2), look in your .cfg file for the Options[targetname]: line and
+   make sure it does not specify 'bits'.  Look also for an 'Options[_]: bits'
+   or 'Options[^]: bits' since these will be added/replaced/appended to the 
+   per-target options.  Note that a global option affects ALL targets, not just
+   the ones following it.
+   You can also use
+	routers.cgi*Options[targetname]: bytes
+   to force a target to be treated as a 'bytes' target.
+
+Q. I use Include:s, and I can get some Target menus with several 'Routing Table'
+   links.  I only want one of them!  How do I stop the others?
+Q. I don't want the routing table link to be added for some of my .cfg files.
+
+A. Use the command in the MRTG .cfg file:
+	routers.cgi*RoutingTable: no
+   to switch off the automatic routing table extension for the current file 
+   and all following Include:s.  If you use this at the beginning there
+   will be no links, or you can use it after the first include if you want only
+   one.
+
+Q. I'm using Windows for my server.  The Working Day and Unknown background
+   highlighting does not seem to work.
+
+A. This is because of a difference in RRDTool under UNIX and Windows.  Under
+   the current Windows version, it is not possible to do background
+   highlighting, so it does not appear.
+   This has been confirmed as a bug in the Windows RRDTool library, so with
+   luck this will be fixed in RRDTool v1.0.39 or later under Windows.(Sep 2002)
+   Now confirmed fixed in the latest Windows version. v1.0.40 (Dec 2003)
+
+Q. My weekly graphs have the X-axis labelled 'week' and not 'week <number>'.
+   Where are my week numbers?
+
+A. This is a bug in earlier versions of RRDTool.  In order to correct it, you
+   should upgrade your RRDTool to at least v1.0.29, preferably v1.0.35 or 
+   later.  Also, Windows users should note that a bug in Activeperl means that
+   the 'V' week numbering does not work.  You should use U or W instead.
+
+Q. The CSV export seems to have different data from the graph.  Also, the 
+   total usage figures on the graph dont match the total of the CSV table.
+
+A. Remember that the CSV export is the RAW data.  So, the graph may show the
+   throughput in bits instead of bytes, or perminute instead of per second.
+   For totals, you have to multiple the throughput by the time interval before
+   you add the figures.  Larger interval graphs will average the figures for
+   smaller intervals in order to get the graph.
+   The interval used in the export is the best available from the .rrd file you
+   have - this may be a different granularity to the data in the graph you
+   see.  However, the data should match after averaging.
+
+Q. I get an error about units-exponent
+
+A. This happens if you are using the fixunits option and have a too old version
+   of RRDTool.  Either upgrade rrdtool, or stop using fixunits
+
+Q. My Compact Summary page does not appear in the menu
+
+A. You have disabled the Compact Summary in your routers2.conf file.  Make sure
+   you have 'compact = yes' in there.
+
+A. This is because routers.cgi does not think there are any Targets that would
+   be shown on this page.  All of your targets have defaulted to NOT being on
+   the Compact Summary page.  You can force a target to appear in the Compact 
+   summary page by using the directive:
+	routers.cgi*InCompact[targetname]: yes
+   in your MRTG .cfg file.
+
+Q. Some of the directives in my MRTG file appear to be being ignored!
+
+A. All directives in the MRTG file for a particular target MUST come AFTER
+   the Target[]: definition.  Otherwise, they will be ignored.
+   Also, make sure you haven't overridden one set of directives with another.
+   Finally, not all of MRTGs directives are supported by routers.cgi -- check
+   the MRTG_INFO file for details of what is supported, and what is not.
+
+Q. I can't seem to get the correct units from the kMG[] directive
+
+A. The kMG MRTG directive is not supported by routers.cgi, since there is
+   no way (currently) to pass this sort of configuration to the RRDTool
+   graphing libraries.  Instead, use Factor[] to multiply the values so that
+   they are in the correct units -- eg, Factor[x]: 1024000 if your SNMP
+   agent is returning values in Mb.
+
+Q. routers.cgi does not seem to recognise my .cfg files
+
+A. Check your cfgfiles and confpath definitions.  If you use Windows, then
+   make sure there are no spaces or / characters in the path or file names,
+   as these can confuse Perl.  Use the configuration verification pages to
+   see if they are being spotted, but have no valid Targets in (any empty
+   or invalid files are ignored).
+
+Q. This runs very slow...
+
+A. There are a few things you can do to improve performance.  Use speedycgi
+   or mod_perl (but read the HOWTO first -- there are a few special things
+   you need to do first!).  Put the .cfg files on a ram disk.  Remove comments
+   in the .cfg files and routers2.conf.  Make sure you have enough memory and
+   CPU in your monitoring server.  Check disk access times.  Make sure your
+   .cfg files do not contain >100 targets each.
+
+Q. There are lots of problems with this version!  Where can I get the latest
+   version with all the fixes?
+
+A. http://www.steveshipway.org/software/
+   http://www.shipway.org.uk/software/
+
+Q. I want this bug fixed!  Who do I tell about it?
+
+A. steve@steveshipway.org
+   Note that this project is done in spare time, so I will do more or less 
+   work on it depending on my *real* workload.  You are, of course, free to
+   make your own changes to the code an fix the bug yourself (but please
+   email me to let me know of the problem)
+
+Q. I really like this program.  What can I do to say 'thanks' ?
+
+A. Contribute something yourself to the Internet.  Write a utility, app, 
+   or whatever, maybe run a mailing list or newsgroup, join an open source
+   project, write a game and send it out as free/shareware.  Keep the
+   co-operation fuelled.
+   If you want to give me a gift (who am I to complain?) there are some
+   suggestions on the application homepage.  Tobi Oeticker, who wrote MRTG
+   and RRDTool, would also like you to help build his CD collection.  See his
+   pages for details.
+   I have an Amazon Wishlist set up on www.amazon.co.uk, so you can send
+   me something from there if you'd like?
+   http://www.steveshipway.org/software/wishlist.html
+

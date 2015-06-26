@@ -1,0 +1,243 @@
+README file v 2.20
+-------------------------------------------------------------------------------
+ROUTERS.CGI  : Frontend to RRDTool databases created by MRTG
+-------------------------------------------------------------------------------
+Author: Steve Shipway (steve@steveshipway.org)
+
+Note: if you are experiencing problems with running routers.cgi, take a look
+      at the PROBLEMS file for more help. It's in the doc directory.
+
+      If you want help using a particular feature, check the doc/HOWTO file.
+
+      If you want help installing, look at the doc/INSTALL file
+
+      If you want to know about MRTG file directives, look at the doc/MRTG_INFO 
+      file.
+
+      If you want to know about configuring routers.cgi, then look at 
+      the doc/ROUTERS_CONF file.
+ 
+      If you are upgrading, and want to know the new features and bug fixes,
+      then take a look at the doc/UPGRADING and CHANGES files.
+
+Acknowledgement:
+      The SNMP_Session.pm, SNMP_util.pm and BER.pm files accompanying this
+      package are not created by myself.  They are as distributed with the
+      current MRTG release from Tobi Oeticker, and contain their own
+      attribution.  They are not required for the routers.cgi package to run,
+      they are used only by the targetnames.pl script.
+
+Quick Install
+-------------
+For more details, look at doc/INSTALL.  However, if you just want to go for it,
+then run the Perl script install.pl and follow the prompts.
+
+Summary
+-------
+This package consists of a single Perl CGI script, and a number of GIF 
+images.  Both the images and script need to be accessible from your web 
+browser in order for the package to work.  In addition there is a setup
+script, a script to help configure your .conf file, and an addin script
+to give routing tape information.
+
+This gives a new, forms-enhanced frontend for the RRDTool databases.  It is
+intended to replace the '14all.cgi' script shipped with RRDTool and MRTG,
+for certain applications.
+
+What it does
+------------
+It generates some compact, fairly good-looking frames-based pages to act as
+frontends for the router statistics collected by MRTG and held in the RRDTool 
+databases, as configured in the MRTG .conf files.  Although highly configurable,
+it is designed to work with minimum configuration using AI code to take
+reasonable defaults for most options.
+
+What it does not do
+-------------------
+It will not work with MRTG .log files.  It will not work with other RRDTool
+databases not created by MRTG. 
+It will not collect the data, it will only display it (except in the case
+of the routingtable addin).
+
+What it looks like
+------------------
+Hopefully, there will be links to demo pages from the main website, on
+http://www.steveshipway.org/software/
+
+Why does it do/not do this?
+---------------------------
+I wanted a frontend that was user-friendly and easy to move to.  A more
+general frontend would necessarily be more complex to configure, and would
+not be so user-friendly (if you want something like this, see the excellent
+Cricket frontend).
+I found that 90% of the statistics I needed access to were for routers, 
+collected by the MRTG software.  So, making the appropriate assumptions, I
+found I could use the existing MRTG configuration files and save on unnecessary
+work.
+
+How does it decide what names to give routers and interfaces?
+-------------------------------------------------------------
+Device names are chosen in this order of preference:
+1. The [targetnames] section of the routers.conf files, using the .conf file
+   name as a key (without the path) (deprecated)
+2. The old [routerdesc] section of the routers.conf file, using the name in 4.
+   below as a key.  This is now deprecated.
+3. The first ShortDesc[] directive for the first target in the MRTG .conf file
+4. The first word of the first Title[] line in the MRTG .conf file
+5. The filename containing the data
+
+Target Long descriptions - 
+1. [targettitles] section of routers2.conf (deprecated)
+2. routers.cgi*Description[xxxx]: xxxxx
+3. Title[xxxx]: xxxxx
+
+Target Short descriptions -
+1. [targetnames] section of routers2.conf (deprecated)
+2. routers.cgi*ShortDesc[xxx]: xxxxxxx
+3. SetEnv[xxxx]: MRTG_INT_DESC="xxxxxx"
+4. If ifdefault=target is set in routers2.conf [targetnames] section, or 
+   ifdefault is undefined, then use IP Address, Interface desc, #interface 
+   number, or the target name itself (in that order)
+5. If ifdefault=cfgmaker is set in routers2.conf [targetnames] section, then 
+   use the PageTop section defined by cfgmaker to find and use PortName, 
+   Description, or IfName (in that order)
+6. If a MRTG .ok file exists with an entry for this target's interface, then 
+   the description associated with that interface.
+7. Use the long description, possibly truncated to the first word or the first 
+   word after the last colon if it contains a colon.
+
+Router group names are set as:
+1. The [targetnames] section of the routers.conf, using the full directory
+   name as a key (case sensitive, NT users should add the drive letter if it
+   is specified in the confpath directive)
+2. The last component of the directory name, often with a trailing /
+
+95th Percentile Calculations
+----------------------------
+In brief, they are inaccurate, and this cannot be corrected.
+The 95th Percentile is a weighted Median average.  Simply put, it is the 
+minimum value that the sample set remains below 95% of the time.  A true
+Median average could also be thought of as the 50th Percentile.
+Unfortunately the RRDTool databases work on a Mean average.  As the sample
+interval increases (ie, you move from Daily graphs to Weekly graphs, and so
+on) you will smooth out the data.  This results in a lower 95th Percentile
+number than it should be.  This is unavoidable because of the lossy nature
+of the RRDTool databases - they summarise in order to save space.  Sadly this
+summarising is not compatible with the calculation of the 95th Percentile.
+So, if you want a more meaningful 95th Percentile, look at the daily graphs,
+where the samples are averaged only over 5min intervals.
+Other ways to get more meaningful 95th Percentile numbers are to decrease
+the sample interval to 1min, and to double the RRA length of the RRD files
+(you can do this with the rrdextend.pl script in the extras directory).
+The new v1.3 of RRDtool has built-in support for accurate 95th Percentile
+calculations, if you manually add an extra RRA to the database.  Routers2
+does not yet take advantage of this, though.
+
+Routing Tables
+--------------
+If you set the appropriate option in the routers.conf file, then a new link
+will appear on the 'info' page giving the router's routing table.  However,
+for this to work you must:
+* Install Net::SNMP on your server
+* Install the routingtable.cgi script
+* Make sure your routers will allow this server to make SNMP queries 
+* Uncomment the option in the routers.conf
+In addition, the MIME multipart support in IE4 and IE5 is broken, and does not
+usually work correctly.  It's OK with Netscape though!  The script detects
+the existance of IE, and disables the server push update, so it works but is
+not so pretty.
+
+Grouping of routers
+-------------------
+This feature is disabled by default, but you can switch it on in the 
+routers.conf file.  When enabled, the routers are grouped according to the
+directory in which their correcponding MRTG .cfg file lives.  You can define
+files in more than one directory by having multiple entries on the 'cfgfiles'
+directive, eg:
+cfgfiles = dir1/*.cfg dir2/*.cfg
+and so on.  You can set a better description for these groups by making an
+entry in the [targetnames] section of the routers.conf file.
+See the HOWTO file for more detailson this feature.
+
+Timezones
+---------
+Support for different timezones is patchy, due to O/S problems.  Basically,
+under UNIX you will find the Timezone[] directive mostly works, although
+you may need to use a more specific syntax.  Under Windows, it is more
+difficult and you may not be able to place routers into different timezones,
+nor will you be able to show graphs relative to any timezone but the one the
+server lives in (this can be overridden on a GLOBAL basis in the routers.conf
+file).  See the HOWTO for more information.  Note that MRTG under Windows can
+cope better with Timezones than RRDTool as it uses a different (better) C
+compiler for the library.  Sadly we are stuck with the current RRDTool
+library limitations with timezones.
+
+Trend Analysis
+--------------
+To do this, you need to install the trend.cgi script in the extensions
+directory into your cgi-bin.  Full instructions are given in the accompanying
+documentation.  You need to add directives to your MRTG .cfg files to link
+this script in as an extension to the various targets.
+
+Which MRTG .cfg file directives are supported?
+----------------------------------------------
+See the file MRTG_INFO for a complete list.
+
+I have a few ideas...
+---------------------
+If they are relating to MRTG or RRDTool, then send them to Tobi Oetiker (the
+author of RRDTool).  For this frontend, then by all means email me.  I'd like
+to know if anyone else is using this.
+
+There's a bug!
+--------------
+If you find a bug, or something that doesn't work in your setup, then remember
+that this is a work in progress.  Email me and let me know how/if you fixed it,
+and what you think should be done to correct it.  All bug reports are read, 
+and discussion happens on the mailing list.  So far, most bugs have been 
+fixed very soon after reporting.  
+There is a discussion forum and bug reporting centre on steveshipway.org:
+http://www.steveshipway.org/forum
+The mailing list currently lives on steveshipway.org, to join go to the URL
+http://www.steveshipway.org/support
+
+More information
+----------------
+There is a book available, _Using MRTG with RRDtool and Routers2_.  This gives
+detailed information on planning, setting up, configuring and tuning your
+MRTG system.  See http://www.steveshipway.org/book/ for more details.
+
+Saying Thanks
+-------------
+If you want to thank me for giving away this software, then there is an easy
+way to do it - send me a DVD or similar gift from my Amazon wishlist.
+See the page on
+http://www.steveshipway.org/software/wishlist.html
+for more details on how to show your appreciation.  
+Also, Tobi (who of course produced MRTG and RRDTool) has a similar scheme
+for his DVD collection, and you could do worse than sending him a gift as well.
+
+Legal Jargon
+------------
+
+In summary, you can use it, copy it, modify it and give it away, but not
+sell it or any derivative work.  More precisely, see the following GPL
+text:
+
+routers.cgi : Interactive web frontend to RRDTool routers traffic database
+Copyright (C) 2000-2009 Steve Shipway
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+

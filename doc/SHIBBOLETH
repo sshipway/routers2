@@ -1,0 +1,58 @@
+Setting up Shibboleth Authentication.
+
+Routers2 supports Shibboleth authentication.  To use this, you need to do 
+these things:
+
+1. Install shibboleth and check that it is working.
+    Of course.
+
+2. Lock the Routers2.cgi script like this:
+<Location /cgi-bin/routers2.cgi>
+        AuthType shibboleth
+        ShibRequestSetting requireSession 0
+	require shibboleth
+</Location>
+
+This will mean that shib authentication will be used if available, but not
+required.
+
+2. Create a separate directory that is Shibboleth locked, for example /shib
+<Location /shib>
+        AuthType shibboleth
+        ShibRequestSetting requireSession 1
+        ShibDisable Off
+	require valid-user
+</Location>
+
+This is the location that will be used to perform authentication.
+
+3. Set up a forwarding page in the loced URL.  
+  For example, create /shib/index.html that contains this:
+
+<HTML><HEAD>
+<META http-equiv="Redirect" CONTENT="/cgi-bin/routers2.cgi">
+<META http-equiv="Refresh" CONTENT="0;URL=/cgi-bin/routers2.cgi">
+</HEAD>
+<BODY>
+Redirecting to <a href=/cgi-bin/routers2.cgi>MRTG server</a>
+</BODY></HTML>
+
+4. Edit routers2.conf
+
+You need to set the options
+  auth-required = shib
+  shib-login = /shib
+where /shib is the location you created the file in step (3)
+
+5. Set up users in your routers2.conf
+
+  Users who have not yet authenticated will get the options in the
+[routers.cgi] section of the file.  Authenticated users will get the
+[user-xxxx] section, if they authenticated to shibboleth as xxxx.
+
+6. Test!
+
+With the shib option enabled, you will get a Login button in the top banner
+of the screen; after logging in, you will instead see 'User: xxxx' for username
+xxxx.
+

@@ -1,0 +1,16 @@
+The graphprune utility.  You are supposed to use this in conjunction with
+the graph archive feature in routers.cgi
+
+This is designed to be called by your favourite batch scheduler - for example, 
+cron on a UNIX server.
+
+On UNIX, call it from your crontabs similarly to this:
+
+00 00 * * * /usr/local/bin/graphprune.pl 
+
+You configure it by setting the location of the routers.conf file and your
+perl executable in the script, and then set your expiry time for archived
+graphs in the routers.conf
+
+Make sure you run it as a user who has rights to delete archived graphs!
+

@@ -1,0 +1,45 @@
+Known bugs:
+
+The system should be able to correctly cope with a target name starting with 
+an underscore. 
+
+The verify page creates a special png file in the graphs dir, but cannot 
+delete this or prevent it from being cached.
+
+We need to add the new headings to the icons sets in the altgif directories
+
+Not all MRTG directives are fully supported (Tobi keeps adding new ones!)
+
+Under Windows, the lack of variable timezone support prevents the time zones
+from working correctly.  No way around this, unless rrdtool is changed!
+
+The working day averages on the daily graph get upset when it's the weekend
+and no working day is visible.
+
+Routingtable extensions have been reported to cause problems under Netscape,
+but unable to duplicate this.
+
+Authentication seems to expire even when it should not.  This has not been
+successfully duplicated, yet -- may be due to client clock synchronisation?
+
+File-based authentication is not so wonderful, but seems to work.
+
+When using an Extension, there is no guarantee that it will be friendly and
+reset the Target menu.  Maybe provide a wrapper?
+
+Script should check the GD libraries and use PNG/GIF depending on which
+version we have.  Install should also check this and set appropriately.
+
+Install does not fully set up the authentication for you.
+
+cfgmaker-host needs more for interfaces, and more support for other SNMP
+agents.  Seems to hang with AIX agent for some reason.
+
+Language support is a bit patchy.  Cannot have non-8bit-ascii characters in
+the RRDTool graph image.  Also, if you have multiple languages in use on your
+system, then trendurl and routingtableurl can cause odd behaviour if used
+in the routers2.conf in conjunction with caching mode.
+
+Performance is getting rather bad if you have >500 cfg files and do not use
+some sort of caching with mod_perl or speedycgi.
+

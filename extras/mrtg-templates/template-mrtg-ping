@@ -1,0 +1,30 @@
+#
+# Template for  ping times
+#
+# Global relpace: SHNAME LHNAME IPADDR MAXMEM(Mbytes) DISKC
+
+##########################################################################
+# Targets
+
+Target[SHNAME-ping]: `/u01/mrtg/bin/mrtg-ping-probe -s IPADDR`
+Title[SHNAME-ping]: Ping times to LHNAME
+routers.cgi*ShortName[SHNAME-ping]: Ping 
+MaxBytes[SHNAME-ping]: 500
+AbsMax[SHNAME-ping]: 10000
+PageTop[SHNAME-ping]: null
+Options[SHNAME-ping]: gauge nopercent
+YLegend[SHNAME-ping]: milliseconds
+ShortLegend[SHNAME-ping]: ms
+Legend1[SHNAME-ping]: Round Trip Time range 
+Legend2[SHNAME-ping]: Round Trip Time range
+Legend3[SHNAME-ping]: High Peak 5min RTT 
+Legend4[SHNAME-ping]: Low Peak 5min RTT 
+LegendI[SHNAME-ping]: High:
+LegendO[SHNAME-ping]: Low:
+routers.cgi*Options[SHNAME-ping]: nomax fixunit nototal scaled nopercent
+routers.cgi*GraphStyle[SHNAME-ping]: range
+routers.cgi*InCompact[SHNAME-ping]: no
+routers.cgi*UnScaled[SHNAME-ping]: none
+routers.cgi*BgColour[SHNAME-ping]: #ffffff
+routers.cgi*Icon[SHNAME-ping]: clock-sm.gif
+

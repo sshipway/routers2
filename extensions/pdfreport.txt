@@ -1,0 +1,35 @@
+Name:
+pdfreport.cgi: Generate a PDF report for this device
+v1.4
+
+Author:
+Steve Shipway 2004
+
+Requires:
+htmldoc - You can get this from htmldoc.org or easysw.com.  Tested: v1.9
+May not run under windows, unix only?
+Temporary workspace
+Adobe acrobat reader and browser plugin
+NOTE: if you have web-server based authentication for routers2.cgi, you need
+the same authentication for pdfreport.cgi
+
+Example line in MRTG .cfg file:
+routers.cgi*Extension: "PDF Report" /cgi-bin/pdfreport.cgi pdf-sm.gif
+
+Another example, which generates daily/weekly graphs instead of the default
+monthly/yearly in the report:
+routers.cgi*Extension: "Short-term Report" /cgi-bin/pdfreport.cgi?dwmy=dw pdf-sm.gif
+
+Description:
+
+This plugin generates PDF reports for the current device.
+
+You need to first configure the appropriate definitions at the beginning of
+the script, and also install htmldoc (which converts HTML to PDF format).
+
+The generated report is fairly basic.  If your graphs come off the side, 
+make sure you upgrade to at least v2.15beta2 of routers2.cgi.
+
+The graphs in the report are MONTHLY and YEARLY, for each target that is
+to be found in the side menu (routers.cgi*InMenu directive).
+

@@ -1,0 +1,31 @@
+This is the directory containing icons for the routers.cgi system.
+
+You should not delete icons from here - many are used by the routers.cgi
+script, and if they are not found you will have problems.  You can change
+them, however.  Also note that some icons are duplicated under different
+names - this is intentional as they are used in multiple places, and this 
+allows you to change one occurence but not the other.
+
+All icons with the -sm.gif suffix are 15x15 icons that can be used in the
+menus.  They will also be shown in the info list, if the directory can be
+found by the script.
+
+The target-sm.gif and menu-sm.gif files are the defaults used by the system.
+
+The 100x20 icons are the menu headers.  There are alternative sets available
+in the altgif directory, included with the package.
+
+Contributions:
+
+Garry Cook - interface2-sm, firewall[23]-sm, router[23]-sm, switch[234]-sm
+	server[23]-sm, pbrush[23]?-sm
+
+Luis Alegra - 3com-sm.gif	   error-sm.gif    padlock-sm.gif
+alert-grey-sm.gif  freebsd-sm.gif  mac-sm.gif	    printer-sm.gif
+alert-sm.gif	   group-sm.gif    mandrake-sm.gif  sun-sm.gif
+check-sm.gif	   hp-sm.gif	   me-sm.gif	    switch4-sm.gif
+cisco-sm.gif	   iis-sm.gif	   mssql-sm.gif     win2-sm.gif
+clock2-sm.gif	   info2-sm.gif    net2-sm.gif	    win2k-sm.gif
+comp2-sm.gif	   intel-sm.gif    netcard-sm.gif   www-sm.gif
+cube-sm.gif	   intel2-sm.gif   netdrive-sm.gif  xp-sm.gif
+dir-sm.gif	   linux2-sm.gif   novell2-sm.gif

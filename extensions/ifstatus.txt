@@ -1,0 +1,38 @@
+Name:
+ ifstatus.cgi.pl v1.0
+
+Author:
+ Steve Shipway Jan 2006
+
+Requires:
+ You must have the Net::SNMP perl module installed for this to work.
+
+Example:
+routers.cgi*Extension[targetname]: "Show current interface status" /cgi-bin/ifstatus.cgi camera2-sm.gif insecure
+
+Description:
+
+ This is an Extension script for the routers.cgi program, supposed to be used
+ as a per-target extension, not a per-device extension.  Install it
+ in your cgi-bin directory, and modify your MRTG .cfg files to call it:
+
+routers.cgi*Extension[targetname]: "Show current interface status" /cgi-bin/ifstatus.cgi camera2-sm.gif 
+
+ See the routers.cgi documentation for more information about how to link 
+ this script in to your MRTG .cfg files.
+
+ You may also need to change its name (use a .pl extension for the IIS web
+ server, a .cgi extension for Apache) or alter the first line to give your 
+ Perl location.
+
+ You must have the Net::SNMP perl module installed for this to work.
+
+ If the script is not able to determine the SNMP community from the CFG file, 
+then you will need to add the 'insecure' option to the end of the Extension
+definition.  This is a security risk as it passes your SNMP community to the
+web browser.
+
+ The script also needs to know the interface number, which it determines
+either from the Target[] line in the cfg file, or else from a definition line
+routers.cgi*IfNo[targetname]: xxxx
+to set the interface number to xxxx for this target.

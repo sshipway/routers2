@@ -1,0 +1,19 @@
+# cfgmaker template for use with Routers2 application
+# use: cfgmaker --template=routers2.tmpl
+
+$target_lines = $default_target_lines;
+$target_lines .= "routers.cgi*IfIp[$target_name]: $if_ip\n" if( $if_ip );
+$target_lines .= "routers.cgi*IfNo[$target_name]: $if_index\n" if( $if_index );
+$target_lines .= "routers.cgi*IfName[$target_name]: $if_snmp_name\n" 
+	if( $if_snmp_name );
+$target_lines .= "routers.cgi*ShortDesc[$target_name]: ".(
+# You may wish to reorder these according to your sites requirements
+	$if_snmp_alias?$if_snmp_alias:
+	$if_cisco_descr?$if_cisco_descr:
+	$if_port_name?$if_port_name:
+	$if_snmp_descr?$if_snmp_descr:
+	$if_snmp_name?$if_snmp_name:
+	$if_ip?$if_ip:$if_index?$if_index:$target_name)."\n";
+# You may wish to uncomment this if you have the ifstatus extension installed
+$target_lines .= "routers.cgi*Extension[$target_name]: \"Show current port status\" /cgi-bin/ifstatus.cgi camera2-sm.gif\n" if($if_is_lan);
+	

@@ -1,0 +1,47 @@
+# cisco.htp
+# This host template is for Cisco devices
+# cfgmaker --template=cisco.htp
+# Cisco CPU OID is 1.3.6.1.4.1.9.2.1.58.0
+
+if( $sysdescr =~ /cisco/i ) {
+$head_lines .= "#---------------------------------------------------------------------\n";
+my $target_name = $router_name . "_cpu";
+$target_lines .= <<ECHO;
+routers.cgi*Icon: cisco-sm.gif
+routers.cgi*Description: $router_name ($sysname)
+routers.cgi*ShortDesc: $sysname
+#-------------------------------------------------
+Target[$target_name]: 1.3.6.1.4.1.9.2.1.58.0&1.3.6.1.4.1.9.2.1.58.0:$router_connect
+Title[$target_name]: $router_name CPU load
+YLegend[$target_name]: Percentage
+ShortLegend[$target_name]: %
+Legend1[$target_name]: CPU load in %
+Legend3[$target_name]: Max Observed CPU load
+LegendI[$target_name]: &nbsp;CPU Load:
+MaxBytes[$target_name]: 100
+UnScaled[$target_name]: dwmy
+Options[$target_name]: growright, gauge, nopercent, noo
+PageTop[$target_name]: <h1>$router_name CPU load</h1>
+     <div><table><tr>
+          <td>System:</td>
+          <td>$router_name in $html_syslocation</td>
+     </tr><tr>
+          <td>Maintainer:</td>
+          <td>$html_syscontact</td>
+     </tr><tr>
+          <td>Description:</td>
+          <td>$html_sysdescr</td>
+     </tr><tr>
+          <td>Resource:</td><td>CPU.</td>
+     </tr></table></div>
+routers.cgi*Icon[$target_name]: chip-sm.gif
+routers.cgi*InOut[$target_name]: no
+routers.cgi*InSummary[$target_name]: yes
+routers.cgi*ShortDesc[$target_name]: CPU
+routers.cgi*InCompact[$target_name]: yes
+routers.cgi*Mode[$target_name]: cpu
+routers.cgi*Options[$target_name]: nototal fixunit
+ECHO
+}
+
+

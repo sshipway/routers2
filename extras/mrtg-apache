@@ -1,0 +1,70 @@
+#!/usr/bin/perl
+##########################################################
+# mrtg-apache.pl 
+#
+# Get the current number of serviced requests from Apache via 
+# the /server-status URL
+# Also the number of active child processes
+##########################################################
+use LWP::UserAgent;
+
+my($SERVER) = "localhost";
+
+sub getpage {
+	my($ua, $request, $response);
+
+	$ua = new LWP::UserAgent;
+	$request = new HTTP::Request('GET',"http://$SERVER/server-status");
+	$request->header(Expires=> "Mon, 26 Jul 1997 05:00:00 GMT");
+	$response = $ua->request($request);
+
+	if($response->code == 200) {
+		my($page) = $response->content;
+		return $page;
+	} else {
+		return 0;
+	}
+}
+
+sub getcount {
+	my($p);
+	$p = getpage;
+	if( !$p ) { return 0; }
+	if( $p =~ /Total accesses:\s*(\d+)/i ) { return $1; }
+	return 0;
+}
+
+sub getprocs {
+	my(@rv) = (-1,-1);
+	my($p);
+	$p = getpage;
+	if( !$p ) { return (-1,-1); }
+	if( $p =~ /(\d+)\s*requests? current.*?(\d+)\s*idle/i ) { 
+		@rv = ( ($1+$2), $1 );
+		return @rv; 
+	}
+	return (-2,-2);
+}
+
+if( $ARGV[0] eq '-p' ) {
+	$SERVER = $ARGV[1] if($ARGV[1]);
+	my($tota,$totb) = getprocs;
+	if($tota >= 0 ) {
+		print "$tota\n$totb\n";
+	} else {
+		print "UNKNOWN\nUNKNOWN\n";
+	}
+} else {
+	$SERVER = $ARGV[0] if($ARGV[0]);
+	my($tot) = getcount;
+	if( $tot ) {
+		print "$tot\n";
+	} else {
+		print "UNKNOWN\n";
+	}
+	print "0\n";
+}
+print "(Cannot check)\n";
+print "Apache server on $SERVER\n";
+
+exit(0);

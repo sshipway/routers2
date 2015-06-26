@@ -1,0 +1,32 @@
+Multilanguage support for routers2.cgi
+Language packs are available for download from www.steveshipway.org/software
+
+                        *** THIS IS EXPERIMENTAL! ***
+
+This will slow down your MRTG frontend, although if you use mod_perl or 
+speedy_cgi the effect will be relatively small.
+
+You need to:
+1) get the 2-letter code for the language you want to add.  For example, 
+   English is en, French is fr.
+2) Obtain the language pack, or choose to write your own
+3) Make a subdirectory of the rrdicons directory with this name.  This should
+   contain the following files:
+archive.gif    devices-dn.gif    logout.gif        otherstuff.gif  targets.gif
+archive-h.gif  devices-dn-w.gif  mainmenu.gif      refresh.gif     zoomin.gif
+bookmark.gif   devices.gif       options-dn.gif    rescale.gif     zoomout.gif
+csv.gif        graphs.gif        options-dn-w.gif  rrdtool.gif
+delete.gif     login.gif         options.gif       styles.gif
+   You can either use the defaults, or use any provided with the language pack.
+4) Copy the file lang_xx.conf (if your language code is xx) into the same
+   directory as your routers2.conf file.
+   If you are creating your own, then look at the lang_en.cnof supplied and
+   modify it for your own language.
+5) Edit the routers.conf file.  Either in the [routers.cgi] section (to affect
+   everyone) or in a [user-xxxxx] section (to affect just the user 'xxxxx') you
+   need to add the line 'language = xx' (if your language code is 'xx').
+
+If you have created a new lang_xx.conf and xx/*.gif language pack, then send
+it to me to include with the next release!   Or, post on the support forum
+and let other people know.
+steve@steveshipway.org
