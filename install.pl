@@ -21,7 +21,7 @@ use Sys::Hostname;  # To work out our URL
 use Env qw(PATH);
 
 my ($APP) = "routers2";
-my ($VERSION) = "v2.23beta6";
+my ($VERSION) = "v2.23";
 my ($EMAIL) = 'steve@steveshipway.org';
 my ($WEB) = 'http://www.steveshipway.org/software';
 
