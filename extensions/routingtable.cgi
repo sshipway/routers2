@@ -220,8 +220,7 @@ sub do_bad()
 
 # are we netscape??
 $agent = $ENV{HTTP_USER_AGENT};
-$Netscape = 1 if( $agent =~ /Mozilla/ and $agent !~ /MS/
-	and $agent !~ /Microsoft/ );
+$Netscape = 1 if( $agent =~ /Mozilla/ and $agent !~ /MS|Microsoft|Chrome/ );
 
 $file = $q->param("fi");
 $router = $q->param("r");

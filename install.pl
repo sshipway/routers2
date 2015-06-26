@@ -21,7 +21,7 @@ use Sys::Hostname;  # To work out our URL
 use Env qw(PATH);
 
 my ($APP) = "routers2";
-my ($VERSION) = "v2.23beta6";
+my ($VERSION) = "v2.24beta1";
 my ($EMAIL) = 'steve@steveshipway.org';
 my ($WEB) = 'http://www.steveshipway.org/software';
 
@@ -134,7 +134,7 @@ sub locate_paths()
 	my( $webconffile, $f, $p, $d );
 
 	print "\n0. Attempting to identify your OS and web server...\n";
-	if( $^O =~ /Win/i or $^O =~ /DOS/i ) { $NT=1; $PS="\\"; } 
+	if( $^O =~ /Win/ or $^O =~ /DOS/i ) { $NT=1; $PS="\\"; } 
 	elsif( $^O =~ /[ui]x/i or $^O =~ /Sun/i or $^O =~ /Sol/i ) { $UNIX = 1; }
 	print "   - I think you are running under NT.\n" if( $NT );
 	print "   - I think you are running under UNIX.\n" if( $UNIX );

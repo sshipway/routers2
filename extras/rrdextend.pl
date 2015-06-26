@@ -29,7 +29,7 @@ my( $rrd, $rrdinfo, $rra, $dir, $from, $rv );
 my( $rrdtool ) = "rrdtool"; # rrdtool executable
 
 $pathsep = "/";
-$pathsep = "\\" if( $^O =~ /win|dos/i );
+$pathsep = "\\" if( $^O =~ /Win|DOS/ );
 
 $cfgfile = $ARGV[0];
 if(!defined $cfgfile or  ! -f $cfgfile) {

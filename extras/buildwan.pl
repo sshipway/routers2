@@ -490,7 +490,7 @@ sub writefile($)
 
 autoflush STDOUT 1;
 
-if( $^O =~ /win|dos/i) {
+if( $^O =~ /Win|DOS/ ) {
 	$pathsep = "\\" ;
 	$script = "/cgi-bin/routers2.pl";
 }

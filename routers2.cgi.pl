@@ -9,7 +9,7 @@
 # mod_perl directory and it will work.  This is not very thoroughly tested 
 # though. You also need to set the CACHE global below to 1.
 ##############################################################################
-# routers.cgi : Version v2.23
+# routers.cgi : Version v2.24
 # Create router monitoring pages 
 #
 # This code is covered by the Gnu GPL.  See the README file, or the Gnu
@@ -47,9 +47,9 @@ my ($CACHE) = 0;
 # You should set this to something random and secret, if you are using
 # the script's internal authentication via cookies.  It's called this because
 # it is embedded into a cookie...
-my ($CHOCOLATE_CHIP) = 'fh89647jnvhtg678gtfpo9fuku86yhgs';
+my ($CHOCOLATE_CHIP) = 'fhglfwyt85jncwufjoinhffuku86yhgs';
 ##CONFIG#END##################################################################
-my ($VERSION) = 'v2.23';
+my ($VERSION) = 'v2.24beta1';
 my ($APPURL ) = 'http://www.steveshipway.org/software/';
 my ($FURL   ) = 'http://www.steveshipway.org/forum/';
 my ($MLURL  ) = 'http://www.steveshipway.org/mailman/listinfo/support_steveshipway.org';
@@ -1531,7 +1531,7 @@ sub do_footer()
 			."</TD><TD valign=top align=left class=footer id=ftmiddle>";
 		print $q->small({class=>'footer'},"routers.cgi Version $VERSION : &copy; "
 			.$q->a({href=>$APPMAIL, class=>'footer'},"Steve Shipway")
-			." 2000-2008 : ".$q->a({ href=>$APPURL, target=>"_top", class=>'footer' },$APPURL)
+			." 2000-2014 : ".$q->a({ href=>$APPURL, target=>"_top", class=>'footer' },$APPURL)
 		)."\n";
 		if($language) {
 			print $q->br()."<SMALL class=footer>Language pack [$language]";
@@ -1584,7 +1584,7 @@ sub do_simple_footer() {
 		or $config{'web-paranoia'}=~/[n0]/i) {
 		print $q->small({class=>'footer'},"routers.cgi Version $VERSION : &copy; "
 			.$q->a({href=>$APPMAIL,class=>'footer'},"Steve Shipway")
-			." 2000-2008 : ".$q->a({ href=>$APPURL, target=>"_top",class=>'footer' },$APPURL)
+			." 2000-2014 : ".$q->a({ href=>$APPURL, target=>"_top",class=>'footer' },$APPURL)
 		)."\n" ;
 		print "<!-- U:[$authuser] -->\n";
 		print "<!-- $debugmessage\n-->\n" if($debugmessage);

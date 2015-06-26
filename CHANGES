@@ -24,6 +24,10 @@ Last chance contact: s.shipway@auckland.ac.nz (Working as UNIX support)
 Please do not telephone me directly, unless you want to offer me lots of money.
 ##############################################################################.
 
+v2.24
+! (Peter Maguire) Fix to routingtable.cgi for Chrome 
+! (Marty Skinner) Fix to install so that Darwin is not though to be windows.
+
 v2.23 11/4/14
 + Different rrd-archiving mode -- hash -- to allow better filesystem management
   when thousands of Targets (though this is likely superceeded by the new

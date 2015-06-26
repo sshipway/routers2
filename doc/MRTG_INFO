@@ -88,7 +88,7 @@ PageFoot[targetname]:  (if enabled in the routers.conf)  [=][G]
     file for a complete list of all supported symbols and their uses.
 Background[targetname]:    [+][=][G]
 Options[targetname]: integer noo noi bits bytes perminute perhour nopercent [+]
-    dorelpercent logscale
+    dorelpercent logscale 
     Note that nopercent also implies routers.cgi*InCompact[]: no
     Also, dorelpercent implies noo, nopercent, max=100, unit=%, fixunit,
       and incompact=no
@@ -133,6 +133,7 @@ routers.cgi*Options[target]: interface[!] ignore noo noi scaled[=][!]
    nomax[=] nototal[G] noabsmax nopercentile nopercent average[G only] 
    total[G] fixunit available[not G] noavailable[not G] reverse[not G]
    aspercent rigid c2fi[not G] c2fo[not G] default nothresholds[not G]
+   nogroup[G] group[G]
     Set various graph options for this target
     Instead of 'interface', use the Mode option, and use routers.cgi*UnScaled
       with the 'none' option instead of 'scaled'.
@@ -150,6 +151,8 @@ routers.cgi*Options[target]: interface[!] ignore noo noi scaled[=][!]
       values at display time.  IE,  value * 1.8 + 32.
     default means that this is the default target to display for this device.
     nothresholds means to NOT display lines for any Thresh*[] definitions
+    nogroup means a single total/average line summarising over ALL parts on a
+      userdefined graph, without the in/out separated
 routers.cgi*InMenu[target]: yes no
     Should this target appear in the Targets menu? It is still accessible
     via a bookmarked URL, though.
