@@ -10,6 +10,7 @@
 # v1.7 : Add check to not overwrite .css file on upgrade
 # v1.8 : Fix install to not overwrite .gif files or .css (really)
 # v1.9 : Add JSCal2 install
+# v1.10 : PATH environment
 #
 ############################################################################
 
@@ -18,7 +19,7 @@ use File::Basename; # for OS Filesystems specific stuff
 use Term::ReadLine; # For user input - should work under Perl and ActivePerl
 use File::Copy;     # To copy the files of course
 use Sys::Hostname;  # To work out our URL
-use Env qw(PATH);
+#use Env qw(PATH);
 
 my ($APP) = "routers2";
 my ($VERSION) = "v2.23";
@@ -281,10 +282,10 @@ sub locate_paths()
 
 	####perl#####
 	if( $NT ) {
-		@paths = split /;/,$PATH ;
+		@paths = split /;/,$ENV{PATH} ;
 		$p = "PERL.EXE"
 	} else {
-		@paths = split /:/,$PATH ;
+		@paths = split /:/,$ENV{PATH} ;
 		$p = "perl";
 	}
 	# assume perl is in the current path, and look for it
