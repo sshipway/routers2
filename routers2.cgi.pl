@@ -9731,6 +9731,9 @@ $router = $opt_D if($opt_D); # command line
 $router = $q->param('rtr') if( $q->param('rtr') );
 #$router = "" if(!defined $router or $router eq "none");
 $router = "" if(!defined $router);
+# Fix for CVE-2018-6193 XSS issue
+# These characters should never appear in the router name (director/folder name)
+$router =~ s/[<>]/_/g;
 # Only read in the routers table if (1) we need it, or (2) we are caching
 if(($pagetype =~ /config/) 
 	or ($pagetype =~ /menu/ and ($mtype eq "routers" or !$router))
