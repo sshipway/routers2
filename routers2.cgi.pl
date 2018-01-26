@@ -9800,6 +9800,10 @@ $interface = $opt_T if($opt_T); # command line
 $interface = '_summary_' if($interface eq '__summary'); # backwards compatible
 $interface = 'none' if($router eq 'none');
 $interface = "" if(! defined $interface );
+# Fix for CVE-2018-6193 XSS issue
+# These characters should never appear in the interface name (base file name)
+$interface =~ s/[<>\/\\]/_/g;
+
 if( ( ($pagetype =~ /menu/ and $mtype ne "routers" )
 	  or $pagetype =~ /csv|graph|summary|info|compact|verify|image/ )
 	and $router ne "none" ) {
