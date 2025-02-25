@@ -29,3 +29,7 @@ RRDRowCount1d[_]:  1600
 Finally, stop the rrd-archive.pl scheduled job, and set extendedtime=full in
 your routers2.conf
 
+NOTE: The RRD files MUST all have been created on a machine with the SAME
+architecture as the one you run rrdmerge on!  You cannot share files
+between e.g. windows, mac, linux, 64bit, 32bit etc as rrd files are
+architecture-dependent.

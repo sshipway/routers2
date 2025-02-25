@@ -333,10 +333,21 @@ foreach my $rrd ( @ARGV ) {
 	print "Checking $rrd\n" if($opt_debug);
 	if( ! -r $rrd ) {
 		print "Unable to read RRD file $rrd\n";
-		exit 0;
+		exit 1;
 	}
-	my $rv = RRDs::info($rrd);
+	my $rv = RRDs::info($rrd);	
+	if( !$rv ) {
+		print "Unable to read $rrd, may be wrong architecture\n";
+		exit 1;
+	}
 	my $lu = $rv->{last_update};
+        if( ! $rv->{step} ) {
+		print "Invalid step in RRD files $rrd\n";
+		foreach ( keys %$rv ) {
+			print "$_ -> ".$rv->{$_}."\n";
+		}
+		exit 1;
+        }
 	$lu = (int($lu/$rv->{step})+1)*$rv->{step};
 	print "  Interval is ".$rv->{step}."\n" if($opt_debug);
 	print "  Last update is ".$rv->{last_update}." -> $lu\n" if($opt_debug);
